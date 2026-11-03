@@ -16,10 +16,23 @@
   letter-spacing: -0.01em;
 }
 
-.activity-count {
+.activity-all {
   font-size: 13px;
-  color: var(--text-muted);
+  font-weight: 500;
+  color: var(--accent-soft);
   font-variant-numeric: tabular-nums;
+}
+
+.activity-all:hover {
+  text-decoration: underline;
+}
+
+.activity-empty {
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--fill);
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 .activity-date {

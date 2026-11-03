@@ -109,3 +109,32 @@ export type Project = {
   modules: Module[];
   home: HomeSummary;
 };
+
+// Project tools (To do, Notes, Idées). Kept in the browser for now (src/data/tools.ts).
+
+export type Task = {
+  id: string;
+  text: string;
+  /** Due date as YYYY-MM-DD, or null when there is none. */
+  due: string | null;
+  done: boolean;
+  createdAt: number;
+};
+
+export type Note = {
+  id: string;
+  title: string;
+  body: string;
+  pinned: boolean;
+  updatedAt: number;
+};
+
+export type IdeaStage = 'creuser' | 'tester' | 'validee';
+
+export type Idea = {
+  id: string;
+  title: string;
+  detail: string;
+  stage: IdeaStage;
+  createdAt: number;
+};

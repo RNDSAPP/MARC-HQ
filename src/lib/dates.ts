@@ -51,3 +51,45 @@ export function dueDayIndex(due: string, today = new Date()): number {
   if (due.startsWith('Auj')) return (today.getDay() + 6) % 7;
   return SHORT_DAYS.findIndex((short) => due.startsWith(short));
 }
+
+/** "2026-11-03" for a local date. */
+export function isoDate(date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Local date from "2026-11-03". */
+export function fromIsoDate(value: string): Date {
+  const [y, m, d] = value.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** Whole days from today to `value` (negative when it is past). */
+export function daysFromToday(value: string, today = new Date()): number {
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((fromIsoDate(value).getTime() - start.getTime()) / 86400000);
+}
+
+/** "Auj.", "Demain", "Mer. 5", "12 nov." or "Hier" for a due date. */
+export function dueLabel(value: string, today = new Date()): string {
+  const days = daysFromToday(value, today);
+  if (days === 0) return 'Auj.';
+  if (days === 1) return 'Demain';
+  if (days === -1) return 'Hier';
+  const date = fromIsoDate(value);
+  if (days > 1 && days < 7) {
+    const day = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' }).format(date).replace('.', '');
+    return `${day.charAt(0).toUpperCase()}${day.slice(1)}. ${date.getDate()}`;
+  }
+  return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(date);
+}
+
+/** Date of this week's day `index` (Monday = 0). */
+export function dateOfWeekDay(index: number, today = new Date()): string {
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  monday.setDate(monday.getDate() + index);
+  return isoDate(monday);
+}

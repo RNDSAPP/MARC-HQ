@@ -1,18 +1,30 @@
-import type { Todo } from '../data/types';
-import { dayLabel, dueDayIndex, weekDays } from '../lib/dates';
+import { Link } from 'react-router-dom';
+import type { Task } from '../data/types';
+import { dayLabel, daysFromToday, dueLabel, fromIsoDate, weekDays } from '../lib/dates';
 import './Activity.css';
 
 type Props = {
-  todos: Todo[];
-  done: Set<string>;
+  tasks: Task[];
   onToggle: (id: string) => void;
+  /** Link to the full To do page. */
+  allHref: string;
 };
 
-/** This week at a glance (days with tasks are marked), then the tasks as a timeline Marc can tick. */
-export default function Activity({ todos, done, onToggle }: Props) {
+const SHOWN = 4;
+
+/** This week at a glance (days with tasks are marked), then the next tasks as a timeline Marc can tick. */
+export default function Activity({ tasks, onToggle, allHref }: Props) {
   const days = weekDays();
-  const busy = new Set(todos.filter((todo) => !done.has(todo.id)).map((todo) => dueDayIndex(todo.due)));
-  const next = todos.find((todo) => !done.has(todo.id));
+  const open = tasks.filter((task) => !task.done);
+  const busy = new Set(
+    open
+      .filter((task) => task.due && Math.abs(daysFromToday(task.due)) < 7)
+      .map((task) => (fromIsoDate(task.due as string).getDay() + 6) % 7),
+  );
+  // Undated tasks last, then by date; done ones stay visible (struck through) until the page is left.
+  const sorted = [...tasks].sort((a, b) => Number(a.done) - Number(b.done) || (a.due ?? '9999').localeCompare(b.due ?? '9999'));
+  const shown = sorted.slice(0, SHOWN);
+  const next = sorted.find((task) => !task.done);
 
   return (
     <section className="activity" aria-labelledby="activity-title">
@@ -20,9 +32,9 @@ export default function Activity({ todos, done, onToggle }: Props) {
         <h2 id="activity-title" className="activity-title">
           À faire
         </h2>
-        <span className="activity-count">
-          {todos.filter((todo) => done.has(todo.id)).length} / {todos.length}
-        </span>
+        <Link to={allHref} className="activity-all">
+          {open.length} en cours · Tout voir
+        </Link>
       </div>
       <p className="activity-date">{dayLabel()}</p>
 
@@ -37,21 +49,21 @@ export default function Activity({ todos, done, onToggle }: Props) {
         ))}
       </ol>
 
-      <ul className="activity-list">
-        {todos.map((todo) => {
-          const checked = done.has(todo.id);
-          const isNext = todo === next;
-          return (
-            <li key={todo.id} className="activity-row">
-              <span className="activity-when">{todo.due}</span>
-              <label className={`activity-card${isNext ? ' activity-card--next' : ''}${checked ? ' activity-card--done' : ''}`}>
-                <input type="checkbox" className="activity-box" checked={checked} onChange={() => onToggle(todo.id)} />
-                <span className="activity-text">{todo.text}</span>
+      {shown.length === 0 ? (
+        <p className="activity-empty">Rien à faire. Ajoute une tâche depuis la page To do.</p>
+      ) : (
+        <ul className="activity-list">
+          {shown.map((task) => (
+            <li key={task.id} className="activity-row">
+              <span className="activity-when">{task.due ? dueLabel(task.due) : '—'}</span>
+              <label className={`activity-card${task === next ? ' activity-card--next' : ''}${task.done ? ' activity-card--done' : ''}`}>
+                <input type="checkbox" className="activity-box" checked={task.done} onChange={() => onToggle(task.id)} />
+                <span className="activity-text">{task.text}</span>
               </label>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

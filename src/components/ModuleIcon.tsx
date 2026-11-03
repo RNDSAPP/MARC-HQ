@@ -66,6 +66,36 @@ const paths: Record<string, ReactNode> = {
   ),
   // App Store: a star
   'app-store': <path d="M12 3.8l2.5 5.1 5.6.8-4.1 4 1 5.6-5-2.7-5 2.7 1-5.6-4.1-4 5.6-.8z" />,
+  // To do: a ticked list
+  todo: (
+    <>
+      <path d="M4 6.5l1.6 1.6L8.5 5" />
+      <path d="M4 12.5l1.6 1.6L8.5 11" />
+      <path d="M4 18.5l1.6 1.6L8.5 17" />
+      <path d="M11.5 7h8.5M11.5 13h8.5M11.5 19h8.5" />
+    </>
+  ),
+  // Notes: a page with a folded corner
+  notes: (
+    <>
+      <path d="M6 3.5h8.5L19 8v12.5H6z" />
+      <path d="M14 3.5V8.5h5" />
+      <path d="M9 13h7M9 16.5h5" />
+    </>
+  ),
+  // Ideas: a light bulb
+  idees: (
+    <>
+      <path d="M8.5 15.5c-1.8-1.3-3-3.3-3-5.6a6.5 6.5 0 0 1 13 0c0 2.3-1.2 4.3-3 5.6v2h-7z" />
+      <path d="M9.5 20.5h5" />
+    </>
+  ),
+  // More: three rows
+  plus: (
+    <>
+      <path d="M4.5 7h15M4.5 12h15M4.5 17h15" />
+    </>
+  ),
   // Revenue: euro sign in a circle
   revenus: (
     <>

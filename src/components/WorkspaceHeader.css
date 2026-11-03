@@ -13,6 +13,11 @@
   margin-right: auto;
 }
 
+/* Back to HQ and project switch live in the side rail; the header shows them on phones only */
+.wh-phone {
+  display: none !important;
+}
+
 .wh-back {
   flex: none;
   display: flex;
@@ -160,6 +165,10 @@
 }
 
 @media (max-width: 860px) {
+  .wh-phone {
+    display: flex !important;
+  }
+
   .wh {
     gap: 12px;
   }

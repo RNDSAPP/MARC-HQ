@@ -1,0 +1,591 @@
+/* Shared look of the project tools (To do, Notes, Idées): white cards, pills, round checks */
+.tool {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1080px;
+}
+
+.tool-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tool-title {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.3em;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 2.6vw, 38px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.tool-title-light {
+  font-weight: 300;
+}
+
+.tool-title-bold {
+  font-weight: 600;
+}
+
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+.tool-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-card);
+}
+
+.tool-input {
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.tool-input:focus {
+  outline: none;
+  background: var(--surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.tool-input--date {
+  flex: 0 1 170px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tool-primary {
+  flex: none;
+  height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tool-primary:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tool-primary--small {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.tool-ghost {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tool-ghost:hover:not(:disabled) {
+  background: var(--fill-strong);
+  color: var(--text);
+}
+
+.tool-ghost:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tool-ghost--danger:hover:not(:disabled) {
+  color: var(--rnds-soft);
+}
+
+.tool-segment {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--fill-strong);
+}
+
+.tool-segment button {
+  height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tool-segment button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-card);
+}
+
+.tool-segment-count {
+  margin-left: 4px;
+  color: var(--text-muted);
+}
+
+.tool-empty {
+  padding: 28px 24px;
+  border-radius: var(--r-2xl);
+  background: var(--fill);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-2);
+  list-style: none;
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tool-group-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.tool-group-title span {
+  margin-left: 4px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.tool-group-title--late {
+  color: var(--rnds-soft);
+}
+
+/* Round check, like in Reminders */
+.tool-check {
+  appearance: none;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+  background: var(--surface);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.tool-check::after {
+  content: '';
+  width: 10px;
+  height: 5px;
+  margin-top: -2px;
+  border-left: 2px solid var(--on-accent);
+  border-bottom: 2px solid var(--on-accent);
+  transform: rotate(-45deg) scale(0);
+  transition: transform var(--fast) var(--ease);
+}
+
+.tool-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.tool-check:checked::after {
+  transform: rotate(-45deg) scale(1);
+}
+
+.tool-remove {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.task:hover .tool-remove,
+.tool-remove:focus-visible {
+  opacity: 1;
+}
+
+.tool-remove:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+
+@media (hover: none) {
+  .tool-remove {
+    opacity: 1;
+  }
+}
+
+/* To do */
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px 8px 18px;
+}
+
+.task + .task {
+  border-top: 1px solid var(--hairline);
+}
+
+.task-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.task-text {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.task--done .task-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.task-due {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.task-due--late {
+  background: var(--rnds-tint);
+  color: var(--rnds-soft);
+}
+
+/* Notes */
+.notes-body {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.note-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+}
+
+.note-item:hover {
+  box-shadow: var(--shadow-pop);
+}
+
+.note-item--open {
+  background: var(--accent-tint);
+  box-shadow: none;
+}
+
+.note-item-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.note-pin {
+  font-size: 8px;
+  color: var(--accent);
+}
+
+.note-item-preview {
+  font-size: 13px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-item-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.note-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px 24px;
+  min-height: 460px;
+}
+
+.note-editor-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.note-back {
+  display: none;
+}
+
+.note-saved {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.note-title-input,
+.note-body-input {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--text);
+  outline: none;
+}
+
+.note-title-input {
+  padding: 12px 0 4px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.note-body-input {
+  flex: 1;
+  min-height: 340px;
+  resize: vertical;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.note-placeholder {
+  padding: 40px 24px;
+  border-radius: var(--r-2xl);
+  border: 1.5px dashed var(--hairline-strong);
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+/* Ideas */
+.ideas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.ideas-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 240px;
+  padding: 14px;
+  border-radius: var(--r-2xl);
+  background: var(--fill);
+  transition: background-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+
+.ideas-col--over {
+  background: var(--accent-tint);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.ideas-col-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ideas-col-title span {
+  margin-left: 4px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.ideas-col-hint {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ideas-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.idea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+}
+
+.idea-open {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.idea-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.idea-detail {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.idea-move {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.idea-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.idea-detail-input {
+  height: auto;
+  min-height: 90px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.idea-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ideas-empty {
+  padding: 18px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 960px) {
+  .ideas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .notes-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* On a phone, the list or the open note, one at a time */
+  .notes--editing .notes-list {
+    display: none;
+  }
+
+  .notes:not(.notes--editing) .note-placeholder {
+    display: none;
+  }
+
+  .note-back {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .tool-add {
+    border-radius: 22px;
+  }
+
+  .tool-input,
+  .tool-input--date {
+    flex: 1 1 100%;
+    font-size: 16px;
+  }
+
+  .tool-primary {
+    flex: 1 1 100%;
+  }
+
+  .note-editor {
+    padding: 12px 16px 20px;
+  }
+}

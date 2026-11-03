@@ -20,7 +20,7 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 8. **Un seul objet par projet.** `src/data/rnds.ts` et `src/data/club421.ts` ont exactement la même forme (définie dans `src/data/types.ts`) : agents, tâches, pipeline, rubriques et résumé pour l'accueil. Les textes et chiffres sont ceux de la maquette, à la lettre.
 9. **Adresses des rubriques.** Les rubriques ont une adresse sans accent ni espace : `/rnds/vue-d-ensemble`, `/rnds/clubs`, `/rnds/ambassadeurs`, `/rnds/publications`, `/rnds/abonnes`, `/club421/vue-d-ensemble`, `/club421/bde`, `/club421/soirees`, `/club421/app-store`, `/club421/revenus`. `/rnds` seul mène à la vue d'ensemble ; une adresse inconnue ramène à l'accueil.
 10. **Couleur des badges de statut.** Comme dans la maquette, elle se déduit du texte : « Actif », « Prêt », « Confirmé », « Répondu », « Hausse »… en couleur du projet ; « À relancer », « À valider », « À répondre », « À confirmer » en ambre ; le reste en gris.
-11. **Cases « À faire ».** Elles sont gardées dans le stockage de session du navigateur : elles restent cochées quand tu changes de rubrique, de projet ou que tu recharges la page, et repartent à zéro quand tu fermes l'onglet.
+11. **Cases « À faire ».** Elles étaient gardées pour la session du navigateur ; depuis le point 63, les tâches sont enregistrées pour de bon dans le navigateur (stockage local).
 
 ## Espace de travail
 
@@ -107,3 +107,13 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 59. **Routes et voitures** : bitume gris avec lignes de rive, ligne centrale en pointillés et passages piétons. Voitures en pâte : carrosserie, vitres teintées, pare-brise incliné, roues avec jantes, phares et feux arrière.
 60. **Titre de l'accueil** : « Deux étages, une seule boutique » ne plaisait pas à Marc. Il devient « Marc HQ » en fin et « RNDS et Club 421 » en gras, comme le titre du panneau des tableaux de bord. La salutation reste dans la petite ligne au-dessus.
 61. **Routes jusqu'aux bords** : les routes de l'arrière s'arrêtaient net dans le dessin ; elles filent maintenant hors du cadre. Les ombres floues des arbres et des voitures n'ont plus de bord carré (zone de flou agrandie).
+
+## Barre latérale et outils de gestion (3 novembre)
+
+62. **Barre latérale à icônes partout**, à la demande de Marc (accueil compris), dans l'esprit de sa référence « Unit Monitoring » : HQ en haut, les logos des projets pour passer de l'un à l'autre (avec leur point d'état), puis, dans un projet, ses rubriques et une section « Outils » (`src/components/AppRail.tsx`). Elle remplace les pilules de rubriques, le bouton retour et le sélecteur de l'en-tête ; sur téléphone, où elle est masquée, l'en-tête garde le retour et le sélecteur.
+63. **Trois outils par projet**, enregistrés dans le navigateur (stockage local), séparément pour chaque projet (`src/data/tools.ts`) :
+    1. **To do** (`/rnds/todo`) : ajouter une tâche avec une échéance, la cocher, la supprimer ; tâches groupées En retard, Aujourd'hui, Cette semaine, Plus tard, Sans date, et un onglet « Faites ». C'est la même liste que le panneau « À faire » des tableaux de bord, qui montre les 4 prochaines et mène à la page complète. Au départ, elle contient les tâches de la maquette, datées sur la semaine en cours.
+    2. **Notes** (`/rnds/notes`) : liste à gauche, note ouverte à droite, enregistrement à chaque frappe, épingler, supprimer. Sur téléphone, la liste ou la note, l'une après l'autre.
+    3. **Idées** (`/rnds/idees`) : trois colonnes « À creuser », « À tester », « Validées » ; on déplace une idée avec ses flèches ou en la glissant (ordinateur), on l'ouvre pour l'éditer. Au départ, Club 421 contient la seule idée de la maquette (« Finale inter BDE en décembre »).
+    La recherche de l'en-tête filtre aussi ces pages. Ces données restent dans ce navigateur : elles ne passent pas d'un appareil à l'autre tant que Supabase n'est pas branché (il suffira de réécrire `tools.ts`).
+64. **Barre d'onglets sur téléphone** : Aperçu, To do, Notes, Idées et « Rubriques », qui ouvre une feuille avec les autres rubriques du projet.

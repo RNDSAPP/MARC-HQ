@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import AppRail from '../components/AppRail';
 import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
 import { getProjects } from '../data/api';
@@ -24,6 +25,7 @@ export default function Home() {
 
   return (
     <div className="home">
+      <AppRail projects={projects} />
       <main className="home-inner">
         <header className="home-header">
           <div className="home-title-block">

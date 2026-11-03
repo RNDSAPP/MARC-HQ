@@ -1,11 +1,20 @@
 /* Workspace: a light grey stage on the left, a white panel on the right, as in Marc's reference */
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: 96px minmax(0, 1fr) 380px;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
+}
+
+/* Tool pages (To do, Notes, Idées) take the whole width, without the right panel */
+.workspace--tool {
+  grid-template-columns: 96px minmax(0, 1fr);
+}
+
+.workspace .rail {
+  grid-row: 1 / span 2;
 }
 
 .workspace-loading {
@@ -86,46 +95,6 @@
 
 .workspace-side .kpi-value {
   font-size: 22px;
-}
-
-.workspace-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.workspace-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 18px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-2);
-}
-
-.workspace-pill:hover {
-  color: var(--text);
-}
-
-.workspace-pill.active {
-  background: var(--accent-tint);
-  color: var(--accent-soft);
-  box-shadow: none;
-}
-
-.workspace-pill-count {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.workspace-pill.active .workspace-pill-count {
-  color: var(--accent-soft);
 }
 
 .workspace-list {
@@ -222,7 +191,11 @@
 
 @media (max-width: 1280px) {
   .workspace {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .workspace-panel {
+    grid-column: 2;
   }
 
   .workspace-panel {
@@ -268,6 +241,15 @@
 }
 
 @media (max-width: 860px) {
+  .workspace,
+  .workspace--tool {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace-panel {
+    grid-column: 1;
+  }
+
   .workspace-main {
     padding: calc(16px + env(safe-area-inset-top)) 16px 32px;
     gap: 20px;
@@ -277,9 +259,9 @@
     gap: 32px;
   }
 
-  /* The tab bar at the bottom replaces the pills */
-  .workspace-pills {
-    display: none;
+  /* Nothing comes after a tool page: leave room for the tab bar */
+  .workspace--tool .workspace-main {
+    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
   }
 
   .workspace-h2 {

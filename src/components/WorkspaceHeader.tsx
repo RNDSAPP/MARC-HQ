@@ -10,10 +10,14 @@ type Props = {
   projects: Project[];
   search: string;
   onSearch: (value: string) => void;
+  placeholder: string;
 };
 
-/** Top of a workspace: back to HQ, the project's logo and name, the search, and the project switch. */
-export default function WorkspaceHeader({ project, projects, search, onSearch }: Props) {
+/**
+ * Top of a workspace: the project's logo and name, and the search. On a phone, where the side
+ * rail is hidden, it also has the way back to HQ and the project switch.
+ */
+export default function WorkspaceHeader({ project, projects, search, onSearch, placeholder }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // ⌘K (or Ctrl+K) jumps to the search field from anywhere in the workspace.
@@ -32,7 +36,7 @@ export default function WorkspaceHeader({ project, projects, search, onSearch }:
   return (
     <header className="wh">
       <div className="wh-identity">
-        <Link to="/" className="wh-back" aria-label="Retour à HQ">
+        <Link to="/" className="wh-back wh-phone" aria-label="Retour à HQ">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 5l-7 7 7 7" />
           </svg>
@@ -59,7 +63,7 @@ export default function WorkspaceHeader({ project, projects, search, onSearch }:
           ref={inputRef}
           type="search"
           value={search}
-          placeholder={project.searchPlaceholder}
+          placeholder={placeholder}
           onChange={(event) => onSearch(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === 'Escape') onSearch('');
@@ -70,7 +74,7 @@ export default function WorkspaceHeader({ project, projects, search, onSearch }:
         </kbd>
       </label>
 
-      <nav className="wh-switch" aria-label="Projets">
+      <nav className="wh-switch wh-phone" aria-label="Projets">
         {projects.map((item) => {
           const status = projectStatus(item);
           const active = item.id === project.id;

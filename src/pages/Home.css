@@ -1,10 +1,14 @@
 .home {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);
 }
 
 .home-inner {
+  width: 100%;
+  min-width: 0;
   max-width: 1360px;
   margin: 0 auto;
   padding: calc(32px + env(safe-area-inset-top)) 40px calc(56px + env(safe-area-inset-bottom));
@@ -27,7 +31,9 @@
   gap: 16px;
 }
 
+/* The HQ logo is in the side rail; the header shows it on phones only */
 .home-logo {
+  display: none !important;
   flex: none;
   width: 48px;
   height: 48px;
@@ -166,6 +172,14 @@
 }
 
 @media (max-width: 860px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-logo {
+    display: flex !important;
+  }
+
   .home-inner {
     padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
     gap: 18px;
