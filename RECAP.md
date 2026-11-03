@@ -24,7 +24,7 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (141 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (142 points).
 
 ## Lancer l'app
 
@@ -60,7 +60,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 1. **Couleurs.** L'app est passée en thème clair, à ta demande. RNDS suit sa charte (rouge `#FF0A3C`). Club 421 est en violet (`#7C4DFF`) à ta demande ; envoie-moi sa charte quand elle est prête pour caler la teinte exacte.
 2. ~~**Titres façon Apple ou façon affiche ?**~~ Réglé : les grands titres restent dans la police d'Apple, en minuscules (validé par Marc le 3 novembre).
-3. **Identité des commits.** Marc HQ est sur le compte GitHub ttpcreators : les nouveaux commits sont signés « ttpcreators ». Les commits faits avant le 3 novembre restent signés « Marc Bouraoui » avec ton adresse Gmail. Je peux réécrire leur auteur si tu veux, mais il faudra forcer l'envoi sur GitHub.
+3. ~~**Identité des commits.**~~ Réglé : tous les commits sont signés « ttpcreators » avec l'adresse masquée de GitHub (choix de Marc le 3 novembre).
 4. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
 5. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
 6. **Les étiquettes d'étage** sont un peu plus larges que dans la maquette, pour que le texte tienne sur une ligne.
