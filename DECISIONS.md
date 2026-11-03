@@ -258,3 +258,4 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - Les libellés longs (« Ambassadeurs ») restent dans leurs tuiles, et les grands nombres ne se coupent plus en deux lignes (« 4 / 900 »).
     - Sur téléphone, les ronds posés sur les dessins disparaissent (les pastilles des rubriques font ce travail), et les tuiles du plan du projet vont deux par deux, en plus compact.
     - Un pipeline entièrement vide affiche une seule phrase au lieu de quatre colonnes vides.
+166. **Plus aucune donnée de démo dans les outils** : les 6 tâches d'exemple sont supprimées de Supabase, et l'idée « Finale inter BDE », les versions 1.2 et 1.3 et « Prochaine version », le retour « mode équipe » et l'objectif « 3 412 / 5 000 abonnés » sont retirés. Les outils démarrent vides. Un navigateur qui gardait encore ces exemples en mémoire les efface tout seul à l'ouverture, et ne renvoie pas les anciennes tâches d'exemple vers le compte.

@@ -7,6 +7,19 @@ import { supabase } from '../lib/supabase';
 import { dateOfWeekDay, dueDayIndex } from '../lib/dates';
 import type { Feedback, Goal, Idea, Note, Project, Task, ToolLink, Version } from './types';
 
+
+// The demo items the app used to start with (ideas, versions, feedback, goals). A browser that
+// still holds them drops them the next time the tool opens: Marc HQ keeps only Marc's own.
+const DEMO_IDS = new Set(['club421-idee-finale', 'club421-v12', 'club421-v13', 'rnds-next', 'club421-retour-equipe', 'rnds-objectif-abonnes']);
+
+function useWithoutDemo<T extends { id: string }>(list: T[], set: (update: (prev: T[]) => T[]) => void) {
+  const hasDemo = list.some((item) => DEMO_IDS.has(item.id));
+  useEffect(() => {
+    if (hasDemo) set((prev) => prev.filter((item) => !DEMO_IDS.has(item.id)));
+  }, [hasDemo, set]);
+  return hasDemo ? list.filter((item) => !DEMO_IDS.has(item.id)) : list;
+}
+
 /** First tasks of a project: the ones from the sample data, dated on this week. */
 function seedTasks(project: Project): Task[] {
   return project.todos.map((todo, index) => {
@@ -15,19 +28,6 @@ function seedTasks(project: Project): Task[] {
   });
 }
 
-/** First ideas: the one the sample data already calls an idea. */
-function seedIdeas(project: Project): Idea[] {
-  if (project.id !== 'club421') return [];
-  return [
-    {
-      id: 'club421-idee-finale',
-      title: 'Finale inter BDE en décembre',
-      detail: '120 joueurs en moyenne par soirée : de quoi réunir tous les BDE partenaires.',
-      stage: 'creuser',
-      createdAt: 0,
-    },
-  ];
-}
 
 type TaskRow = { id: string; project_id: string; text: string; due: string | null; done: boolean; created_at: string };
 const fromRow = (row: TaskRow): Task => ({ id: row.id, text: row.text, due: row.due, done: row.done, createdAt: new Date(row.created_at).getTime() });
@@ -133,7 +133,8 @@ export function useNotes(project: Project) {
 }
 
 export function useIdeas(project: Project) {
-  const [ideas, setIdeas] = useStored<Idea[]>(`marc-hq:${project.id}:ideas`, () => seedIdeas(project));
+  const [ideasStored, setIdeas] = useStored<Idea[]>(`marc-hq:${project.id}:ideas`, () => []);
+  const ideas = useWithoutDemo(ideasStored, setIdeas);
   return {
     ideas,
     add: (title: string) =>
@@ -144,19 +145,10 @@ export function useIdeas(project: Project) {
   };
 }
 
-/** First versions: what the sample data already says (the live version, the one in review, the screen waiting for validation). */
-function seedVersions(project: Project): Version[] {
-  if (project.id === 'club421') {
-    return [
-      { id: 'club421-v12', name: '1.2', status: 'publiee', date: null, items: [] },
-      { id: 'club421-v13', name: '1.3', status: 'review', date: null, items: [{ id: 'club421-v13-equipe', text: 'Mode équipe', done: true }] },
-    ];
-  }
-  return [{ id: 'rnds-next', name: 'Prochaine version', status: 'en-cours', date: null, items: [{ id: 'rnds-next-coups', text: 'Écran de détection des coups', done: false }] }];
-}
 
 export function useVersions(project: Project) {
-  const [versions, setVersions] = useStored<Version[]>(`marc-hq:${project.id}:versions`, () => seedVersions(project));
+  const [versionsStored, setVersions] = useStored<Version[]>(`marc-hq:${project.id}:versions`, () => []);
+  const versions = useWithoutDemo(versionsStored, setVersions);
   const patch = (id: string, change: (v: Version) => Version) => setVersions((prev) => prev.map((v) => (v.id === id ? change(v) : v)));
   return {
     versions,
@@ -169,14 +161,10 @@ export function useVersions(project: Project) {
   };
 }
 
-/** First feedback: the App Store review that asks for something. */
-function seedFeedback(project: Project): Feedback[] {
-  if (project.id !== 'club421') return [];
-  return [{ id: 'club421-retour-equipe', text: 'Il manque un mode équipe (avis App Store, 4 étoiles)', kind: 'demande', priority: 'haute', status: 'en-cours', createdAt: 0 }];
-}
 
 export function useFeedback(project: Project) {
-  const [items, setItems] = useStored<Feedback[]>(`marc-hq:${project.id}:feedback`, () => seedFeedback(project));
+  const [itemsStored, setItems] = useStored<Feedback[]>(`marc-hq:${project.id}:feedback`, () => []);
+  const items = useWithoutDemo(itemsStored, setItems);
   return {
     items,
     add: (text: string, kind: Feedback['kind'], priority: Feedback['priority']) =>
@@ -186,14 +174,10 @@ export function useFeedback(project: Project) {
   };
 }
 
-/** First goal: the one the sample data already tracks (RNDS: 5 000 followers). */
-function seedGoals(project: Project): Goal[] {
-  if (project.id !== 'rnds') return [];
-  return [{ id: 'rnds-objectif-abonnes', title: 'Abonnés', current: 3412, target: 5000, unit: 'abonnés', due: null }];
-}
 
 export function useGoals(project: Project) {
-  const [goals, setGoals] = useStored<Goal[]>(`marc-hq:${project.id}:goals`, () => seedGoals(project));
+  const [goalsStored, setGoals] = useStored<Goal[]>(`marc-hq:${project.id}:goals`, () => []);
+  const goals = useWithoutDemo(goalsStored, setGoals);
   return {
     goals,
     add: (goal: Omit<Goal, 'id'>) => setGoals((prev) => [...prev, { ...goal, id: newId('objectif') }]),
