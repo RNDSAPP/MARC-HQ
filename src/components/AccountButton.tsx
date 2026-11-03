@@ -24,6 +24,8 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [newPassword, setNewPassword] = useState<string | null>(null);
+  const [saved, setSaved] = useState('');
   const picker = useRef<HTMLInputElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const photo = session?.user.user_metadata?.avatar_url as string | undefined;
@@ -71,6 +73,37 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
           <button type="button" role="menuitem" className="account-item" onClick={() => picker.current?.click()} disabled={busy || !session}>
             {busy ? 'Enregistrement…' : photo ? 'Changer la photo' : 'Ajouter une photo'}
           </button>
+          {newPassword === null ? (
+            <button type="button" role="menuitem" className="account-item" onClick={() => { setNewPassword(''); setSaved(''); }} disabled={!session}>
+              Changer le mot de passe
+            </button>
+          ) : (
+            <form
+              className="account-form"
+              onSubmit={async (event) => {
+                event.preventDefault();
+                if (!supabase || newPassword.length < 6) return;
+                const { error: failed } = await supabase.auth.updateUser({ password: newPassword });
+                setSaved(failed ? 'Le mot de passe n’a pas pu être changé.' : 'Mot de passe enregistré.');
+                if (!failed) setNewPassword(null);
+              }}
+            >
+              <input
+                className="account-input"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Nouveau mot de passe (6 min.)"
+                autoComplete="new-password"
+                minLength={6}
+                aria-label="Nouveau mot de passe"
+              />
+              <button type="submit" className="account-item" disabled={newPassword.length < 6}>
+                Enregistrer
+              </button>
+            </form>
+          )}
+          {saved && <p className="account-email">{saved}</p>}
           <button
             type="button"
             role="menuitem"
