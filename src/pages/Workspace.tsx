@@ -32,6 +32,7 @@ import GoalsPage from './tools/GoalsPage';
 import LinksPage from './tools/LinksPage';
 import VersionsPage from './tools/VersionsPage';
 import ConnectionsPage from './tools/ConnectionsPage';
+import MailsPage from './tools/MailsPage';
 import './Workspace.css';
 
 type Props = {
@@ -131,6 +132,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} />}
           {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
           {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
+          {tool?.slug === 'mails' && <MailsPage project={project} query={matches} />}
           {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
           {tool?.slug === 'connexions' && (
             <ConnectionsPage

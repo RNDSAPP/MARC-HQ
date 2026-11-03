@@ -1038,3 +1038,158 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* Mails: sign-in and connection cards, then the inbox */
+.mail-message {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--r-lg);
+  background: var(--fill);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.mail-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px;
+}
+
+.mail-gate-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--fill);
+}
+
+.mail-gate-title {
+  margin: 4px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mail-gate-text {
+  margin: 0 0 6px;
+  max-width: 520px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.mail-gate .tool-add {
+  width: 100%;
+}
+
+.mail-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.mail-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mail-open {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mails {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+.mails li + li {
+  border-top: 1px solid var(--hairline);
+}
+
+.mail {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'dot from date'
+    '. subject subject'
+    '. snippet snippet';
+  column-gap: 10px;
+  row-gap: 2px;
+  padding: 12px 18px;
+  color: var(--text-2);
+}
+
+.mail:hover {
+  background: var(--fill);
+}
+
+.mail-dot {
+  grid-area: dot;
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.mail--unread .mail-dot {
+  background: var(--accent);
+}
+
+.mail-from {
+  grid-area: from;
+  overflow: hidden;
+  font-size: 14.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail-date {
+  grid-area: date;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.mail-subject {
+  grid-area: subject;
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail-snippet {
+  grid-area: snippet;
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail--unread .mail-from,
+.mail--unread .mail-subject {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mail-signout {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: underline;
+}

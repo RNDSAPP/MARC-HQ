@@ -412,3 +412,13 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# Gmail functions: they check the signed-in person themselves (gmail-callback is reached by Google)
+[functions.gmail-connect]
+verify_jwt = false
+
+[functions.gmail-callback]
+verify_jwt = false
+
+[functions.gmail-inbox]
+verify_jwt = false

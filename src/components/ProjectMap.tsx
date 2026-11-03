@@ -9,6 +9,7 @@ const TOOL_HINTS: Record<string, string> = {
   todo: 'Les tâches du projet',
   notes: 'Ce que tu notes en passant',
   idees: 'Les idées à creuser',
+  mails: 'La boîte Gmail du projet',
   versions: 'Ce que contient chaque version',
   retours: 'Bugs et demandes des utilisateurs',
   objectifs: 'Où tu en es de tes objectifs',

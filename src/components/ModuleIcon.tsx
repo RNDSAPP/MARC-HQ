@@ -122,6 +122,13 @@ const paths: Record<string, ReactNode> = {
       <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2" />
     </>
   ),
+  // Mails: an envelope
+  mails: (
+    <>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="3" />
+      <path d="M4.5 7.5l7.5 5.5 7.5-5.5" />
+    </>
+  ),
   // Connections: a plug
   connexions: (
     <>

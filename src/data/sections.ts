@@ -3,6 +3,7 @@ export const TOOLS = [
   { slug: 'todo', label: 'To do' },
   { slug: 'notes', label: 'Notes' },
   { slug: 'idees', label: 'Idées' },
+  { slug: 'mails', label: 'Mails' },
   { slug: 'versions', label: 'Versions' },
   { slug: 'retours', label: 'Retours' },
   { slug: 'objectifs', label: 'Objectifs' },
