@@ -15,6 +15,7 @@ const TOOL_HINTS: Record<string, string> = {
   retours: 'Bugs et demandes des utilisateurs',
   objectifs: 'Où tu en es de tes objectifs',
   liens: 'Les adresses utiles',
+  veille: 'Les comptes TikTok que tu suis',
   connexions: 'Les outils du projet, à ouvrir',
 };
 

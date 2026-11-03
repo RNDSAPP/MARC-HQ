@@ -7,6 +7,7 @@ export const TOOLS = [
   { slug: 'versions', label: 'Versions' },
   { slug: 'retours', label: 'Retours' },
   { slug: 'objectifs', label: 'Objectifs' },
+  { slug: 'veille', label: 'Veille' },
   { slug: 'liens', label: 'Liens' },
   { slug: 'connexions', label: 'Connexions' },
 ] as const;

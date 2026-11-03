@@ -129,6 +129,13 @@ const paths: Record<string, ReactNode> = {
       <path d="M4.5 7.5l7.5 5.5 7.5-5.5" />
     </>
   ),
+  // Watch: an eye
+  veille: (
+    <>
+      <path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
   // Connections: a plug
   connexions: (
     <>

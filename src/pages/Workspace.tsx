@@ -39,6 +39,7 @@ import FeedbackPage from './tools/FeedbackPage';
 import GoalsPage from './tools/GoalsPage';
 import LinksPage from './tools/LinksPage';
 import VersionsPage from './tools/VersionsPage';
+import VeillePage from './tools/VeillePage';
 import ConnectionsPage from './tools/ConnectionsPage';
 import './Workspace.css';
 
@@ -133,7 +134,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
                 : `« ${label} » n'est pas encore branché.`,
     );
 
-  const placeholder = tool ? `Rechercher dans ${tool.label === 'To do' ? 'les tâches' : `les ${tool.label.toLowerCase()}`}` : project.searchPlaceholder;
+  const placeholder = tool ? `Rechercher dans ${tool.label === 'To do' ? 'les tâches' : tool.label === 'Veille' ? 'ta veille' : `les ${tool.label.toLowerCase()}`}` : project.searchPlaceholder;
 
   return (
     <div className={`workspace${tool ? ' workspace--tool' : ''}`} data-project={project.id}>
@@ -159,6 +160,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} projectId={project.id} />}
           {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
           {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
+          {tool?.slug === 'veille' && <VeillePage project={project} query={matches} />}
           {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
           {tool?.slug === 'connexions' && (
             <ConnectionsPage
