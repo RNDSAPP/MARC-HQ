@@ -885,7 +885,7 @@ const LAMP_POSTS: Point[] = [
  * Colour of the sky over the model: nothing by day, warm at dawn and dusk, deep blue at night
  * (Building.css, from the scene's data-phase). Laid over everything with a multiply blend.
  */
-export function SkyTint({ box: [x, y, w, h], lit = [], dim = [] }: { box: [number, number, number, number]; lit?: string[]; dim?: string[] }) {
+export function SkyTint({ box: [x, y, w, h], lit = [] }: { box: [number, number, number, number]; lit?: string[] }) {
   const id = useId().replace(/:/g, '');
   return (
     <>
@@ -896,10 +896,6 @@ export function SkyTint({ box: [x, y, w, h], lit = [], dim = [] }: { box: [numbe
             <rect x={x} y={y} width={w} height={h} fill="#FFFFFF" />
             {lit.map((area) => (
               <polygon key={area} points={area} fill="#000000" filter="url(#bld-blur-s)" />
-            ))}
-            {/* Half lit: still readable, still night */}
-            {dim.map((area) => (
-              <polygon key={area} points={area} fill="#8A8A8A" />
             ))}
           </mask>
         </defs>
@@ -1334,14 +1330,13 @@ function BuildingArt() {
       <Tree s={250} t={700} size={1.1} />
       <Tree s={360} t={708} size={0.9} />
 
-      <SkyTint
-        box={[-80, -40, 1170, 730]}
-        lit={[LIT_SPACES.rnds, LIT_SPACES.club421]}
-        dim={CARS.map((car) => {
-          const at = (u: number, v: number, h: number): [number, number, number] => (car.alongT ? [car.s + v, car.t + u, h] : [car.s + u, car.t + v, h]);
-          return litArea(SITE_GROUND, [at(0, 0, 0), at(46, 0, 0), at(46, 19, 0), at(0, 19, 0), at(0, 0, 18), at(46, 0, 18), at(46, 19, 18), at(0, 19, 18)]);
-        })}
-      />
+      <SkyTint box={[-80, -40, 1170, 730]} lit={[LIT_SPACES.rnds, LIT_SPACES.club421]} />
+      {/* At night the cars are drawn again over the dark, dimmed but readable, at their exact shape */}
+      <g className="night-cars">
+        {CARS.map((car) => (
+          <Car key={`${car.s}-${car.t}`} {...car} />
+        ))}
+      </g>
       <NightLights />
       <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
     </svg>
