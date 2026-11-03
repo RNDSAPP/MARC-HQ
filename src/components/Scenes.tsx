@@ -21,6 +21,8 @@ import {
 } from './Building';
 import type { Look, Point } from './Building';
 import MapViewport from './MapViewport';
+import { VERSION_STATE } from '../lib/appstore';
+import type { StoreData, StoreReview } from '../lib/appstore';
 import './Scenes.css';
 
 const normalize = (text: string) =>
@@ -554,14 +556,26 @@ const stars = (n: number) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.s
 
 /**
  * The App Store module as its store page: the icon and name, a strip of key figures (as on the
- * App Store), then the ratings: the average in big and how the stars spread, from the reviews.
+ * App Store), then the ratings: the average in big and how the stars spread. With App Store
+ * Connect (`live`), all of it comes from Apple: the real versions and the real written reviews.
  */
-export function AppStorePanel({ project, module, rating, icon }: { project: Project; module: Module; rating: string; icon: string }) {
+export function AppStorePanel({ project, module, rating, icon, live }: { project: Project; module: Module; rating: string; icon: string; live: StoreData | null }) {
   if (module.view.kind !== 'table') return null;
-  const notes = module.view.rows.map(([, note]) => parseInt(note, 10) || 0).filter((n) => n > 0);
+  const notes = live ? live.reviews.map((r) => r.rating) : module.view.rows.map(([, note]) => parseInt(note, 10) || 0).filter((n) => n > 0);
   const spread = [5, 4, 3, 2, 1].map((n) => ({ n, count: notes.filter((x) => x === n).length }));
   const most = Math.max(1, ...spread.map((row) => row.count));
-  const waiting = module.view.rows.filter(([, , , status]) => normalize(status).includes('repondre')).length;
+  const waiting = live ? live.reviews.filter((r) => !r.response).length : module.view.rows.filter(([, , , status]) => normalize(status).includes('repondre')).length;
+  const average = live ? (notes.length ? (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(1).replace('.', ',') : '–') : rating;
+  const current = live?.versions[0];
+  const online = live?.versions.find((v) => VERSION_STATE[v.state] === 'En ligne');
+  const facts = live
+    ? [
+        { label: 'En ligne', value: online ? online.version : '–', delta: online ? 'version publiée' : 'pas encore' },
+        { label: 'Dernière version', value: current ? current.version : '–', delta: current ? (VERSION_STATE[current.state] ?? current.state) : '' },
+        { label: 'Avis écrits', value: `${live.reviews.length}`, delta: 'derniers' },
+        { label: 'À répondre', value: `${waiting}`, delta: waiting ? 'sans réponse' : 'à jour' },
+      ]
+    : module.kpis;
   return (
     <section className="store" data-project={project.id} aria-label={`${project.name} sur l'App Store`}>
       <header className="store-head">
@@ -569,14 +583,14 @@ export function AppStorePanel({ project, module, rating, icon }: { project: Proj
           <img src={icon} alt="" />
         </span>
         <div className="store-title">
-          <h3 className="store-name">{project.name}</h3>
-          <p className="store-tag">{project.tag}</p>
-          <p className="store-note">Avis d'exemple : les vrais arriveront avec App Store Connect.</p>
+          <h3 className="store-name">{live ? live.app.name : project.name}</h3>
+          <p className="store-tag">{live ? live.app.bundleId : project.tag}</p>
+          <p className="store-note">{live ? 'En direct d’App Store Connect.' : 'Avis d’exemple : connecte-toi à Marc HQ pour voir les vrais.'}</p>
         </div>
       </header>
 
       <dl className="store-strip">
-        {module.kpis.map((kpi) => (
+        {facts.map((kpi) => (
           <div key={kpi.label} className="store-fact">
             <dt>{kpi.label}</dt>
             <dd>{kpi.value}</dd>
@@ -588,7 +602,7 @@ export function AppStorePanel({ project, module, rating, icon }: { project: Proj
       <div className="store-ratings">
         <h4 className="store-subhead">Notes et avis</h4>
         <div className="store-score">
-          <span className="store-score-num">{rating}</span>
+          <span className="store-score-num">{average}</span>
           <span className="store-score-of">sur 5</span>
         </div>
         <ul className="store-bars" aria-label="Répartition des étoiles">
@@ -604,11 +618,88 @@ export function AppStorePanel({ project, module, rating, icon }: { project: Proj
           ))}
         </ul>
         <p className="store-count">
-          {notes.length} avis
+          {notes.length} avis écrit{notes.length > 1 ? 's' : ''}
           {waiting > 0 && <span className="store-waiting">{waiting} à répondre</span>}
         </p>
       </div>
     </section>
+  );
+}
+
+/** The real written reviews, newest first: stars, title, text, who and when, the answer or a box to answer. */
+export function LiveReviewCards({ reviews, onReply }: { reviews: StoreReview[]; onReply: (id: string, text: string) => Promise<string> }) {
+  const [open, setOpen] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  async function send(id: string) {
+    setBusy(true);
+    const error = await onReply(id, draft);
+    setBusy(false);
+    setMessage(error || 'Réponse envoyée. Apple la publie après vérification.');
+    if (!error) {
+      setOpen(null);
+      setDraft('');
+    }
+  }
+  return (
+    <>
+      {message && (
+        <p className="mail-message" role="status">
+          {message}
+        </p>
+      )}
+      <ul className="reviews">
+        {reviews.map((review) => (
+          <li key={review.id} className={`review${review.response ? '' : ' review--waiting'}`}>
+            <div className="review-top">
+              <span className="review-stars" aria-label={`${review.rating} étoiles sur 5`}>
+                {stars(review.rating)}
+              </span>
+              <span className="review-date">{new Date(review.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+            </div>
+            <p className="review-title">{review.title}</p>
+            <p className="review-body">{review.body}</p>
+            <p className="review-who">
+              {review.nickname} · {review.territory}
+            </p>
+            {review.response ? (
+              <p className="review-reply">
+                <strong>Ta réponse{review.response.state === 'PENDING_PUBLISH' ? ' (en vérification)' : ''} :</strong> {review.response.body}
+              </p>
+            ) : open === review.id ? (
+              <div className="review-form">
+                <textarea className="tool-input review-input" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ta réponse, visible sur l'App Store" rows={3} />
+                <div className="review-foot">
+                  <button type="button" className="tool-ghost" onClick={() => setOpen(null)}>
+                    Annuler
+                  </button>
+                  <button type="button" className="review-answer" onClick={() => send(review.id)} disabled={busy || !draft.trim()}>
+                    {busy ? 'Envoi…' : 'Envoyer'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="review-foot">
+                <span className="review-status review-status--waiting">À répondre</span>
+                <button
+                  type="button"
+                  className="review-answer"
+                  onClick={() => {
+                    setOpen(review.id);
+                    setDraft('');
+                    setMessage('');
+                  }}
+                >
+                  Répondre
+                </button>
+              </div>
+            )}
+          </li>
+        ))}
+        {reviews.length === 0 && <li className="tool-empty">Pas encore d'avis écrit sur l'App Store.</li>}
+      </ul>
+    </>
   );
 }
 

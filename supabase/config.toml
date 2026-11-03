@@ -428,3 +428,6 @@ verify_jwt = false
 
 [functions.calendar-sync]
 verify_jwt = false
+
+[functions.appstore]
+verify_jwt = false

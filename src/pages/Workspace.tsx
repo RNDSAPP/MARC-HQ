@@ -10,7 +10,7 @@ import type { Entity } from '../components/EntitySheet';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
-import { AmbassadorsPlaza, AppStorePanel, FollowerCards, FollowersScene, PipelineCity, PostCards, RevenueCards, RevenueScene, ReviewCards, StudioScene } from '../components/Scenes';
+import { AmbassadorsPlaza, AppStorePanel, LiveReviewCards, FollowerCards, FollowersScene, PipelineCity, PostCards, RevenueCards, RevenueScene, ReviewCards, StudioScene } from '../components/Scenes';
 import logo421 from '../assets/logo-421-blanc.svg';
 import logoRnds from '../assets/logo-rnds.svg';
 import StatPanel from '../components/StatPanel';
@@ -20,6 +20,7 @@ import ModuleStrip from '../components/ModuleStrip';
 import { useCustomProjects, useProjects } from '../data/customProjects';
 import { TOOLS, isTool } from '../data/sections';
 import ProjectMap from '../components/ProjectMap';
+import { useAppStore } from '../lib/appstore';
 import { useCalendarSync } from '../lib/calendar';
 import AccountGate from '../components/AccountGate';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
@@ -220,11 +221,13 @@ type ModuleViewProps = {
 
 /** A module's dashboard: title and scene, agents and figures, then its pipeline or table. */
 function ModuleView({ project, module, columns, rows, query, onAction, onAddTask }: ModuleViewProps) {
+  // App Store Connect, live once signed in (the App Store module only)
+  const store = useAppStore(project.id, module.slug === 'app-store');
   const [open, setOpen] = useState<string | null>(null);
   const entity = open ? findEntity(project, module, open) : null;
   const navigate = useNavigate();
   const isPipeline = module.view.kind === 'pipeline';
-  const listTitle = module.view.kind === 'table' ? module.view.title : project.pipeline.title;
+  const listTitle = store.data ? 'Avis sur l’App Store' : module.view.kind === 'table' ? module.view.title : project.pipeline.title;
   const total = isPipeline
     ? project.pipeline.columns.reduce((sum, column) => sum + column.cards.length, 0)
     : module.view.kind === 'table'
@@ -232,7 +235,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
       : 0;
   const shown = isPipeline ? columns.reduce((sum, column) => sum + column.cards.length, 0) : rows.length;
   const unit = isPipeline ? 'au total' : 'lignes';
-  const listMeta = query ? `${shown} sur ${total}` : `${total} ${unit}`;
+  const listMeta = store.data ? `${store.data.reviews.length} avis écrits` : query ? `${shown} sur ${total}` : `${total} ${unit}`;
 
   return (
     <>
@@ -256,7 +259,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           ) : module.slug === 'publications' ? (
             <StudioScene project={project} module={module} icon={logoRnds} onSelect={setOpen} />
           ) : module.slug === 'app-store' ? (
-            <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} />
+            <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} live={store.data} />
           ) : (
             <ProjectScene project={project} current={module.slug} />
           )}
@@ -302,7 +305,9 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             {listMeta}
           </span>
         </div>
-        {module.slug === 'app-store' ? (
+        {module.slug === 'app-store' && store.data ? (
+          <LiveReviewCards reviews={store.data.reviews.filter((r) => !query || normalize(`${r.title} ${r.body} ${r.nickname}`).includes(query))} onReply={store.reply} />
+        ) : module.slug === 'app-store' ? (
           <ReviewCards rows={rows} onOpen={setOpen} onAction={onAction} />
         ) : module.slug === 'revenus' ? (
           <RevenueCards rows={rows} onOpen={setOpen} />
