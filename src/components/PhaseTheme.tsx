@@ -9,7 +9,7 @@ export default function PhaseTheme() {
   useEffect(() => {
     const night = phase === 'night';
     document.documentElement.dataset.theme = night ? 'night' : 'day';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', night ? '#0e0f12' : '#f4f4f4');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', night ? '#0f0f10' : '#f4f4f4');
   }, [phase]);
   return null;
 }

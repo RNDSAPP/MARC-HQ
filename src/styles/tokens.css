@@ -107,25 +107,25 @@
 :root[data-theme='night'] {
   color-scheme: dark;
 
-  --bg: #0e0f12;
-  --sidebar: #121317;
-  --surface: #17181c;
-  --surface-low: #17181c;
-  --card: #1f2026;
-  --border: #2a2b31;
-  --border-soft: #222328;
-  --border-strong: #34353c;
+  --bg: #0f0f10;
+  --sidebar: #141415;
+  --surface: #1a1a1c;
+  --surface-low: #1a1a1c;
+  --card: #232325;
+  --border: #2c2c2f;
+  --border-soft: #242426;
+  --border-strong: #363639;
 
   --fill: rgb(255 255 255 / 0.05);
   --fill-strong: rgb(255 255 255 / 0.08);
   --fill-pressed: rgb(255 255 255 / 0.12);
   --hairline: rgb(255 255 255 / 0.07);
   --hairline-strong: rgb(255 255 255 / 0.13);
-  --glass: rgb(14 15 18 / 0.78);
+  --glass: rgb(15 15 16 / 0.78);
 
   --text: #f2f3f5;
-  --text-2: #c3c5cc;
-  --text-muted: #8b8e97;
+  --text-2: #c6c6c9;
+  --text-muted: #8f8f94;
   --text-card: #e6e7ea;
 
   --alert-text: #f3c870;
@@ -137,9 +137,9 @@
   --club-soft: #b69cff;
   --club-tint: #241743;
 
-  --col-new: #4a4c53;
-  --bar: #2c2e34;
-  --bar-recent: #4a4d55;
+  --col-new: #4c4c50;
+  --bar: #2e2e31;
+  --bar-recent: #4d4d52;
 
   --shadow-pop: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px rgb(0 0 0 / 0.5);
   --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 6px 20px rgb(0 0 0 / 0.35);

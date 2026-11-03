@@ -1,7 +1,9 @@
+import { useId } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { Project, ProjectId } from '../data/types';
 import { agentStatusLabel, projectStatus } from '../lib/format';
+import MapViewport from './MapViewport';
 import ModuleIcon from './ModuleIcon';
 import { useStored } from '../hooks/useStored';
 import { phaseLabel, usePhase } from '../lib/sun';
@@ -19,18 +21,20 @@ export default function Building({ projects }: Props) {
   const phase = usePhase(choice);
   return (
     <div className="building" data-phase={phase}>
-      <BuildingArt />
-
-      {/* Large invisible click zones over each floor. Keyboard users get the labels below instead. */}
-      {projects.map((project) => (
-      <Link
-          key={`zone-${project.id}`}
-          to={`/${project.id}/vue-d-ensemble`}
-          className={`building-zone building-zone--${project.id}`}
-          tabIndex={-1}
-          aria-hidden="true"
-        />
-      ))}
+      <MapViewport label="Le site Marc HQ. Glisse pour te déplacer, pince ou ⌘ + molette pour zoomer.">
+        <BuildingArt />
+        {/* Large invisible click zones over each floor. Keyboard users get the labels below instead. */}
+        {projects.map((project) => (
+          <Link
+            key={`zone-${project.id}`}
+            to={`/${project.id}/vue-d-ensemble`}
+            className={`building-zone building-zone--${project.id}`}
+            tabIndex={-1}
+            aria-hidden="true"
+            draggable={false}
+          />
+        ))}
+      </MapViewport>
 
       <ul className="building-labels">
         {projects.map((project) => {
@@ -59,7 +63,7 @@ export default function Building({ projects }: Props) {
       </ul>
 
       <span className="building-hint" aria-hidden="true">
-        Clique sur un étage
+        Clique sur un étage · glisse pour te déplacer
       </span>
       <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
     </div>
@@ -421,7 +425,17 @@ export type Look = {
  * `fight`: one of the two sparring boxers, 'a' on the left, 'b' on the right, or 'bag' for the one on the punching bag.
  * `rope`: skipping rope. `cheer`: hops for joy (the podium).
  */
-export type Figure = { s: number; t: number; look: Look; walk?: [number, number]; fight?: 'a' | 'b' | 'bag'; rope?: boolean; cheer?: boolean };
+export type Figure = {
+  s: number;
+  t: number;
+  look: Look;
+  walk?: [number, number];
+  fight?: 'a' | 'b' | 'bag';
+  rope?: boolean;
+  cheer?: boolean;
+  /** selfie: phone held up to film; nap: asleep on a stool; chat: talking, with a speech bubble. */
+  pose?: 'selfie' | 'nap' | 'chat';
+};
 
 export const SKIN = { light: '#F3C9AE', rose: '#EDB89A', tan: '#C98B62', deep: '#8A5636' };
 const INK = '#1E1E1E';
@@ -492,7 +506,7 @@ function limb(x1: number, y1: number, x2: number, y2: number, width: number) {
 }
 
 /** A designer-toy figure standing at floor point (s, t). */
-export function Person({ origin, s, t, look, walk, fight, rope, cheer }: Figure & { origin: Point }) {
+export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: Figure & { origin: Point }) {
   const [x, y] = iso(origin, s, t);
   // Small idle motions (Building.css): boxers hop and jab, walkers stroll, the others breathe.
   // Each figure starts at a different point of its loop so they never move in step.
@@ -505,13 +519,23 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer }: Figure 
   const sleeve = shade(look.top, 0.08);
   const legBottom = look.shorts ? -6.6 : -2.4;
   const crease = shade(look.top, 0.28);
+  const selfie = pose === 'selfie';
   const arms = look.gloves
     ? [limb(-6, -21, -6.6, -24.6, 4), limb(6, -21, 6.8, -25.2, 4)]
-    : [limb(-6.2, -22.4, -8, -14, 4), limb(6.2, -22.4, 8, -14, 4)];
+    : [limb(-6.2, -22.4, -8, -14, 4), selfie ? limb(6.2, -22.4, 9.6, -30, 4) : limb(6.2, -22.4, 8, -14, 4)];
+  const rightHand: Point = selfie ? [9.8, -31.4] : [8.2, -12.6];
+  const nap = pose === 'nap';
   return (
-    <g className={`fig${kind}`} style={motion}>
+    <g className={`fig${kind}${nap ? ' fig--nap' : ''}`} style={motion}>
+    {nap && (
+      <g>
+        <ellipse cx={x + 2} cy={y + 1} rx="11" ry="3.4" fill="#000" fillOpacity="0.18" filter="url(#bld-blur-s)" />
+        <rect x={x - 9} y={y - 9} width="18" height="9" rx="2" fill="#D9D9D9" />
+        <rect x={x - 9} y={y - 11} width="18" height="3" rx="1.5" fill="#F4F4F4" />
+      </g>
+    )}
     <g className="fig-body">
-    <g transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(0.92)`}>
+    <g transform={`translate(${x.toFixed(1)} ${(y - (nap ? 6 : 0)).toFixed(1)}) scale(0.92${nap ? ' 0.86' : ''}) rotate(${nap ? -6 : 0})`}>
       <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#000" fillOpacity="0.2" filter="url(#bld-blur-s)" />
 
       {look.head === 'long' && vinyl((f) => <rect x="-9.6" y="-40" width="19.2" height="25" rx="8" fill={f} />, look.headColor)}
@@ -548,8 +572,14 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer }: Figure 
           </g>
           <g className="fig-arm fig-arm--r">
             {vinyl(arms[1], sleeve)}
-            {vinyl((f) => <circle cx="8.2" cy="-12.6" r="2.8" fill={f} />, look.skin)}
-            {look.holds === 'phone' && <rect x="7.4" y="-19.6" width="3.4" height="6.2" rx="0.9" fill="#2F6B4C" />}
+            {vinyl((f) => <circle cx={rightHand[0]} cy={rightHand[1]} r="2.8" fill={f} />, look.skin)}
+            {look.holds === 'phone' && !selfie && <rect x="7.4" y="-19.6" width="3.4" height="6.2" rx="0.9" fill="#2F6B4C" />}
+            {selfie && (
+              <g>
+                <rect x="7.6" y="-42" width="4.4" height="8" rx="1" fill="#1E1E1E" />
+                <rect x="8.3" y="-41.2" width="3" height="6.4" rx="0.6" fill="#6F8FB8" />
+              </g>
+            )}
           </g>
         </>
       )}
@@ -564,7 +594,12 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer }: Figure 
       <ellipse cx="-2.6" cy="-37.6" rx="3.2" ry="1.6" fill="#FFFFFF" fillOpacity="0.35" />
       <Headgear look={look} />
 
-      {look.eyes === 'sunglasses' ? (
+      {pose === 'nap' ? (
+        <g fill="none" stroke={INK} strokeWidth="0.9" strokeLinecap="round">
+          <path d="M-4.4,-32 q1.6,1.2 3.2,0" />
+          <path d="M1.2,-32 q1.6,1.2 3.2,0" />
+        </g>
+      ) : look.eyes === 'sunglasses' ? (
         <g>
           <ellipse cx="-3" cy="-32.4" rx="2.6" ry="1.8" fill={INK} />
           <ellipse cx="3" cy="-32.4" rx="2.6" ry="1.8" fill={INK} />
@@ -605,6 +640,21 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer }: Figure 
           {vinyl((f) => <ellipse cx="-9.4" cy="-32" rx="2.6" ry="3.4" fill={f} />, INK)}
           {vinyl((f) => <ellipse cx="9.4" cy="-32" rx="2.6" ry="3.4" fill={f} />, INK)}
         </>
+      )}
+
+      {pose === 'nap' && (
+        <text className="fig-zzz" x="8" y="-44" fontSize="7" fontWeight="700" fill="#8A93A6">
+          z<tspan dx="1" dy="-4" fontSize="9">Z</tspan>
+        </text>
+      )}
+      {pose === 'chat' && (
+        <g className="fig-bubble">
+          <rect x="4" y="-58" width="17" height="11" rx="5.5" fill="#FFFFFF" stroke="#D6D6D6" strokeWidth="0.6" />
+          <path d="M8,-47.2 l-1.5,4 l4.5,-4 z" fill="#FFFFFF" />
+          <circle cx="8.6" cy="-52.5" r="1.1" fill="#9A9A9A" />
+          <circle cx="12.5" cy="-52.5" r="1.1" fill="#9A9A9A" />
+          <circle cx="16.4" cy="-52.5" r="1.1" fill="#9A9A9A" />
+        </g>
       )}
 
       {/* Skipping rope: from hand to hand, it swings over the head and under the feet (Building.css) */}
@@ -829,9 +879,28 @@ const LAMP_POSTS: Point[] = [
  * Colour of the sky over the model: nothing by day, warm at dawn and dusk, deep blue at night
  * (Building.css, from the scene's data-phase). Laid over everything with a multiply blend.
  */
-export function SkyTint({ box: [x, y, w, h] }: { box: [number, number, number, number] }) {
-  return <rect className="sky-tint" x={x} y={y} width={w} height={h} />;
+export function SkyTint({ box: [x, y, w, h], lit = [] }: { box: [number, number, number, number]; lit?: string[] }) {
+  const id = useId().replace(/:/g, '');
+  return (
+    <>
+      {lit.length > 0 && (
+        <defs>
+          {/* The lit spaces are cut out of the night, with a soft edge */}
+          <mask id={`${id}-lit`} maskUnits="userSpaceOnUse" x={x} y={y} width={w} height={h}>
+            <rect x={x} y={y} width={w} height={h} fill="#FFFFFF" />
+            {lit.map((area) => (
+              <polygon key={area} points={area} fill="#000000" filter="url(#bld-blur-s)" />
+            ))}
+          </mask>
+        </defs>
+      )}
+      <rect className="sky-tint" x={x} y={y} width={w} height={h} mask={lit.length > 0 ? `url(#${id}-lit)` : undefined} />
+    </>
+  );
 }
+
+/** Floor outlines of the two spaces, which stay lit at night. */
+const LIT_SPACES = { rnds: points(RNDS_FLOOR, [[0, 0], [320, 0], [320, 250], [0, 250]]), club421: points(CLUB_FLOOR, [[0, 0], [320, 0], [320, 250], [0, 250]]) };
 
 /** Neon line along the two front edges of a floor, with its glow. */
 function Neon({ origin, color }: { origin: Point; color: string }) {
@@ -891,7 +960,7 @@ function NightLights({ only }: { only?: ProjectId }) {
       )}
       {!only && (
         <>
-          <g fill="none" stroke="#9DB4E0" strokeOpacity="0.45" strokeWidth="1.8" strokeDasharray="14 12">
+          <g fill="none" stroke="#FFFFFF" strokeOpacity="0.3" strokeWidth="1.8" strokeDasharray="14 12">
             {ROADS.map(({ across: [a0, a1], alongT }) => {
               const mid = (a0 + a1) / 2;
               return <polyline key={`${a0}-${alongT}`} points={points(SITE_GROUND, alongT ? [[mid, -900], [mid, 1500]] : [[-900, mid], [1500, mid]])} />;
@@ -1180,7 +1249,7 @@ function BuildingArt() {
       <Tree s={250} t={700} size={1.1} />
       <Tree s={360} t={708} size={0.9} />
 
-      <SkyTint box={[-80, -40, 1170, 730]} />
+      <SkyTint box={[-80, -40, 1170, 730]} lit={[LIT_SPACES.rnds, LIT_SPACES.club421]} />
       <NightLights />
       <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
     </svg>
@@ -1234,7 +1303,7 @@ export function ProjectScene({ project, current }: { project: Project; current: 
         <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-ground)" />
         <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
         {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
-        <SkyTint box={scene.viewBox} />
+        <SkyTint box={scene.viewBox} lit={[LIT_SPACES[project.id]]} />
         <NightLights only={project.id} />
         <rect x={vx} y={vy} width={vw} height={vh} filter="url(#bld-grain)" />
       </svg>

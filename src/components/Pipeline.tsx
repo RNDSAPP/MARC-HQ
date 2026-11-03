@@ -6,10 +6,12 @@ type Props = {
   columns: PipelineColumn[];
   hotAction: string;
   onAction: (label: string) => void;
+  /** Open the card of a club. */
+  onOpen: (name: string) => void;
 };
 
 /** Pipeline in columns (clubs for RNDS, BDE for Club 421). */
-export default function Pipeline({ columns, hotAction, onAction }: Props) {
+export default function Pipeline({ columns, hotAction, onAction, onOpen }: Props) {
   return (
     <div className="pipeline">
       {columns.map((column) => (
@@ -25,7 +27,7 @@ export default function Pipeline({ columns, hotAction, onAction }: Props) {
             <ul className="pipeline-cards">
               {column.cards.map((card) => (
                 <li key={card.name}>
-                  <Card card={card} hot={column.hot} hotAction={hotAction} onAction={onAction} />
+                  <Card card={card} hot={column.hot} hotAction={hotAction} onAction={onAction} onOpen={onOpen} />
                 </li>
               ))}
             </ul>
@@ -41,12 +43,17 @@ type CardProps = {
   hot?: boolean;
   hotAction: string;
   onAction: (label: string) => void;
+  onOpen: (name: string) => void;
 };
 
-function Card({ card, hot, hotAction, onAction }: CardProps) {
+function Card({ card, hot, hotAction, onAction, onOpen }: CardProps) {
   return (
     <article className={`pipeline-card${hot ? ' pipeline-card--hot' : ''}`}>
-      <h4 className="pipeline-card-name">{card.name}</h4>
+      <h4 className="pipeline-card-name">
+        <button type="button" className="pipeline-card-open" onClick={() => onOpen(card.name)}>
+          {card.name}
+        </button>
+      </h4>
       <p className="pipeline-card-meta">{card.meta}</p>
       <div className="pipeline-card-foot">
         <span className="pipeline-avatar" aria-hidden="true">

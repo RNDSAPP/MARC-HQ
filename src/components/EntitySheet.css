@@ -1,0 +1,250 @@
+/* Card of an establishment or a person: from the right on a computer, from the bottom on a phone */
+.sheet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.sheet-shade {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.28);
+  animation: shade-in 200ms var(--ease);
+}
+
+.esheet {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: min(420px, calc(100vw - 24px));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 20px 28px;
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  animation: esheet-in 280ms var(--ease);
+}
+
+.esheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.esheet-avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--accent-tint);
+  color: var(--accent-soft);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.esheet-title-block {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.esheet-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.esheet-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.esheet-stage::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.esheet-stage--accent::before {
+  background: var(--accent);
+}
+
+.esheet-stage--alert::before {
+  background: var(--alert);
+}
+
+.esheet-close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--text);
+}
+
+.esheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.esheet-primary,
+.esheet-quick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.esheet-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.esheet-quick {
+  background: var(--fill-strong);
+  color: var(--text);
+}
+
+.esheet-quick--off {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.esheet-facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.esheet-fact {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--fill);
+}
+
+.esheet-fact dt {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.esheet-fact dd {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.esheet-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.esheet-h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.esheet-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.esheet-field input,
+.esheet-field textarea {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--fill);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.esheet-field textarea {
+  min-height: 120px;
+  padding: 12px 14px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.esheet-field input:focus,
+.esheet-field textarea:focus {
+  outline: none;
+  background: var(--surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.esheet-saved {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+@keyframes esheet-in {
+  from {
+    transform: translateX(24px);
+  }
+}
+
+@keyframes shade-in {
+  from {
+    background: transparent;
+  }
+}
+
+@media (max-width: 860px) {
+  .esheet {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    width: auto;
+    max-height: 86dvh;
+    padding-bottom: 24px;
+    animation-name: esheet-up;
+  }
+
+  .esheet-field input,
+  .esheet-field textarea {
+    font-size: 16px;
+  }
+}
+
+@keyframes esheet-up {
+  from {
+    transform: translateY(24px);
+  }
+}

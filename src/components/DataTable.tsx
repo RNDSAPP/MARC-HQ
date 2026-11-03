@@ -7,10 +7,12 @@ type Props = {
   caption: string;
   columns: TableRow;
   rows: TableRow[];
+  /** Open the card of the row's first column. */
+  onOpen: (name: string) => void;
 };
 
 /** Four-column table: name with avatar, two text columns, then a status badge. */
-export default function DataTable({ caption, columns, rows }: Props) {
+export default function DataTable({ caption, columns, rows, onOpen }: Props) {
   return (
     <div className="table-frame">
       <div className="table-scroll" role="region" aria-label={caption} tabIndex={0}>
@@ -40,7 +42,9 @@ export default function DataTable({ caption, columns, rows }: Props) {
                       <span className="table-avatar" aria-hidden="true">
                         {initials(name)}
                       </span>
-                      <span className="table-name-text">{name}</span>
+                      <button type="button" className="table-name-text table-open" onClick={() => onOpen(name)}>
+                        {name}
+                      </button>
                     </span>
                   </th>
                   <td>{second}</td>

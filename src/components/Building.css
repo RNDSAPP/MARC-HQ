@@ -159,6 +159,12 @@
   color: var(--accent-soft);
 }
 
+.building .map-controls {
+  top: auto;
+  bottom: 60px;
+  right: 3%;
+}
+
 .building-hint {
   position: absolute;
   left: 3%;
@@ -587,7 +593,7 @@
 
 /* Day and night (src/lib/sun.ts): the sky tint darkens the model, then the lights come on */
 .sky-tint {
-  fill: #0b1020;
+  fill: #000000;
   opacity: 0;
   mix-blend-mode: multiply;
   transition: opacity 1.2s var(--ease), fill 1.2s var(--ease);
@@ -612,7 +618,7 @@
 }
 
 [data-phase='night'] .sky-tint {
-  opacity: 0.84;
+  opacity: 0.8;
 }
 
 [data-phase='dawn'] .night-lights {
@@ -629,7 +635,7 @@
 
 .building[data-phase='night'],
 .scene[data-phase='night'] {
-  background: #20232c;
+  background: #19191a;
 }
 
 .phase-button {
@@ -663,4 +669,48 @@
 /* The podium winner hops for joy */
 .fig--cheer .fig-body {
   animation: rope-hop 1.1s ease-in-out infinite;
+}
+
+/* Ambassadors' little lives: zzz rising over the one asleep, a speech bubble that comes and goes */
+.fig--nap .fig-body {
+  animation: fig-breathe 3.6s ease-in-out infinite;
+}
+
+.fig-zzz {
+  animation: zzz 2.8s ease-in-out infinite;
+}
+
+.fig-bubble {
+  animation: bubble 3.2s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes zzz {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+
+  30%,
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(4px, -6px);
+  }
+}
+
+@keyframes bubble {
+  0%,
+  45%,
+  100% {
+    opacity: 0;
+  }
+
+  55%,
+  90% {
+    opacity: 1;
+  }
 }

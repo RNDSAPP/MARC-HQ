@@ -1,61 +1,154 @@
-/* Labels over the module scenes (city of clubs, ambassadors' square) */
-.scene-tags {
+/* Module scenes (city of clubs, ambassadors' square): the map, then the list of names */
+.scene-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Numbered markers on the map, in the colour of their stage, the same size at any zoom */
+.scene-pins {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.scene-tag-item {
+.scene-pin-item {
   position: absolute;
-  transform: translate(-50%, -100%);
+  transform-origin: 50% 100%;
 }
 
-.scene-tag {
-  display: inline-flex;
+.scene-pin {
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  min-width: 26px;
   height: 26px;
-  padding: 0 10px;
-  border: 0;
+  padding: 0 7px;
+  border: 2px solid #ffffff;
+  border-radius: var(--r-pill);
+  background: #8f8f94;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: transform var(--fast) var(--ease);
+}
+
+.scene-pin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 2px;
+  height: 6px;
+  margin-left: -1px;
+  background: #ffffff;
+}
+
+.scene-pin--accent {
+  background: var(--accent);
+}
+
+.scene-pin--alert {
+  background: #e3a33a;
+}
+
+.scene-pin--new {
+  background: #b5b5ba;
+}
+
+.scene-pin:hover,
+.scene-pin--hover {
+  transform: scale(1.2);
+}
+
+.scene-pin-name {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  padding: 4px 10px;
   border-radius: var(--r-pill);
   background: var(--surface);
   box-shadow: var(--shadow-card);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
   white-space: nowrap;
+  pointer-events: none;
 }
 
-.scene-tag::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--text-muted);
+/* The names, legible, under the map */
+.scene-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 6px;
 }
 
-.scene-tag:hover {
+.scene-legend-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  color: var(--text);
+}
+
+.scene-legend-item:hover,
+.scene-legend-item--hover {
   box-shadow: var(--shadow-pop);
 }
 
-.scene-tag--accent::before {
-  background: var(--accent);
+.scene-legend-num {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #8f8f94;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.scene-tag--alert::before {
-  background: var(--alert);
+.scene-legend-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.scene-tag--new {
-  background: rgb(255 255 255 / 0.75);
-  color: var(--text-2);
+.scene-legend-name {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.scene-tag-rank {
-  display: none;
+.scene-legend-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.scene-tag-num {
+.scene-legend-value {
+  flex: none;
+  font-size: 15px;
   font-weight: 700;
   color: var(--accent-soft);
   font-variant-numeric: tabular-nums;
@@ -81,13 +174,9 @@
 }
 
 @media (max-width: 860px) {
-  .scene-tag {
+  .scene-pin {
+    min-width: 22px;
     height: 22px;
-    padding: 0 8px;
     font-size: 11px;
-  }
-
-  .scene-tag-num {
-    display: none;
   }
 }

@@ -159,3 +159,34 @@
     min-height: 0;
   }
 }
+
+/* The name opens the club's card */
+.pipeline-card-open {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.pipeline-card-open:hover {
+  color: var(--accent-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pipeline-card-open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.pipeline-card {
+  position: relative;
+}
+
+.pipeline-card-action {
+  position: relative;
+  z-index: 1;
+}

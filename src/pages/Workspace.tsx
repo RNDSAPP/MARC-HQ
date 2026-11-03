@@ -5,6 +5,8 @@ import AgentCard from '../components/AgentCard';
 import AppRail from '../components/AppRail';
 import { ProjectScene } from '../components/Building';
 import DataTable from '../components/DataTable';
+import EntitySheet from '../components/EntitySheet';
+import type { Entity } from '../components/EntitySheet';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
@@ -17,7 +19,8 @@ import { TOOLS, isTool } from '../data/sections';
 import { useIdeas, useNotes, useTasks } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { useData } from '../data/useData';
-import { dayLabel } from '../lib/dates';
+import { dayLabel, isoDate } from '../lib/dates';
+import { statusTone } from '../lib/format';
 import IdeasPage from './tools/IdeasPage';
 import NotesPage from './tools/NotesPage';
 import TodoPage from './tools/TodoPage';
@@ -116,9 +119,9 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
               rows={rows}
               query={query}
               onAction={showAction}
-              onPick={(name) => {
-                setSearch(name);
-                document.getElementById('list-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              onAddTask={(text) => {
+                tasks.add(text, isoDate(new Date(Date.now() + 86400000)));
+                setNotice(`Tâche ajoutée pour demain : « ${text} ».`);
               }}
             />
           )}
@@ -152,12 +155,13 @@ type ModuleViewProps = {
   rows: TableRow[];
   query: string;
   onAction: (label: string) => void;
-  /** A name tapped on the scene: filter the list below on it. */
-  onPick: (name: string) => void;
+  onAddTask: (text: string) => void;
 };
 
 /** A module's dashboard: title and scene, agents and figures, then its pipeline or table. */
-function ModuleView({ project, module, columns, rows, query, onAction, onPick }: ModuleViewProps) {
+function ModuleView({ project, module, columns, rows, query, onAction, onAddTask }: ModuleViewProps) {
+  const [open, setOpen] = useState<string | null>(null);
+  const entity = open ? findEntity(project, module, open) : null;
   const isPipeline = module.view.kind === 'pipeline';
   const listTitle = module.view.kind === 'table' ? module.view.title : project.pipeline.title;
   const total = isPipeline
@@ -175,9 +179,9 @@ function ModuleView({ project, module, columns, rows, query, onAction, onPick }:
         <div className="workspace-center">
           <Hero eyebrow={`${project.name} · ${dayLabel()}`} headline={module.headline} sub={module.sub} cta={module.cta} onAction={onAction} />
           {module.view.kind === 'pipeline' && module.slug !== 'vue-d-ensemble' ? (
-            <PipelineCity project={project} module={module} onPick={onPick} />
+            <PipelineCity project={project} module={module} onSelect={setOpen} />
           ) : module.slug === 'ambassadeurs' ? (
-            <AmbassadorsPlaza project={project} module={module} onPick={onPick} />
+            <AmbassadorsPlaza project={project} module={module} onSelect={setOpen} />
           ) : (
             <ProjectScene project={project} current={module.slug} />
           )}
@@ -212,11 +216,43 @@ function ModuleView({ project, module, columns, rows, query, onAction, onPick }:
           </span>
         </div>
         {module.view.kind === 'table' ? (
-          <DataTable caption={listTitle} columns={module.view.columns} rows={rows} />
+          <DataTable caption={listTitle} columns={module.view.columns} rows={rows} onOpen={setOpen} />
         ) : (
-          <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={onAction} />
+          <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={onAction} onOpen={setOpen} />
         )}
       </section>
+
+      {entity && <EntitySheet project={project} entity={entity} onClose={() => setOpen(null)} onAction={onAction} onAddTask={onAddTask} />}
     </>
   );
+}
+
+/** What the card shows for a name opened on the scene, the pipeline or the table. */
+function findEntity(project: Project, module: Project['modules'][number], name: string): Entity | null {
+  for (const column of project.pipeline.columns) {
+    const card = column.cards.find((c) => c.name === name);
+    if (!card) continue;
+    const [where, size] = card.meta.split(' · ');
+    const facts: [string, string][] = [['Étape', column.name]];
+    if (where) facts.push([project.id === 'rnds' ? 'Lieu' : 'Type', where]);
+    if (size) facts.push([project.id === 'rnds' ? 'Membres' : 'Contact', size]);
+    facts.push(['Prochaine étape', card.when]);
+    return { name, stage: column.name, tone: column.tone, facts, action: column.hot ? project.pipeline.hotAction : undefined };
+  }
+  if (module.view.kind === 'table') {
+    const row = module.view.rows.find((r) => r[0] === name);
+    if (!row) return null;
+    const status = row[3];
+    const tone = statusTone(status);
+    // "À relancer" gives the action "Relancer", "À valider" gives "Valider"…
+    const action = status.startsWith('À ') ? status.charAt(2).toUpperCase() + status.slice(3) : undefined;
+    return {
+      name,
+      stage: status,
+      tone: tone === 'good' ? 'accent' : tone === 'warn' ? 'alert' : 'muted',
+      facts: module.view.columns.slice(1).map((label, i): [string, string] => [label, row[i + 1]]),
+      action,
+    };
+  }
+  return null;
 }
