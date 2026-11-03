@@ -112,11 +112,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 600;
+  font-family: var(--mark-font);
+  font-weight: 700;
   font-size: 17px;
-  background: var(--accent);
-  color: var(--bg);
+  background: var(--mark-bg);
+  color: var(--mark-ink);
 }
 
 .sidebar-project-text {

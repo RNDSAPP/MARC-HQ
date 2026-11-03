@@ -1,4 +1,4 @@
-import WeeklyBars from './WeeklyBars';
+import WeeklySteps from './WeeklySteps';
 import './Hero.css';
 
 type Props = {
@@ -42,7 +42,7 @@ export default function Hero({ eyebrow, headline, sub, cta, heroLabel, heroNum, 
           <span className="hero-stat-delta">{heroDelta}</span>
         </div>
         <span className="hero-stat-num">{heroNum}</span>
-        <WeeklyBars series={series} label={heroLabel} />
+        <WeeklySteps series={series} label={heroLabel} />
       </div>
     </section>
   );

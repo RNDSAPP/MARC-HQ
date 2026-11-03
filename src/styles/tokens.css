@@ -34,10 +34,14 @@
   --alert-border: #f0d29a;
   --alert-ink: #1a1206;
 
-  /* Project accents: the brand colour, a darker shade readable on white, a pale tint */
-  --rnds: #f04a2a;
-  --rnds-soft: #c2381c;
-  --rnds-tint: #ffebe5;
+  /* Project accents: the brand colour, a darker shade readable on white, a pale tint.
+     RNDS: "Rouge Gong" from the RNDS brand kit (Documents/RNDS/RNDS_charte_graphique.pdf). */
+  --rnds: #ff0a3c;
+  --rnds-soft: #c8002c;
+  --rnds-tint: #ffe7ec;
+  --rnds-ink: #000000;
+  --rnds-black: #000000;
+  --rnds-chalk: #ececea;
   --club: #1f9a5a;
   --club-soft: #17804a;
   --club-tint: #e0f5e9;
@@ -46,6 +50,8 @@
   --accent: var(--text);
   --accent-soft: var(--text-2);
   --accent-tint: var(--fill-strong);
+  /* Ink on an accent fill */
+  --on-accent: var(--bg);
 
   /* Chart and pipeline greys */
   --col-new: #b8b8b8;
@@ -78,10 +84,23 @@
   --tabbar-h: 58px;
 }
 
+/* Recomputed on each project element, so they pick up that project's accent */
+[data-project] {
+  --on-accent: var(--bg);
+  --mark-bg: var(--accent);
+  --mark-ink: var(--on-accent);
+  --mark-font: var(--font-display);
+}
+
 [data-project='rnds'] {
   --accent: var(--rnds);
   --accent-soft: var(--rnds-soft);
   --accent-tint: var(--rnds-tint);
+  /* The brand kit puts black on red, and the mark on black in Kode Mono */
+  --on-accent: var(--rnds-ink);
+  --mark-bg: var(--rnds-black);
+  --mark-ink: var(--rnds-chalk);
+  --mark-font: 'Kode Mono', var(--font-mono);
 }
 
 [data-project='club421'] {

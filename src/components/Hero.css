@@ -86,7 +86,7 @@
 
 .hero-cta {
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
 }
 
 .hero-cta:hover {
@@ -149,10 +149,10 @@
 
 .hero-stat-num {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 56px;
+  font-weight: 300;
+  font-size: 64px;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
