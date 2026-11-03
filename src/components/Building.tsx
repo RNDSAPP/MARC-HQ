@@ -833,6 +833,29 @@ export function SkyTint({ box: [x, y, w, h] }: { box: [number, number, number, n
   return <rect className="sky-tint" x={x} y={y} width={w} height={h} />;
 }
 
+/** Neon line along the two front edges of a floor, with its glow. */
+function Neon({ origin, color }: { origin: Point; color: string }) {
+  const edge = points(origin, [[320, 0], [320, 250], [0, 250]]);
+  return (
+    <g fill="none" strokeLinejoin="round">
+      <polyline points={edge} stroke={color} strokeWidth="7" strokeOpacity="0.55" filter="url(#bld-blur-s)" />
+      <polyline points={edge} stroke={color} strokeWidth="2" />
+    </g>
+  );
+}
+
+/** A band of lit windows along a wall's inner face, at height h. */
+function WindowBand({ origin, from, to, h }: { origin: Point; from: Point; to: Point; h: number }) {
+  const [x1, y1] = iso(origin, from[0], from[1]);
+  const [x2, y2] = iso(origin, to[0], to[1]);
+  return (
+    <g strokeLinecap="butt">
+      <line x1={x1} y1={y1 - h} x2={x2} y2={y2 - h} stroke="#DDEEFF" strokeWidth="9" strokeOpacity="0.45" strokeDasharray="16 7" filter="url(#bld-blur-s)" />
+      <line x1={x1} y1={y1 - h} x2={x2} y2={y2 - h} stroke="#EEF7FF" strokeWidth="5" strokeDasharray="16 7" />
+    </g>
+  );
+}
+
 /**
  * What lights up when it gets dark, laid over the sky tint with a screen blend: the lamps over the
  * ring and the dice table, the street lamps and the cars' headlights. `only` keeps one floor.
@@ -845,6 +868,10 @@ function NightLights({ only }: { only?: ProjectId }) {
     <g className="night-lights">
       {only !== 'club421' && (
         <>
+          <Neon origin={R} color={RNDS} />
+          <WindowBand origin={R} from={[8, 30]} to={[8, 236]} h={60} />
+          <WindowBand origin={R} from={[30, 8]} to={[306, 8]} h={60} />
+          <ellipse cx={iso(R, 8, 152)[0]} cy={iso(R, 8, 152)[1] - 58} rx="42" ry="22" fill="#FFFFFF" fillOpacity="0.35" filter="url(#bld-blur-m)" />
           <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp-night)" />
           <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="#FFCF5C" fillOpacity="0.75" filter="url(#bld-blur-m)" />
           <ellipse cx="626" cy="98" rx="12" ry="4" fill="#FFF3B0" filter="url(#bld-blur-s)" />
@@ -852,6 +879,9 @@ function NightLights({ only }: { only?: ProjectId }) {
       )}
       {only !== 'rnds' && (
         <>
+          <Neon origin={C} color={CLUB} />
+          <WindowBand origin={C} from={[8, 24]} to={[8, 150]} h={80} />
+          <ellipse cx={iso(C, 8, 202)[0]} cy={iso(C, 8, 202)[1] - 58} rx="36" ry="24" fill={CLUB} fillOpacity="0.55" filter="url(#bld-blur-m)" />
           <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp-night)" />
           <ellipse cx="392" cy="400" rx="52" ry="28" fill="#FFCF5C" fillOpacity="0.7" filter="url(#bld-blur-m)" />
           <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
@@ -861,6 +891,12 @@ function NightLights({ only }: { only?: ProjectId }) {
       )}
       {!only && (
         <>
+          <g fill="none" stroke="#9DB4E0" strokeOpacity="0.45" strokeWidth="1.8" strokeDasharray="14 12">
+            {ROADS.map(({ across: [a0, a1], alongT }) => {
+              const mid = (a0 + a1) / 2;
+              return <polyline key={`${a0}-${alongT}`} points={points(SITE_GROUND, alongT ? [[mid, -900], [mid, 1500]] : [[-900, mid], [1500, mid]])} />;
+            })}
+          </g>
           {LAMP_POSTS.map(([ls, lt]) => {
             const [x, y] = iso(SITE_GROUND, ls, lt);
             return (

@@ -101,3 +101,50 @@
   --accent-soft: var(--club-soft);
   --accent-tint: var(--club-tint);
 }
+
+/* Night: when the sun is down over Lyon (or night is forced on the map), the whole interface goes
+   dark, like the night references Marc shared. Set on <html> by src/components/PhaseTheme.tsx. */
+:root[data-theme='night'] {
+  color-scheme: dark;
+
+  --bg: #0e0f12;
+  --sidebar: #121317;
+  --surface: #17181c;
+  --surface-low: #17181c;
+  --card: #1f2026;
+  --border: #2a2b31;
+  --border-soft: #222328;
+  --border-strong: #34353c;
+
+  --fill: rgb(255 255 255 / 0.05);
+  --fill-strong: rgb(255 255 255 / 0.08);
+  --fill-pressed: rgb(255 255 255 / 0.12);
+  --hairline: rgb(255 255 255 / 0.07);
+  --hairline-strong: rgb(255 255 255 / 0.13);
+  --glass: rgb(14 15 18 / 0.78);
+
+  --text: #f2f3f5;
+  --text-2: #c3c5cc;
+  --text-muted: #8b8e97;
+  --text-card: #e6e7ea;
+
+  --alert-text: #f3c870;
+  --alert-tint: #2e2412;
+  --alert-border: #5a4520;
+
+  --rnds-soft: #ff5c78;
+  --rnds-tint: #3a0f19;
+  --club-soft: #b69cff;
+  --club-tint: #241743;
+
+  --col-new: #4a4c53;
+  --bar: #2c2e34;
+  --bar-recent: #4a4d55;
+
+  --shadow-pop: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px rgb(0 0 0 / 0.5);
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 6px 20px rgb(0 0 0 / 0.35);
+}
+
+:root[data-theme='night'] [data-project='club421'] {
+  --on-accent: #ffffff;
+}
