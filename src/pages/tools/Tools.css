@@ -298,8 +298,8 @@
 }
 
 .task-due--late {
-  background: var(--rnds-tint);
-  color: var(--rnds-soft);
+  background: var(--rnds);
+  color: #ffffff;
 }
 
 /* Notes */
@@ -695,18 +695,18 @@
 }
 
 .feedback-kind--bug {
-  background: var(--rnds-tint);
-  color: var(--rnds-soft);
+  background: var(--rnds);
+  color: #ffffff;
 }
 
 .feedback-kind--demande {
-  background: var(--club-tint);
-  color: var(--club-soft);
+  background: var(--club);
+  color: #ffffff;
 }
 
 .feedback-priority--haute {
-  background: var(--alert-tint);
-  color: var(--alert-text);
+  background: var(--alert);
+  color: #ffffff;
 }
 
 .feedback-text {
@@ -854,8 +854,8 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: var(--accent-tint);
-  color: var(--accent-soft);
+  background: var(--bubble);
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -986,8 +986,8 @@
 }
 
 .conn-state--wanted {
-  background: var(--accent-tint);
-  color: var(--accent-soft);
+  background: var(--bubble);
+  color: #ffffff;
 }
 
 .conn-gives {
@@ -1284,8 +1284,8 @@
 }
 
 .store-version-state--live {
-  background: var(--accent-tint);
-  color: var(--accent-soft);
+  background: var(--bubble);
+  color: #ffffff;
 }
 
 .store-version-date {

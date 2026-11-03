@@ -65,8 +65,8 @@
 }
 
 .pcard-status--wait {
-  background: var(--alert-tint);
-  color: var(--alert-text);
+  background: var(--alert);
+  color: #ffffff;
 }
 
 .pcard-status--wait .pcard-status-dot {

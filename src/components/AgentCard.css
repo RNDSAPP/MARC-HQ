@@ -38,13 +38,13 @@
 }
 
 .agent--wait .agent-status {
-  background: var(--alert-tint);
-  color: var(--alert-text);
+  background: var(--alert);
+  color: #ffffff;
 }
 
 .agent--work .agent-status {
-  background: var(--accent-tint);
-  color: var(--accent-soft);
+  background: var(--bubble);
+  color: #ffffff;
 }
 
 .agent-task {

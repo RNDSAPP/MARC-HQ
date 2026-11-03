@@ -60,6 +60,8 @@
   --accent-tint: var(--fill-strong);
   /* Ink on an accent fill */
   --on-accent: var(--bg);
+  /* Colored bubbles are filled, with white text: grey outside a project, its color inside */
+  --bubble: #4b5260;
 
   /* Chart and pipeline greys */
   --col-new: #b8b8b8;
@@ -109,6 +111,11 @@
   --accent: var(--club);
   --accent-soft: var(--club-soft);
   --accent-tint: var(--club-tint);
+}
+
+[data-project='rnds'],
+[data-project='club421'] {
+  --bubble: var(--accent);
 }
 
 /* Night: when the sun is down over Lyon (or night is forced on the map), the whole interface goes

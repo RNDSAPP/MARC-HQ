@@ -103,8 +103,8 @@
   flex: none;
   padding: 2px 8px;
   border-radius: var(--r-pill);
-  background: var(--rnds-tint);
-  color: var(--rnds-soft);
+  background: var(--rnds);
+  color: #ffffff;
   font-size: 12px;
   font-weight: 500;
 }

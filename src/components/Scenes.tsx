@@ -20,6 +20,7 @@ import {
   usePhaseChoice,
 } from './Building';
 import type { Look, Point } from './Building';
+import Club421Logo from './Club421Logo';
 import MapViewport from './MapViewport';
 import { VERSION_STATE } from '../lib/appstore';
 import type { StoreData, StoreReview } from '../lib/appstore';
@@ -580,9 +581,7 @@ export function AppStorePanel({ project, module, rating, icon, live }: { project
   return (
     <section className="store" data-project={project.id} aria-label={`${project.name} sur l'App Store`}>
       <header className="store-head">
-        <span className="store-icon">
-          <img src={icon} alt="" />
-        </span>
+        <span className="store-icon">{project.id === 'club421' ? <Club421Logo className="store-icon-logo" /> : <img src={icon} alt="" />}</span>
         <div className="store-title">
           <h3 className="store-name">{live ? live.app.name : project.name}</h3>
           <p className="store-tag">{live ? live.app.bundleId : project.tag}</p>

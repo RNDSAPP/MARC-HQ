@@ -30,8 +30,8 @@
 .stat-delta {
   padding: 3px 10px;
   border-radius: var(--r-pill);
-  background: var(--accent-tint);
-  color: var(--accent-soft);
+  background: var(--bubble);
+  color: #ffffff;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;

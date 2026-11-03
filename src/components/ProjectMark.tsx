@@ -1,5 +1,5 @@
 import type { Project } from '../data/types';
-import logo421White from '../assets/logo-421-blanc.svg';
+import Club421Logo from './Club421Logo';
 import './ProjectMark.css';
 
 /**
@@ -35,7 +35,7 @@ export default function ProjectMark({ project }: { project: Project }) {
   }
   return (
     <span className="project-mark project-mark--club421" aria-hidden="true">
-      <img src={logo421White} alt="" />
+      <Club421Logo />
     </span>
   );
 }
