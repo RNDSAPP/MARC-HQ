@@ -587,7 +587,7 @@
 
 /* Day and night (src/lib/sun.ts): the sky tint darkens the model, then the lights come on */
 .sky-tint {
-  fill: #33406b;
+  fill: #0b1020;
   opacity: 0;
   mix-blend-mode: multiply;
   transition: opacity 1.2s var(--ease), fill 1.2s var(--ease);
@@ -612,7 +612,7 @@
 }
 
 [data-phase='night'] .sky-tint {
-  opacity: 0.66;
+  opacity: 0.84;
 }
 
 [data-phase='dawn'] .night-lights {
@@ -629,7 +629,7 @@
 
 .building[data-phase='night'],
 .scene[data-phase='night'] {
-  background: #757b92;
+  background: #20232c;
 }
 
 .phase-button {

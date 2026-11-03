@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import AppRail from '../components/AppRail';
 import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
+import TodayTasks from '../components/TodayTasks';
 import { getProjects } from '../data/api';
 import { useData } from '../data/useData';
 import { dayLabel, greeting, timeLabel } from '../lib/dates';
@@ -19,9 +20,6 @@ export default function Home() {
   const agents = projects.flatMap((project) => project.agents);
   const active = agents.filter((agent) => agent.status !== 'done').length;
   const waiting = agents.filter((agent) => agent.status === 'wait').length;
-  const today = projects.flatMap((project) =>
-    project.home.todos.map((todo) => ({ ...todo, project })),
-  );
 
   return (
     <div className="home">
@@ -60,21 +58,7 @@ export default function Home() {
             <ProjectCard key={project.id} project={project} />
           ))}
 
-          <section className="home-today" aria-labelledby="today-title">
-            <h2 id="today-title" className="home-today-title">
-              Ce qui t'attend aujourd'hui
-            </h2>
-            <ul className="home-today-list">
-              {today.map((todo) => (
-                <li key={`${todo.project.id}-${todo.text}`} className="home-today-item">
-                  <span className="home-today-tag" data-project={todo.project.id}>
-                    {todo.project.home.shortTag}
-                  </span>
-                  {todo.text}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <TodayTasks projects={projects} />
         </div>
       </main>
     </div>

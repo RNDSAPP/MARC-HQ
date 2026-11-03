@@ -846,14 +846,14 @@ function NightLights({ only }: { only?: ProjectId }) {
       {only !== 'club421' && (
         <>
           <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp-night)" />
-          <ellipse cx={ringX} cy={ringY - 16} rx="70" ry="38" fill="#FFD66B" fillOpacity="0.5" filter="url(#bld-blur-m)" />
+          <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="#FFCF5C" fillOpacity="0.75" filter="url(#bld-blur-m)" />
           <ellipse cx="626" cy="98" rx="12" ry="4" fill="#FFF3B0" filter="url(#bld-blur-s)" />
         </>
       )}
       {only !== 'rnds' && (
         <>
           <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp-night)" />
-          <ellipse cx="392" cy="400" rx="48" ry="26" fill="#FFD66B" fillOpacity="0.45" filter="url(#bld-blur-m)" />
+          <ellipse cx="392" cy="400" rx="52" ry="28" fill="#FFCF5C" fillOpacity="0.7" filter="url(#bld-blur-m)" />
           <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
           {/* The bottles on the bar shelf catch the light */}
           <polygon points={solid(C, [[10, 48, 50], [14, 48, 50], [14, 160, 50], [10, 160, 50]])} fill="#FFE7A0" fillOpacity="0.5" filter="url(#bld-blur-s)" />
@@ -865,7 +865,7 @@ function NightLights({ only }: { only?: ProjectId }) {
             const [x, y] = iso(SITE_GROUND, ls, lt);
             return (
               <g key={`${ls}-${lt}`}>
-                <ellipse cx={x - 10} cy={y + 2} rx="26" ry="13" fill="#FFD98A" fillOpacity="0.55" filter="url(#bld-blur-m)" />
+                <ellipse cx={x - 10} cy={y + 2} rx="30" ry="15" fill="#FFC970" fillOpacity="0.8" filter="url(#bld-blur-m)" />
                 <circle cx={x - 12} cy={y - 46} r="4" fill="#FFF6CC" filter="url(#bld-blur-s)" />
               </g>
             );
@@ -874,7 +874,7 @@ function NightLights({ only }: { only?: ProjectId }) {
             // Two beams on the road ahead of the nose (u = 46 to 96 in the car's frame)
             const at = (u: number, v: number): Point => (car.alongT ? [car.s + v, car.t + u] : [car.s + u, car.t + v]);
             const beam = [at(46, 2), at(46, 17), at(96, 26), at(96, -7)];
-            return <polygon key={`${car.s}-${car.t}`} points={points(SITE_GROUND, beam)} fill="#FFF2C2" fillOpacity="0.5" filter="url(#bld-blur-s)" />;
+            return <polygon key={`${car.s}-${car.t}`} points={points(SITE_GROUND, beam)} fill="#FFF0BC" fillOpacity="0.7" filter="url(#bld-blur-s)" />;
           })}
         </>
       )}
@@ -930,8 +930,8 @@ function SceneDefs() {
           <stop offset="1" stopColor="#FFF3B8" stopOpacity="0.12" />
         </linearGradient>
         <linearGradient id="bld-lamp-night" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFE58A" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#FFE58A" stopOpacity="0.1" />
+          <stop offset="0" stopColor="#FFE07A" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#FFD060" stopOpacity="0.15" />
         </linearGradient>
         <linearGradient id="bld-canvas" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#2E2E30" />
