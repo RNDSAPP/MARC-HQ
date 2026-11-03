@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import type { Project } from '../data/types';
 import { TOOLS, shortLabel } from '../data/sections';
 import { agentStatusLabel, projectStatus } from '../lib/format';
+import { useStored } from '../hooks/useStored';
 import ModuleIcon from './ModuleIcon';
 import { openNewProject } from './NewProjectDialog';
 import ProjectMark from './ProjectMark';
@@ -13,10 +15,18 @@ type Props = {
   current?: Project;
 };
 
-/** Narrow side rail, on every page: HQ, the projects, then the open project's modules and tools. */
+/**
+ * Side rail, on every page: HQ, the projects, then the open project's modules and tools. Narrow
+ * (icons over short labels) or wide (icons beside full labels), as Marc chooses; the choice is kept
+ * in this browser and set on <html> so the page grids follow (--rail-w, tokens.css).
+ */
 export default function AppRail({ projects, current }: Props) {
+  const [wide, setWide] = useStored('marc-hq:rail-wide', () => false);
+  useEffect(() => {
+    document.documentElement.dataset.rail = wide ? 'wide' : 'narrow';
+  }, [wide]);
   return (
-    <nav className="rail" aria-label="Navigation">
+    <nav className={`rail${wide ? ' rail--wide' : ''}`} aria-label="Navigation">
       <Link to="/" className={`rail-hq${current ? '' : ' rail-hq--active'}`} aria-label="Accueil Marc HQ" aria-current={current ? undefined : 'page'}>
         HQ
       </Link>
@@ -79,9 +89,26 @@ export default function AppRail({ projects, current }: Props) {
         </div>
       )}
 
-      <span className="rail-user" title="Marc Bouraoui · données d'exemple">
-        MB
-      </span>
+      <div className="rail-foot">
+        <button
+          type="button"
+          className="rail-toggle"
+          onClick={() => setWide((was) => !was)}
+          aria-label={wide ? 'Réduire la barre latérale' : 'Agrandir la barre latérale'}
+          aria-pressed={wide}
+          title={wide ? 'Réduire' : 'Agrandir'}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="3.5" />
+            <path d="M9 4v16" />
+            <path d={wide ? 'M15.5 10 13.5 12l2 2' : 'M13.5 10l2 2-2 2'} />
+          </svg>
+          <span className="rail-toggle-label">Réduire</span>
+        </button>
+        <span className="rail-user" title="Marc Bouraoui · données d'exemple">
+          MB
+        </span>
+      </div>
     </nav>
   );
 }

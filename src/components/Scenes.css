@@ -163,6 +163,11 @@
   fill: #c4c4c4;
 }
 
+/* The back slope of a roof, a shade darker than the front one */
+.lot-roof-back {
+  filter: brightness(0.82);
+}
+
 .lot--alert .lot-cap {
   fill: var(--alert);
 }

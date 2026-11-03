@@ -1439,8 +1439,9 @@ function ClubFloorArt() {
   return (
     <>
       {/* Club 421 floor */}
-      <polygon points="626,425 626,443 409.5,568 409.5,550" fill="url(#bld-side-right)" />
-      <polygon points="409.5,550 409.5,568 132.4,408 132.4,390" fill="url(#bld-side-left)" />
+      {/* Its edge, no deeper than the plate it stands on, so the front corner never overhangs */}
+      <polygon points="626,425 626,439 409.5,564 409.5,550" fill="url(#bld-side-right)" />
+      <polygon points="409.5,550 409.5,564 132.4,404 132.4,390" fill="url(#bld-side-left)" />
       {/* Bar floor: light oak planks, staggered */}
       <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-club)" stroke="#3B2519" />
       <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-light)" />
@@ -1549,7 +1550,7 @@ function BuildingArt() {
       ))}
 
       {/* Base plate */}
-      <Slab s0={0} t0={0} s1={366} t1={586} r={26} h={14} top="#F6F7FB" side="#CDD1E5" shadow={0.16} />
+      <Slab s0={0} t0={0} s1={366} t1={586} r={12} h={14} top="#F6F7FB" side="#CDD1E5" shadow={0.16} />
 
       <RndsFloorArt />
       <ClubFloorArt />

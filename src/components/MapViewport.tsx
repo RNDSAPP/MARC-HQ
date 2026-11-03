@@ -12,10 +12,12 @@ const MAX = 4;
  * zoom in, zoom out and back to the whole view. `children` is drawn at scale 1 and moved as one.
  * `markers` get the zoom level so they can stay the same size on screen.
  */
-export default function MapViewport({ children, markers, label }: {
+export default function MapViewport({ children, markers, label, start = 1 }: {
   children: ReactNode;
   markers?: (zoom: number) => ReactNode;
   label: string;
+  /** Zoom of the opening view (and of the "whole view" button), centred. */
+  start?: number;
 }) {
   const frame = useRef<HTMLDivElement>(null);
   const pan = useRef<HTMLDivElement>(null);
@@ -37,12 +39,12 @@ export default function MapViewport({ children, markers, label }: {
     return { k, x, y };
   }, []);
 
-  /** The whole drawing, centred. */
+  /** The opening view: the whole drawing (or its middle, when it opens zoomed), centred. */
   const home = useCallback(() => {
     const box = frame.current?.getBoundingClientRect();
-    if (!box || !pan.current) return { k: 1, x: 0, y: 0 };
-    return clamp({ k: 1, x: (box.width - pan.current.offsetWidth) / 2, y: (box.height - pan.current.offsetHeight) / 2 });
-  }, [clamp]);
+    if (!box || !pan.current) return { k: start, x: 0, y: 0 };
+    return clamp({ k: start, x: (box.width - pan.current.offsetWidth * start) / 2, y: (box.height - pan.current.offsetHeight * start) / 2 });
+  }, [clamp, start]);
 
   // Centre on first show and whenever the frame changes size (rotation, window resize).
   useEffect(() => {

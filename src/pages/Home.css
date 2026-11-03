@@ -1,6 +1,6 @@
 .home {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);

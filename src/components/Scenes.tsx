@@ -45,8 +45,10 @@ export type SceneItem = {
  * Wrapper shared by the module scenes: day/night, a map you can walk around, a numbered marker
  * on each item, and the names in a list under the map (legible, unlike labels on the drawing).
  */
-function SceneFrame({ project, box: plateBox, art, lights, lit, items, title, onSelect, hood }: {
+function SceneFrame({ project, box: plateBox, art, lights, lit, items, title, onSelect, hood, zoom = 1 }: {
   project: Project;
+  /** Opening zoom, for scenes whose figures would look too small from afar. */
+  zoom?: number;
   box: [number, number, number, number];
   /** Roads, blocks and trees around the plate: its ground origin and extent. */
   hood?: { ground: Point; size: Point };
@@ -70,6 +72,7 @@ function SceneFrame({ project, box: plateBox, art, lights, lit, items, title, on
     <div className="scene-block" data-project={project.id}>
       <div className="scene" data-phase={phase}>
         <MapViewport
+          start={zoom}
           label={`${title}, ${phaseLabel[phase].toLowerCase()}. Glisse pour te déplacer, pince ou ⌘ + molette pour zoomer.`}
           markers={(zoom) => (
             <ul className="scene-pins" aria-label={title}>
@@ -144,13 +147,37 @@ const place = ([bx, by, bw, bh]: [number, number, number, number], x: number, y:
 const STREET = 44;
 const SLOT = 40;
 const LOT = 30;
-// Spread order for named clubs on a grid of n × n slots, so their markers do not crowd.
+// Spread order for named clubs on a grid of n × n slots, so their markers do not crowd. Markers
+// stand tall over the buildings, so two slots one above the other on screen clash the most:
+// each next slot is the one farthest from those taken, counting side-by-side distance in full and
+// up-and-down distance a little only.
 const spreadOrder = (n: number) => {
-  const all = Array.from({ length: n * n }, (_, i) => i);
-  const c = (n - 1) / 2;
-  const ring = (i: number) => Math.max(Math.abs((i % n) - c), Math.abs(Math.floor(i / n) - c));
-  // Every other slot first (a checkerboard), from the middle ring outwards
-  return all.sort((a, b) => ((a % n) + Math.floor(a / n)) % 2 - ((b % n) + Math.floor(b / n)) % 2 || ring(a) - ring(b));
+  const screen = (i: number) => {
+    const col = i % n;
+    const row = Math.floor(i / n);
+    return [(col - row) * 0.866, (col + row) * 0.5];
+  };
+  const centre = Math.floor(n / 2) * n + Math.floor(n / 2);
+  const order = [centre];
+  const left = new Set(Array.from({ length: n * n }, (_, i) => i).filter((i) => i !== centre));
+  while (left.size) {
+    let best = -1;
+    let bestScore = -1;
+    for (const i of left) {
+      const [x, y] = screen(i);
+      const score = Math.min(...order.map((j) => {
+        const [jx, jy] = screen(j);
+        return (x - jx) ** 2 + 0.15 * (y - jy) ** 2;
+      }));
+      if (score > bestScore) {
+        bestScore = score;
+        best = i;
+      }
+    }
+    order.push(best);
+    left.delete(best);
+  }
+  return order;
 };
 
 type Lot = { s: number; t: number; h: number; tone: PipelineTone; name?: string; meta?: string; stage: string };
@@ -211,9 +238,33 @@ function CityBuilding({ lot, o }: { lot: Lot; o: Point }) {
       <polygon points={solid(o, [[s, t, top], [s + size, t, top], [s + size, t + size, top], [s, t + size, top]])} fill="#FFFFFF" fillOpacity={ghost ? 0.6 : 1} className={ghost ? 'lot-ghost' : undefined} />
       {!ghost && (
         <>
-          <polygon className="lot-cap" points={solid(o, [[s + 4, t + 4, top], [s + size - 4, t + 4, top], [s + size - 4, t + size - 4, top], [s + 4, t + size - 4, top]])} />
-          <polygon points={solid(o, [[s + 12, t + size, base], [s + 20, t + size, base], [s + 20, t + size, base + 9], [s + 12, t + size, base + 9]])} fill="#5B6168" />
+          {/* A pitched roof in the colour of its stage: back slope, gable, front slope */}
+          <polygon className="lot-cap lot-roof-back" points={solid(o, [[s, t, top], [s + size, t, top], [s + size, t + size / 2, top + 11], [s, t + size / 2, top + 11]])} />
+          <polygon points={solid(o, [[s + size, t, top], [s + size, t + size, top], [s + size, t + size / 2, top + 11]])} fill="#E4E6F1" />
+          <polygon className="lot-cap" points={solid(o, [[s, t + size / 2, top + 11], [s + size, t + size / 2, top + 11], [s + size, t + size, top], [s, t + size, top]])} />
+          {/* Door and two windows on the face turned to us */}
+          <polygon points={solid(o, [[s + 12, t + size, base], [s + 19, t + size, base], [s + 19, t + size, base + 10], [s + 12, t + size, base + 10]])} fill="#5B6168" />
+          {h > 22 && (
+            <>
+              <polygon points={solid(o, [[s + 4, t + size, top - 9], [s + 10, t + size, top - 9], [s + 10, t + size, top - 4], [s + 4, t + size, top - 4]])} fill="#C9D6E8" />
+              <polygon points={solid(o, [[s + 21, t + size, top - 9], [s + 27, t + size, top - 9], [s + 27, t + size, top - 4], [s + 21, t + size, top - 4]])} fill="#C9D6E8" />
+            </>
+          )}
         </>
+      )}
+      {/* The named ones have someone outside: partying (partners), talking (in discussion), on the phone */}
+      {lot.name && !ghost && (
+        <g transform={`translate(${iso(o, s + size + 6, t + size - 2)[0].toFixed(1)} ${(iso(o, s + size + 6, t + size - 2)[1] - base).toFixed(1)}) scale(0.62)`}>
+          <Person
+            origin={[0, 0]}
+            s={0}
+            t={0}
+            look={LOOKS[(Math.round(s + t) / 5) % LOOKS.length | 0]}
+            cheer={tone === 'accent'}
+            pose={tone === 'muted' || tone === 'alert' ? 'chat' : undefined}
+            laugh={tone === 'accent'}
+          />
+        </g>
       )}
     </g>
   );
@@ -254,7 +305,7 @@ export function PipelineCity({ project, module, onSelect }: { project: Project; 
     .sort((a, b) => ['alert', 'muted', 'new', 'accent'].indexOf(a.tone) - ['alert', 'muted', 'new', 'accent'].indexOf(b.tone))
     .map((lot) => {
       const [x, y] = iso(o, lot.s + LOT / 2, lot.t + LOT / 2);
-      return { id: lot.name as string, x, y: y - 8 - lot.h - 4, label: lot.name as string, sub: `${lot.stage} · ${lot.meta ?? ''}`, tone: lot.tone };
+      return { id: lot.name as string, x, y: y - 8 - lot.h - 14, label: lot.name as string, sub: `${lot.stage} · ${lot.meta ?? ''}`, tone: lot.tone };
     });
   return (
     <SceneFrame
@@ -356,13 +407,13 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
   const crowd = others.length + unnamed;
 
   // The square grows with the crowd: people on rings around the podium.
-  const size = Math.max(420, 300 + Math.ceil(crowd / 8) * 120);
+  const size = Math.max(340, 260 + Math.ceil(crowd / 8) * 90);
   const c = size / 2;
   const o: Point = [0.866 * size + 60, 56];
   const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 110];
   const spot = (i: number): Point => {
     const ring = Math.floor(i / 8);
-    const radius = 120 + ring * 60;
+    const radius = 100 + ring * 54;
     const angle = (i % 8) * (Math.PI / 4) + ring * 0.4 + 0.35;
     return [c + radius * Math.cos(angle), c + radius * Math.sin(angle)];
   };
@@ -396,6 +447,7 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
       project={project}
       box={box}
       title="Les ambassadeurs sur la place"
+      zoom={1.45}
       items={items}
       onSelect={onSelect}
       hood={{ ground: o, size: [size, size] }}
@@ -403,21 +455,43 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
       art={
         <>
           <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={30} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          <ellipse cx={iso(o, c + 20, c + 20)[0]} cy={iso(o, c + 20, c + 20)[1] - 8} rx="120" ry="64" fill="none" stroke="#E1E3F0" strokeWidth="1.2" />
-          <FloorText origin={[o[0], o[1] - 8]} s={40} t={size - 16} size={22}>
-            {`${total} AMBASSADEURS`}
-          </FloorText>
-          <Tree origin={o} s={30} t={30} base={8} />
-          <Tree origin={o} s={size - 28} t={40} size={0.9} base={8} />
-          <Tree origin={o} s={40} t={size - 28} size={0.9} base={8} />
+          {/* The paved round in the middle, a lighter ring of stone round the podium */}
+          {(() => {
+            const [cx, cy] = iso(o, c, c);
+            const round = (r: number) => ({ cx, cy: cy - 8, rx: r * 1.2247, ry: r * 0.7071 });
+            return (
+              <g>
+                <ellipse {...round(size * 0.42)} fill="#ECEEF6" stroke="#DFE2EF" strokeWidth="1.2" />
+                <ellipse {...round(size * 0.42 - 8)} fill="none" stroke="#E4E7F2" strokeWidth="0.8" />
+                <ellipse {...round(62)} fill="#F7F8FC" stroke="#DFE2EF" strokeWidth="1" />
+              </g>
+            );
+          })()}
+          {/* Benches on each side, and a tree in a round planter in each corner */}
+          {[
+            { s0: 14, s1: 24, t0: c - 26, t1: c + 26 },
+            { s0: c - 26, s1: c + 26, t0: 14, t1: 24 },
+          ].map((bench) => (
+            <Box3 key={`${bench.s0}-${bench.t0}`} o={[o[0], o[1] - 8]} {...bench} h1={9} />
+          ))}
+          {([[34, 34], [size - 34, 34], [34, size - 34]] as Point[]).map(([ps, pt]) => (
+            <g key={`${ps}-${pt}`}>
+              <Slab origin={[o[0], o[1] - 8]} s0={ps - 14} t0={pt - 14} s1={ps + 14} t1={pt + 14} r={13} h={8} top="#E3E6F0" side="#CDD1E5" shadow={0.08} />
+              <Tree origin={o} s={ps} t={pt} size={0.85} base={16} />
+            </g>
+          ))}
           {steps.map((step) => (
             <Step key={step.rank} {...step} o={o} />
           ))}
           {people.map((person) => (
             <g key={person.key} opacity={person.ghost ? 0.45 : 1}>
-              <Person origin={[o[0], o[1] - person.lift]} s={person.s} t={person.t} look={person.look} cheer={person.cheer} pose={person.pose} />
+              <Person origin={[o[0], o[1] - person.lift]} s={person.s} t={person.t} look={person.look} cheer={person.cheer} pose={person.pose} laugh={person.rank > 0} />
             </g>
           ))}
+          <Box3 o={[o[0], o[1] - 8]} s0={size - 24} s1={size - 14} t0={c - 26} t1={c + 26} h1={9} />
+          <Box3 o={[o[0], o[1] - 8]} s0={c - 26} s1={c + 26} t0={size - 24} t1={size - 14} h1={9} />
+          <Slab origin={[o[0], o[1] - 8]} s0={size - 48} t0={size - 48} s1={size - 20} t1={size - 20} r={13} h={8} top="#E3E6F0" side="#CDD1E5" shadow={0.08} />
+          <Tree origin={o} s={size - 34} t={size - 34} size={0.85} base={16} />
         </>
       }
     />
@@ -428,6 +502,29 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
 // App Store: the game on a big phone standing on its plate, the reviews around it.
 
 const stars = (n: number) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+
+/**
+ * Someone who left a review: phone in hand, happy or not depending on the stars, and a bubble over
+ * the head with the stars given. Amber outline while the review waits for an answer.
+ */
+function Reviewer({ review, at: [s, t], o, look }: { review: { text: string; note: number; status: string }; at: Point; o: Point; look: Look }) {
+  const [x, y] = iso(o, s, t);
+  const waiting = normalize(review.status).includes('repondre');
+  const top = y - 8 - 52;
+  return (
+    <g>
+      <Person origin={[o[0], o[1] - 8]} s={s} t={t} look={{ ...look, holds: 'phone' }} laugh={review.note >= 5} />
+      <g>
+        <rect x={x - 33} y={top - 26} width="66" height="22" rx="11" fill="#FFFFFF" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.2" />
+        <path d={`M${x - 4},${top - 4.6} L${x},${top + 1} L${x + 4},${top - 4.6} Z`} fill="#FFFFFF" />
+        <path d={`M${x - 4},${top - 4} L${x},${top + 1} L${x + 4},${top - 4}`} fill="none" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.2" />
+        <text x={x} y={top - 11} textAnchor="middle" fontSize="10.5" fill="#F0B44C" letterSpacing="1">
+          {stars(review.note)}
+        </text>
+      </g>
+    </g>
+  );
+}
 
 /**
  * The App Store module as a scene: a big phone shows the game's icon and its rating, the latest
@@ -468,7 +565,7 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
     return {
       id: review.text,
       x,
-      y: y - 70,
+      y: y - 92,
       label: `« ${review.text} »`,
       sub: `${stars(review.note)} · ${review.date} · ${review.status}`,
       tone: waiting ? 'alert' : 'accent',
@@ -480,6 +577,7 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
       project={project}
       box={box}
       title="Les avis App Store"
+      zoom={1.3}
       items={items}
       onSelect={onSelect}
       hood={{ ground: o, size: [size, size] }}
@@ -487,9 +585,8 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
       art={
         <>
           <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          <FloorText origin={[o[0], o[1] - 8]} s={34} t={size - 16} size={20}>
-            {`NOTE ${rating} · ${reviews.length} AVIS RÉCENTS`}
-          </FloorText>
+          {/* Reviewers behind the phone first */}
+          {reviews.map((review, i) => (spots[i % spots.length][0] + spots[i % spots.length][1] < p.s0 + p.t ? <Reviewer key={review.text} review={review} at={spots[i % spots.length]} o={o} look={LOOKS[(i * 2 + 1) % LOOKS.length]} /> : null))}
           {/* Phone: shadow, side, back edge, then the screen face */}
           <polygon points={points(o, [[p.s0, p.t - 14], [p.s1 + 30, p.t - 14], [p.s1 + 30, p.t + 20], [p.s0, p.t + 6]])} fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-m)" />
           <polygon points={solid(o, [[p.s1, p.t - 12, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s1, p.t - 12, 8 + p.h]])} fill="#2A2A2C" />
@@ -511,22 +608,8 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
             </text>
             <rect x="12" y="108" width="32" height="10" rx="5" className="lot-cap" />
           </g>
-          {/* Review bubbles, standing on thin stems */}
-          {reviews.map((review, i) => {
-            const [s, t] = spots[i % spots.length];
-            const [x, y] = iso(o, s, t);
-            const waiting = normalize(review.status).includes('repondre');
-            return (
-              <g key={review.text}>
-                <ellipse cx={x} cy={y - 8} rx="10" ry="4" fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-s)" />
-                <line x1={x} y1={y - 8} x2={x} y2={y - 46} stroke="#CDD1E5" strokeWidth="1.5" />
-                <rect x={x - 36} y={y - 74} width="72" height="28" rx="12" fill="#FFFFFF" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.2" />
-                <text x={x} y={y - 56} textAnchor="middle" fontSize="11" fill="#F0B44C" letterSpacing="1">
-                  {stars(review.note)}
-                </text>
-              </g>
-            );
-          })}
+          {/* Reviewers in front of the phone */}
+          {reviews.map((review, i) => (spots[i % spots.length][0] + spots[i % spots.length][1] >= p.s0 + p.t ? <Reviewer key={review.text} review={review} at={spots[i % spots.length]} o={o} look={LOOKS[(i * 2 + 1) % LOOKS.length]} /> : null))}
         </>
       }
     />
@@ -573,9 +656,9 @@ export function ReviewCards({ rows, onOpen, onAction }: { rows: string[][]; onOp
 const euros = (text: string) => parseFloat(text.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
 
 /**
- * The Revenus module as a scene: on a plate, one tower per month (oldest at the back), as high as
- * its takings, the current month in the project's colour; beside them a pile of golden dice, as
- * big as their share of sales.
+ * The Revenus module as a scene: a bank in white clay. Against its back wall, one safe per month
+ * (oldest on the left), as tall as its takings, the current month's dial in the project's colour;
+ * a counter with the banker and a client, a guard, and a heap of golden dice as big as their share.
  */
 export function RevenueScene({ project, module, onSelect }: { project: Project; module: Module; onSelect: (name: string) => void }) {
   if (module.view.kind !== 'table') return null;
@@ -586,13 +669,17 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
   const size = 360;
   const o: Point = [0.866 * size + 60, 150];
   const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 200];
-  // Towers side by side along the plate, oldest month on the left
-  const gap = 84;
-  const start = (size - (months.length - 1) * gap) / 2 - 40;
-  const towers = months.map((m, i) => ({ ...m, s: start + i * gap, t: 150, h: 26 + (m.value / max) * 120, now: i === months.length - 1 }));
-  const items: SceneItem[] = [...towers].reverse().map((tower) => {
-    const [x, y] = iso(o, tower.s + 20, tower.t + 20);
-    return { id: tower.month, x, y: y - 8 - tower.h - 6, label: tower.month, sub: `${tower.buys} achats · ${tower.trend}`, tone: tower.now ? 'accent' : 'muted', value: tower.ca };
+  const b = 8; // top of the plate
+  const k = 8; // wall thickness
+  const wall = 140;
+  // Safes in a row against the back wall, oldest month on the left
+  const w = 62;
+  const d = 46;
+  const gap = Math.min(22, (size - 40 - months.length * w) / Math.max(1, months.length - 1));
+  const safes = months.map((m, i) => ({ ...m, s: 30 + i * (w + gap), t: k + 8, h: 42 + (m.value / max) * 64, now: i === months.length - 1 }));
+  const items: SceneItem[] = [...safes].reverse().map((safe) => {
+    const [x, y] = iso(o, safe.s + w / 2, safe.t + d / 2);
+    return { id: safe.month, x, y: y - b - safe.h - 4, label: safe.month, sub: `${safe.buys} achats · ${safe.trend}`, tone: safe.now ? 'accent' : 'muted', value: safe.ca };
   });
   // Golden dice: one per 10 % of sales, in a small heap
   const dice = Math.max(1, Math.round(share / 10));
@@ -601,6 +688,15 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
     const index = layer === 0 ? i : layer === 1 ? i - 3 : i - 5;
     return [250 + index * 18 + layer * 9, 250 + (index % 2) * 10 + layer * 6, 8 + layer * 14];
   });
+  // A circle drawn flat on a safe's door (a plane of constant t): s to the right, height up
+  const onDoor = (s: number, t: number, h: number) => {
+    const [x, y] = iso(o, s, t);
+    return `matrix(0.866 0.5 0 -1 ${x.toFixed(1)} ${(y - h).toFixed(1)})`;
+  };
+  const [signX, signY] = iso(o, 40, k);
+  const banker: Look = { skin: SKIN.rose, top: '#2B2B2B', bottom: '#2B2B2B', shoes: '#1F1F1F', head: 'hair', headColor: '#4A3A30', eyes: 'glasses' };
+  const client: Look = { skin: SKIN.tan, top: '#F4F4F4', bottom: '#6FA8DC', shoes: '#F2C14E', head: 'cap', headColor: '#3E8E5E', holds: 'phone' };
+  const guard: Look = { skin: SKIN.deep, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#1F1F1F', head: 'cap', headColor: '#1F1F1F', eyes: 'sunglasses' };
 
   return (
     <SceneFrame
@@ -610,47 +706,78 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
       items={items}
       onSelect={onSelect}
       hood={{ ground: o, size: [size, size] }}
-      lit={[
-        points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]]),
-        // Each tower's silhouette, so it stays white above the plate at night
-        ...towers.map(({ s, t, h }) => solid(o, [[s, t + 40, 8], [s + 40, t + 40, 8], [s + 40, t, 8], [s + 40, t, 8 + h], [s, t, 8 + h], [s, t + 40, 8 + h]])),
-      ]}
+      lit={[solid(o, [[0, size, wall + b], [0, 0, wall + b], [size, 0, wall + b], [size, 0, 0], [size, size, 0], [0, size, 0]])]}
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          <FloorText origin={[o[0], o[1] - 8]} s={30} t={size - 16} size={18}>
-            {`${months.length} MOIS · ${months[months.length - 1]?.ca ?? ''} CE MOIS`}
-          </FloorText>
-          {towers.map((tower) => {
-            const { s, t, h } = tower;
-            const w = 40;
-            const b = 8;
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
+          {/* The bank's two back walls, and its name on the right one */}
+          <g stroke="#DADDED" strokeWidth="0.8" strokeLinejoin="round">
+            <polygon points={solid(o, [[k, k, b], [k, size - 24, b], [k, size - 24, b + wall], [k, k, b + wall]])} fill="url(#bld-wall-left)" />
+            <polygon points={solid(o, [[0, size - 24, b], [k, size - 24, b], [k, size - 24, b + wall], [0, size - 24, b + wall]])} fill="url(#bld-wall-right)" />
+            <polygon points={solid(o, [[0, 0, b + wall], [k, k, b + wall], [k, size - 24, b + wall], [0, size - 24, b + wall]])} fill="#FFFFFF" />
+            <polygon points={solid(o, [[k, k, b], [size - 24, k, b], [size - 24, k, b + wall], [k, k, b + wall]])} fill="url(#bld-wall-right)" />
+            <polygon points={solid(o, [[size - 24, 0, b], [size - 24, k, b], [size - 24, k, b + wall], [size - 24, 0, b + wall]])} fill="url(#bld-wall-left)" />
+            <polygon points={solid(o, [[0, 0, b + wall], [size - 24, 0, b + wall], [size - 24, k, b + wall], [k, k, b + wall]])} fill="#FFFFFF" />
+          </g>
+          <text
+            transform={`matrix(0.866 0.5 0 1 ${signX.toFixed(1)} ${(signY - b - wall + 24).toFixed(1)})`}
+            fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif"
+            fontWeight="700"
+            fontSize="17"
+            letterSpacing="5"
+            fill="#2B2B2B"
+          >
+            {`BANQUE ${project.name.toUpperCase()}`}
+          </text>
+
+          {/* The safes: a steel box, its door with hinges, a dial and a three-spoke handle */}
+          {safes.map((safe) => {
+            const { s, t, h } = safe;
+            const front = t + d;
+            const [hx, hy] = iso(o, s + w * 0.5, front);
             return (
-              <g key={tower.month} className={tower.now ? 'tower tower--now' : 'tower'}>
-                <polygon points={points(o, [[s, t], [s + w + 10, t], [s + w + 10, t + w + 10], [s, t + w]])} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" transform={`translate(0 ${-b})`} />
-                <polygon points={solid(o, [[s + w, t, b], [s + w, t + w, b], [s + w, t + w, b + h], [s + w, t, b + h]])} fill="#D2D5E7" />
-                <polygon points={solid(o, [[s, t + w, b], [s + w, t + w, b], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#EBEDF5" />
-                <polygon points={solid(o, [[s, t, b + h], [s + w, t, b + h], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#FFFFFF" />
-                <polygon className={tower.now ? 'lot-cap' : 'tower-cap'} points={solid(o, [[s, t + w, b + h - 6], [s + w, t + w, b + h - 6], [s + w, t + w, b + h], [s, t + w, b + h]])} />
-                <FloorText origin={[o[0], o[1] - 8]} s={s - 2} t={t + w + 16} size={11}>
-                  {tower.month.slice(0, 4).toUpperCase()}
-                </FloorText>
+              <g key={safe.month} className={safe.now ? 'safe safe--now' : 'safe'}>
+                <polygon points={points(o, [[s, t], [s + w + 12, t], [s + w + 12, front + 10], [s, front]])} fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-m)" transform={`translate(0 ${-b})`} />
+                <Box3 o={[o[0], o[1] - b]} s0={s} s1={s + w} t0={t} t1={front} h1={h} top="#F4F5FA" />
+                {/* Door, slightly proud of the front, and its two hinges */}
+                <polygon points={solid(o, [[s + 6, front + 1, b + 6], [s + w - 6, front + 1, b + 6], [s + w - 6, front + 1, b + h - 6], [s + 6, front + 1, b + h - 6]])} fill="#F2F3F8" stroke="#CDD1E5" strokeWidth="0.8" />
+                <polygon points={solid(o, [[s + 3, front + 1, b + h * 0.25], [s + 7, front + 1, b + h * 0.25], [s + 7, front + 1, b + h * 0.25 + 8], [s + 3, front + 1, b + h * 0.25 + 8]])} fill="#B9BED3" />
+                <polygon points={solid(o, [[s + 3, front + 1, b + h * 0.7], [s + 7, front + 1, b + h * 0.7], [s + 7, front + 1, b + h * 0.7 - 8], [s + 3, front + 1, b + h * 0.7 - 8]])} fill="#B9BED3" />
+                <g transform={onDoor(s + w * 0.5, front + 1, b + h * 0.58)}>
+                  <circle r="12" className={safe.now ? 'lot-cap' : 'tower-cap'} />
+                  <circle r="8.6" fill="#FFFFFF" />
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((tick) => (
+                    <line key={tick} x1="0" y1="7.4" x2="0" y2="8.4" stroke="#9AA0B8" strokeWidth="0.7" transform={`rotate(${tick * 30})`} />
+                  ))}
+                  <circle r="3" fill="#D3D6E8" stroke="#9AA0B8" strokeWidth="0.6" />
+                </g>
+                <g transform={onDoor(s + w * 0.5, front + 1, b + h * 0.24)} stroke="#8C919A" strokeWidth="1.6" strokeLinecap="round">
+                  <line x1="0" y1="0" x2="0" y2="6" />
+                  <line x1="0" y1="0" x2="5.2" y2="-3" />
+                  <line x1="0" y1="0" x2="-5.2" y2="-3" />
+                </g>
+                <text x={hx} y={hy - b + 16} textAnchor="middle" fontSize="9" fontWeight="700" letterSpacing="1.4" fill="#9AA0B8" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif">
+                  {safe.month.slice(0, 4).toUpperCase()}
+                </text>
               </g>
             );
           })}
-          {heap.map(([s, t, h], i) => (
+
+          {/* The counter: the banker behind it, a client in front */}
+          <Person origin={[o[0], o[1] - b]} s={92} t={196} look={banker} laugh />
+          <Box3 o={[o[0], o[1] - b]} s0={52} s1={140} t0={206} t1={228} h1={26} />
+          <polygon points={solid(o, [[52, 206, b + 26], [140, 206, b + 26], [140, 210, b + 26], [52, 210, b + 26]])} fill="#E4E6F1" />
+          <Person origin={[o[0], o[1] - b]} s={104} t={262} look={client} />
+          <Person origin={[o[0], o[1] - b]} s={318} t={150} look={guard} />
+
+          {heap.map(([hs, ht, hh], i) => (
             <g key={i}>
-              <polygon points={solid(o, [[s + 14, t, h], [s + 14, t + 14, h], [s + 14, t + 14, h + 14], [s + 14, t, h + 14]])} fill="#D9A92E" />
-              <polygon points={solid(o, [[s, t + 14, h], [s + 14, t + 14, h], [s + 14, t + 14, h + 14], [s, t + 14, h + 14]])} fill="#F2C14E" />
-              <polygon points={solid(o, [[s, t, h + 14], [s + 14, t, h + 14], [s + 14, t + 14, h + 14], [s, t + 14, h + 14]])} fill="#FFDB7A" />
-              <circle cx={iso(o, s + 7, t + 7)[0]} cy={iso(o, s + 7, t + 7)[1] - h - 14} r="1.6" fill="#8A6A12" />
+              <polygon points={solid(o, [[hs + 14, ht, hh], [hs + 14, ht + 14, hh], [hs + 14, ht + 14, hh + 14], [hs + 14, ht, hh + 14]])} fill="#D9A92E" />
+              <polygon points={solid(o, [[hs, ht + 14, hh], [hs + 14, ht + 14, hh], [hs + 14, ht + 14, hh + 14], [hs, ht + 14, hh + 14]])} fill="#F2C14E" />
+              <polygon points={solid(o, [[hs, ht, hh + 14], [hs + 14, ht, hh + 14], [hs + 14, ht + 14, hh + 14], [hs, ht + 14, hh + 14]])} fill="#FFDB7A" />
+              <circle cx={iso(o, hs + 7, ht + 7)[0]} cy={iso(o, hs + 7, ht + 7)[1] - hh - 14} r="1.6" fill="#8A6A12" />
             </g>
           ))}
-          {share > 0 && (
-            <FloorText origin={[o[0], o[1] - 8]} s={232} t={300} size={11}>
-              {`DÉS DORÉS · ${share} %`}
-            </FloorText>
-          )}
         </>
       }
     />

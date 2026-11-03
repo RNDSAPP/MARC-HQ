@@ -1,5 +1,14 @@
 /* Design tokens of Marc HQ. Light "white scale model" look, Apple-style type, radii and materials. */
 :root {
+  /* Width of the side rail: narrow by default, wide when Marc opens it (AppRail) */
+  --rail-w: 96px;
+}
+
+:root[data-rail='wide'] {
+  --rail-w: 232px;
+}
+
+:root {
   /* Surfaces: light grey ground, white objects, like a white scale model */
   --bg: #f4f4f4;
   --sidebar: #fbfbfb;

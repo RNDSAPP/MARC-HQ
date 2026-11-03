@@ -172,6 +172,37 @@
   white-space: nowrap;
 }
 
+.rail-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.rail-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.rail-toggle:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+
+.rail-toggle-label {
+  display: none;
+}
+
 .rail-user {
   flex: none;
   display: flex;
@@ -179,12 +210,88 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  margin-top: auto;
   border-radius: 50%;
   background: var(--fill-strong);
   font-size: 12px;
   font-weight: 600;
   color: var(--text-2);
+}
+
+/* Wide rail: icons beside their full label, in rows, like a classic sidebar */
+.rail--wide {
+  align-items: stretch;
+  padding-inline: 14px;
+}
+
+.rail--wide .rail-hq {
+  align-self: flex-start;
+}
+
+.rail--wide .rail-project,
+.rail--wide .rail-item {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 10px;
+}
+
+.rail--wide .rail-item {
+  min-height: 40px;
+}
+
+.rail--wide .rail-project-dot {
+  top: 4px;
+  right: auto;
+  left: 38px;
+}
+
+.rail--wide .rail-label {
+  max-width: none;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.rail--wide .rail-project .rail-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rail--wide .rail-add {
+  margin-left: 10px;
+}
+
+.rail--wide .rail-sections {
+  align-items: stretch;
+}
+
+.rail--wide .rail-sep {
+  width: 100%;
+}
+
+.rail--wide .rail-heading {
+  padding-left: 10px;
+  font-size: 11px;
+}
+
+.rail--wide .rail-foot {
+  align-items: stretch;
+}
+
+.rail--wide .rail-toggle {
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.rail--wide .rail-toggle-label {
+  display: inline;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.rail--wide .rail-user {
+  margin-left: 6px;
 }
 
 @media (max-width: 860px) {
