@@ -683,11 +683,45 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
   });
   // Golden dice: one per 10 % of sales, in a small heap
   const dice = Math.max(1, Math.round(share / 10));
+  const now = safes[safes.length - 1];
+  const heapAt: Point = [now ? now.s + 4 : 200, k + 8 + d + 18];
   const heap: [number, number, number][] = Array.from({ length: dice }, (_, i) => {
     const layer = i < 3 ? 0 : i < 5 ? 1 : 2;
     const index = layer === 0 ? i : layer === 1 ? i - 3 : i - 5;
-    return [250 + index * 18 + layer * 9, 250 + (index % 2) * 10 + layer * 6, 8 + layer * 14];
+    return [heapAt[0] + index * 18 + layer * 9, heapAt[1] + (index % 2) * 10 + layer * 6, 8 + layer * 14];
   });
+  // A circle drawn flat on the left wall (a plane of constant s): t to the left, height up
+  const onLeftWall = (t: number, h: number) => {
+    const [x, y] = iso(o, k, t);
+    return `matrix(-0.866 0.5 0 -1 ${x.toFixed(1)} ${(y - h).toFixed(1)})`;
+  };
+  // Marble floor: a checkerboard of slightly darker slabs
+  const tile = (size - k - 12) / 11;
+  const tiles = Array.from({ length: 121 }, (_, i) => [i % 11, Math.floor(i / 11)]).filter(([a, z]) => (a + z) % 2 === 0);
+  const P: Point = [o[0], o[1] - b];
+  // A brass post of the queue, and the velvet rope between two of them
+  const post = ([s, t]: Point) => {
+    const [x, y] = iso(P, s, t);
+    return (
+      <g key={`${s}-${t}`}>
+        <ellipse cx={x} cy={y} rx="3.4" ry="1.4" fill="#C9A23A" />
+        <line x1={x} y1={y} x2={x} y2={y - 17} stroke="#C9A23A" strokeWidth="1.8" />
+        <circle cx={x} cy={y - 18} r="2" fill="#E8C35A" />
+      </g>
+    );
+  };
+  const rope = ([s1, t1]: Point, [s2, t2]: Point) => {
+    const [x1, y1] = iso(P, s1, t1);
+    const [x2, y2] = iso(P, s2, t2);
+    return <path d={`M${x1},${y1 - 16} Q${(x1 + x2) / 2},${(y1 + y2) / 2 - 6} ${x2},${y2 - 16}`} fill="none" className="accent-stroke" strokeWidth="1.8" strokeLinecap="round" />;
+  };
+  // A plant in a white pot
+  const plant = ([s, t]: Point) => (
+    <g key={`${s}-${t}`}>
+      <Box3 o={P} s0={s - 7} s1={s + 7} t0={t - 7} t1={t + 7} h1={12} />
+      <Tree origin={o} s={s} t={t} size={0.55} base={b + 12} />
+    </g>
+  );
   // A circle drawn flat on a safe's door (a plane of constant t): s to the right, height up
   const onDoor = (s: number, t: number, h: number) => {
     const [x, y] = iso(o, s, t);
@@ -707,10 +741,22 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
       onSelect={onSelect}
       hood={{ ground: o, size: [size, size] }}
       lit={[solid(o, [[0, size, wall + b], [0, 0, wall + b], [size, 0, wall + b], [size, 0, 0], [size, size, 0], [0, size, 0]])]}
+      lights={
+        <>
+          {/* The counter lamp, a light over the vault and one on this month's safe */}
+          <ellipse cx={iso(P, 130, 218)[0]} cy={iso(P, 130, 218)[1] - 30} rx="26" ry="14" fill="#FFE1A0" fillOpacity="0.45" filter="url(#bld-blur-m)" />
+          <ellipse cx={iso(o, k, 116)[0] + 10} cy={iso(o, k, 116)[1] - b - 66} rx="60" ry="56" fill="#FFF1CC" fillOpacity="0.22" filter="url(#bld-blur-m)" />
+          {now && <ellipse cx={iso(P, now.s + w / 2, now.t + d)[0]} cy={iso(P, now.s + w / 2, now.t + d)[1] - now.h / 2} rx="40" ry="44" fill="#FFF1CC" fillOpacity="0.2" filter="url(#bld-blur-m)" />}
+        </>
+      }
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          {/* The bank's two back walls, and its name on the right one */}
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F7F8FC" side="#CDD1E5" shadow={0.16} />
+          {/* Marble floor */}
+          {tiles.map(([a, z]) => (
+            <polygon key={`${a}-${z}`} points={points(P, [[k + a * tile, k + z * tile], [k + (a + 1) * tile, k + z * tile], [k + (a + 1) * tile, k + (z + 1) * tile], [k + a * tile, k + (z + 1) * tile]])} fill="#ECEEF6" />
+          ))}
+          {/* The bank's two back walls, a skirting in the project's colour, and its name on the right one */}
           <g stroke="#DADDED" strokeWidth="0.8" strokeLinejoin="round">
             <polygon points={solid(o, [[k, k, b], [k, size - 24, b], [k, size - 24, b + wall], [k, k, b + wall]])} fill="url(#bld-wall-left)" />
             <polygon points={solid(o, [[0, size - 24, b], [k, size - 24, b], [k, size - 24, b + wall], [0, size - 24, b + wall]])} fill="url(#bld-wall-right)" />
@@ -719,6 +765,17 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
             <polygon points={solid(o, [[size - 24, 0, b], [size - 24, k, b], [size - 24, k, b + wall], [size - 24, 0, b + wall]])} fill="url(#bld-wall-left)" />
             <polygon points={solid(o, [[0, 0, b + wall], [size - 24, 0, b + wall], [size - 24, k, b + wall], [k, k, b + wall]])} fill="#FFFFFF" />
           </g>
+          <polygon className="lot-cap" points={solid(o, [[k, k, b], [k, size - 24, b], [k, size - 24, b + 5], [k, k, b + 5]])} />
+          <polygon className="lot-cap" points={solid(o, [[k, k, b], [size - 24, k, b], [size - 24, k, b + 5], [k, k, b + 5]])} />
+          {/* Two fluted pilasters on each wall */}
+          {[60, 290].map((ps) => (
+            <g key={`ps-${ps}`}>
+              <polygon points={solid(o, [[ps, k, b], [ps + 14, k, b], [ps + 14, k, b + wall - 8], [ps, k, b + wall - 8]])} fill="#F7F8FC" stroke="#DADDED" strokeWidth="0.6" />
+              {[4, 7, 10].map((f) => (
+                <line key={f} {...upright(iso(o, ps + f, k), b + 6, b + wall - 14)} stroke="#E1E3EF" strokeWidth="0.8" />
+              ))}
+            </g>
+          ))}
           <text
             transform={`matrix(0.866 0.5 0 1 ${signX.toFixed(1)} ${(signY - b - wall + 24).toFixed(1)})`}
             fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif"
@@ -729,6 +786,28 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
           >
             {`BANQUE ${project.name.toUpperCase()}`}
           </text>
+
+          {/* The vault door, round, set in the left wall: frame, bolts, the wheel to open it */}
+          <g transform={onLeftWall(116, b + 66)}>
+            <circle r="52" fill="#D9DCEA" />
+            <circle r="46" cx="-2" cy="-2" fill="#C9CDDD" />
+            <circle r="44" fill="#EEF0F6" stroke="#C4C8DA" strokeWidth="1.4" />
+            <circle r="34" fill="none" stroke="#D3D6E4" strokeWidth="2.4" />
+            {Array.from({ length: 16 }, (_, i) => (
+              <circle key={i} cx={39 * Math.cos((i * Math.PI) / 8)} cy={39 * Math.sin((i * Math.PI) / 8)} r="1.7" fill="#BFC4D6" />
+            ))}
+            <g stroke="#8C919A" strokeWidth="2.2" strokeLinecap="round">
+              <circle r="14" fill="none" />
+              {[0, 1, 2, 3, 4, 5].map((spoke) => (
+                <line key={spoke} x1="0" y1="0" x2={19 * Math.cos((spoke * Math.PI) / 3)} y2={19 * Math.sin((spoke * Math.PI) / 3)} />
+              ))}
+            </g>
+            {[0, 1, 2, 3, 4, 5].map((spoke) => (
+              <circle key={spoke} cx={20 * Math.cos((spoke * Math.PI) / 3)} cy={20 * Math.sin((spoke * Math.PI) / 3)} r="2.4" fill="#A7ACB8" />
+            ))}
+            <circle r="5" className="lot-cap" />
+            <rect x="44" y="-16" width="7" height="32" rx="2" fill="#C4C8DA" />
+          </g>
 
           {/* The safes: a steel box, its door with hinges, a dial and a three-spoke handle */}
           {safes.map((safe) => {
@@ -763,12 +842,44 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
             );
           })}
 
-          {/* The counter: the banker behind it, a client in front */}
-          <Person origin={[o[0], o[1] - b]} s={92} t={196} look={banker} laugh />
-          <Box3 o={[o[0], o[1] - b]} s0={52} s1={140} t0={206} t1={228} h1={26} />
-          <polygon points={solid(o, [[52, 206, b + 26], [140, 206, b + 26], [140, 210, b + 26], [52, 210, b + 26]])} fill="#E4E6F1" />
-          <Person origin={[o[0], o[1] - b]} s={104} t={262} look={client} />
-          <Person origin={[o[0], o[1] - b]} s={318} t={150} look={guard} />
+          {/* The guard, by the vault */}
+          <Person origin={P} s={40} t={178} look={guard} />
+
+          {/* The counter: the banker behind a glass screen, a lamp and a bell, a strip in the project's colour */}
+          <Person origin={P} s={92} t={196} look={banker} laugh />
+          <Box3 o={P} s0={52} s1={140} t0={206} t1={228} h1={26} top="#F7F8FC" />
+          <polygon className="lot-cap" points={solid(o, [[52, 228, b + 18], [140, 228, b + 18], [140, 228, b + 21], [52, 228, b + 21]])} />
+          <polygon points={solid(o, [[54, 209, b + 26], [138, 209, b + 26], [138, 209, b + 52], [54, 209, b + 52]])} fill="#DCE6F5" fillOpacity="0.38" stroke="#C3CDE2" strokeWidth="0.8" />
+          {[82, 110].map((ms) => (
+            <line key={ms} {...upright(iso(o, ms, 209), b + 26, b + 52)} stroke="#C3CDE2" strokeWidth="1" />
+          ))}
+          {(() => {
+            const [lx, ly] = iso(P, 130, 218);
+            const [bx, by] = iso(P, 66, 220);
+            return (
+              <g>
+                <line x1={lx} y1={ly - 26} x2={lx} y2={ly - 40} stroke="#C9A23A" strokeWidth="1.4" />
+                <path d={`M${lx - 6},${ly - 39} Q${lx},${ly - 47} ${lx + 6},${ly - 39} Z`} className="lot-cap" />
+                <path d={`M${bx - 3.4},${by - 26} A3.4 3 0 0 1 ${bx + 3.4},${by - 26} Z`} fill="#E8C35A" />
+                <circle cx={bx} cy={by - 29.4} r="0.9" fill="#C9A23A" />
+              </g>
+            );
+          })()}
+
+          {/* The queue: a carpet in the project's colour between brass posts and velvet ropes */}
+          <polygon className="lot-cap" fillOpacity="0.9" points={points(P, [[78, 230], [114, 230], [114, size - 16], [78, size - 16]])} />
+          <polygon fill="none" stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="0.8" points={points(P, [[81, 233], [111, 233], [111, size - 19], [81, size - 19]])} />
+          {rope([66, 244], [66, 296])}
+          {post([66, 244])}
+          {post([66, 296])}
+          <Person origin={P} s={96} t={312} look={{ skin: SKIN.light, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'long', headColor: '#8A5A3C', holds: 'phone' }} />
+          <Person origin={P} s={96} t={258} look={client} laugh />
+          {rope([126, 244], [126, 296])}
+          {post([126, 244])}
+          {post([126, 296])}
+
+          {plant([330, 120])}
+          {plant([330, 318])}
 
           {heap.map(([hs, ht, hh], i) => (
             <g key={i}>
@@ -782,6 +893,11 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
       }
     />
   );
+}
+
+/** A vertical line standing at a floor point, from height h0 to h1 (for a <line>). */
+function upright([x, y]: Point, h0: number, h1: number) {
+  return { x1: x, y1: y - h0, x2: x, y2: y - h1 };
 }
 
 /** Months as cards: takings in big, purchases, trend, and a bar against the best month. */
@@ -856,7 +972,7 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
   const b = 8;
   const ob: Point = [o[0], o[1] - b];
   // Backdrop along the back left edge, logo in the middle
-  const [lx, ly] = iso(o, 30, 170);
+  const [lx, ly] = iso(o, 30, 262);
   // Thumbnails out of the way of the set: front left and along the right edge
   const spots: Point[] = [
     [60, 330],

@@ -345,10 +345,11 @@ export function Tree({ s, t, size = 1, base = 6, origin = SITE_GROUND }: { s: nu
   return (
     <g>
       <ellipse cx={x + 8 * k} cy={y + 2} rx={16 * k} ry={6 * k} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
-      <rect x={x - 1.6 * k} y={y - 18 * k} width={3.2 * k} height={18 * k} rx={1.6 * k} fill="#CDD1E5" />
-      {vinyl((f) => <circle cx={x - 6 * k} cy={y - 22 * k} r={8 * k} fill={f} />, '#F1F2F8')}
-      {vinyl((f) => <circle cx={x + 6 * k} cy={y - 24 * k} r={9 * k} fill={f} />, '#F4F5FA')}
-      {vinyl((f) => <circle cx={x} cy={y - 32 * k} r={9.5 * k} fill={f} />, '#F6F7FB')}
+      <rect x={x - 1.6 * k} y={y - 18 * k} width={3.2 * k} height={18 * k} rx={1.6 * k} fill="#D2CABF" />
+      {/* Crowns in a light, soft green */}
+      {vinyl((f) => <circle cx={x - 6 * k} cy={y - 22 * k} r={8 * k} fill={f} />, '#CFE3C3')}
+      {vinyl((f) => <circle cx={x + 6 * k} cy={y - 24 * k} r={9 * k} fill={f} />, '#D7E9CC')}
+      {vinyl((f) => <circle cx={x} cy={y - 32 * k} r={9.5 * k} fill={f} />, '#DFEED5')}
     </g>
   );
 }
@@ -439,9 +440,9 @@ export type Figure = {
    * selfie: phone held up to film; nap: asleep on a stool; chat: talking, with a speech bubble;
    * sit: seated on a stool, awake; camera: a photographer, camera up to the eye;
    * curl: working the arms with dumbbells; shake: a bartender shaking a cocktail; shot: knocking back a shot;
-   * tray: a tray of drinks carried up on one hand.
+   * tray: a tray of drinks carried up on one hand; dj: one hand on the decks, the other holding the headphones.
    */
-  pose?: 'selfie' | 'nap' | 'chat' | 'sit' | 'camera' | 'curl' | 'shake' | 'shot' | 'tray';
+  pose?: 'selfie' | 'nap' | 'chat' | 'sit' | 'camera' | 'curl' | 'shake' | 'shot' | 'tray' | 'dj';
   /** Laughing: eyes closed in two arcs, mouth open. Everyone else smiles. */
   laugh?: boolean;
 };
@@ -525,7 +526,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
     '--dy': walk ? `${(0.5 * (walk[0] + walk[1])).toFixed(1)}px` : '0px',
   } as CSSProperties;
   const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : cheer ? ' fig--cheer' : run ? ' fig--run' : walk ? ' fig--walk' : '';
-  const action = pose === 'curl' || pose === 'shake' || pose === 'shot' ? ` fig--${pose}` : '';
+  const action = pose === 'curl' || pose === 'shake' || pose === 'shot' || pose === 'dj' ? ` fig--${pose}` : '';
   const sleeve = shade(look.top, 0.08);
   const legBottom = look.shorts ? -6.6 : -2.4;
   const crease = shade(look.top, 0.28);
@@ -535,15 +536,16 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
   const shot = pose === 'shot';
   const curl = pose === 'curl';
   const tray = pose === 'tray';
+  const dj = pose === 'dj';
   const arms = look.gloves
     ? [limb(-6, -21, -6.6, -24.6, 4), limb(6, -21, 6.8, -25.2, 4)]
     : camera
       ? [limb(-6.2, -22.4, -5, -27, 4), limb(6.2, -22.4, 5, -27, 4)]
       : shake
         ? [limb(-6.2, -22.4, -1.6, -27.6, 4), limb(6.2, -22.4, 2.8, -29, 4)]
-        : [tray ? limb(-6.2, -22.4, -10.4, -30, 4) : limb(-6.2, -22.4, -8, -14, 4), selfie ? limb(6.2, -22.4, 9.6, -30, 4) : shot ? limb(6.2, -22.4, 8.8, -29.6, 4) : limb(6.2, -22.4, 8, -14, 4)];
-  const leftHand: Point = camera ? [-5.4, -28] : shake ? [-1.4, -28.6] : tray ? [-10.6, -31] : [-8.2, -12.6];
-  const rightHand: Point = selfie ? [9.8, -31.4] : camera ? [5.4, -28] : shake ? [2.8, -30] : shot ? [9, -31] : [8.2, -12.6];
+        : [tray ? limb(-6.2, -22.4, -10.4, -30, 4) : dj ? limb(-6.2, -22.4, -9, -16, 4) : limb(-6.2, -22.4, -8, -14, 4), dj ? limb(6.2, -22.4, 9.4, -29, 4) : selfie ? limb(6.2, -22.4, 9.6, -30, 4) : shot ? limb(6.2, -22.4, 8.8, -29.6, 4) : limb(6.2, -22.4, 8, -14, 4)];
+  const leftHand: Point = camera ? [-5.4, -28] : shake ? [-1.4, -28.6] : tray ? [-10.6, -31] : dj ? [-9.2, -15] : [-8.2, -12.6];
+  const rightHand: Point = selfie ? [9.8, -31.4] : dj ? [9.6, -30.4] : camera ? [5.4, -28] : shake ? [2.8, -30] : shot ? [9, -31] : [8.2, -12.6];
   // A dumbbell held in the fist: a short bar and a weight at each end
   const dumbbell = ([hx, hy]: Point) => (
     <g>
@@ -966,9 +968,62 @@ const CLUB_PEOPLE: Figure[] = [
   // Second table
   { s: 262, t: 150, look: { skin: SKIN.rose, top: '#B8AE7E', bottom: '#EFEBE3', shoes: '#1F1F1F', head: 'buzz', headColor: '#8C8C8C' } },
   { s: 312, t: 96, laugh: true, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'bucket', headColor: '#EFEBE3' } },
-  // Just in
-  { s: 296, t: 214, look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
+  // Dancing in front of the DJ
+  { s: 246, t: 238, cheer: true, laugh: true, look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
 ];
+
+/** A box in floor units, three faces lit like the rest of the model. */
+function Crate({ o, s0, s1, t0, t1, h, top = '#FFFFFF', front = '#EBEDF5', side = '#D3D6E8' }: { o: Point; s0: number; s1: number; t0: number; t1: number; h: number; top?: string; front?: string; side?: string }) {
+  return (
+    <g>
+      <polygon points={solid(o, [[s1, t0, 0], [s1, t1, 0], [s1, t1, h], [s1, t0, h]])} fill={side} />
+      <polygon points={solid(o, [[s0, t1, 0], [s1, t1, 0], [s1, t1, h], [s0, t1, h]])} fill={front} />
+      <polygon points={solid(o, [[s0, t0, h], [s1, t0, h], [s1, t1, h], [s0, t1, h]])} fill={top} />
+    </g>
+  );
+}
+
+/**
+ * The DJ in a corner of the bar: a speaker behind, the DJ with headphones nodding to the beat and
+ * scratching, a booth in the Club's colour with two turntables and a mixer, notes rising.
+ */
+function DjBooth({ origin: C }: { origin: Point }) {
+  const look: Look = { skin: SKIN.deep, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'cap', headColor: CLUB, headphones: true };
+  const deck = (s: number) => {
+    const [x, y] = iso(C, s, 232);
+    return (
+      <g key={s}>
+        <ellipse cx={x} cy={y - 12.6} rx="6" ry="3.4" fill="#3A3A3D" />
+        <ellipse className="dj-vinyl" cx={x} cy={y - 12.8} rx="4.6" ry="2.6" fill="#111111" stroke="#4A4A4E" strokeWidth="0.4" />
+        <ellipse cx={x} cy={y - 12.8} rx="1.3" ry="0.75" fill={CLUB} />
+      </g>
+    );
+  };
+  const [nx, ny] = iso(C, 292, 220);
+  return (
+    <g>
+      {/* Speaker */}
+      <ellipse cx={iso(C, 312, 196)[0]} cy={iso(C, 312, 196)[1]} rx="16" ry="6" fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <Crate o={C} s0={302} s1={316} t0={186} t1={198} h={32} top="#3A3A3D" front="#2B2B2E" side="#1F1F21" />
+      {[9, 23].map((h) => {
+        const [x, y] = iso(C, 309, 198);
+        return <ellipse key={h} cx={x} cy={y - h + 2} rx="4.2" ry="4.6" fill="#151517" stroke="#4A4A4E" strokeWidth="0.8" />;
+      })}
+      <Person origin={C} s={288} t={218} look={look} pose="dj" laugh />
+      {/* Booth: a front panel in the Club's colour, decks and mixer on top */}
+      <Crate o={C} s0={270} s1={310} t0={226} t1={238} h={12} top="#2B2B2E" front={CLUB} side="#5B2BB8" />
+      <polygon points={solid(C, [[270, 238, 4], [310, 238, 4], [310, 238, 5.5], [270, 238, 5.5]])} fill="#FFFFFF" fillOpacity="0.5" />
+      {deck(278)}
+      {deck(302)}
+      <Crate o={[C[0], C[1] - 12]} s0={286} s1={294} t0={228} t1={236} h={3} top="#4A4A4E" front="#3A3A3D" side="#2B2B2E" />
+      <g className="dj-notes" fill={CLUB} fontSize="9" fontWeight="700">
+        <text x={nx - 6} y={ny - 52}>♪</text>
+        <text x={nx + 6} y={ny - 58}>♫</text>
+        <text x={nx + 16} y={ny - 50}>♪</text>
+      </g>
+    </g>
+  );
+}
 
 // The bartender's round: from his station at the end of the bar he shakes a cocktail, then takes
 // a tray to a player picked at random, by a path that goes round the tables, and comes back.
@@ -1290,10 +1345,21 @@ export function SceneDefs() {
         </linearGradient>
         {/* Floor materials, drawn in floor units and laid flat on each floor */}
         <pattern id="bld-floor-rnds" patternUnits="userSpaceOnUse" width="80" height="80" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${R[0]} ${R[1]})`}>
-          <rect width="80" height="80" fill="#F6F7FB" />
-          <rect x="40" width="40" height="40" fill="#F1F1F1" />
-          <rect y="40" width="40" height="40" fill="#F1F1F1" />
-          <path d="M0 0H80M0 40H80M0 0V80M40 0V80" stroke="#E1E3F0" strokeWidth="1" fill="none" />
+          {/* Light black rubber gym tiles, with a few paler flecks */}
+          <rect width="80" height="80" fill="#4A4B51" />
+          <rect x="40" width="40" height="40" fill="#45464C" />
+          <rect y="40" width="40" height="40" fill="#45464C" />
+          <path d="M0 0H80M0 40H80M0 0V80M40 0V80" stroke="#36373C" strokeWidth="1.2" fill="none" />
+          <g fill="#6A6B72">
+            <circle cx="9" cy="12" r="0.7" />
+            <circle cx="27" cy="31" r="0.6" />
+            <circle cx="52" cy="8" r="0.7" />
+            <circle cx="68" cy="26" r="0.6" />
+            <circle cx="14" cy="58" r="0.6" />
+            <circle cx="33" cy="71" r="0.7" />
+            <circle cx="57" cy="49" r="0.6" />
+            <circle cx="74" cy="66" r="0.7" />
+          </g>
         </pattern>
         <pattern id="bld-floor-club" patternUnits="userSpaceOnUse" width="160" height="40" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${C[0]} ${C[1]})`}>
           {/* Dark brown bar parquet */}
@@ -1388,7 +1454,7 @@ function RndsFloorArt() {
       <polygon points="877,280 877,298 660.5,423 660.5,405" fill="url(#bld-side-right)" />
       <polygon points="660.5,405 660.5,423 383.5,263 383.5,245" fill="url(#bld-side-left)" />
       {/* Gym floor: square rubber tiles */}
-      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-rnds)" stroke="#E2E4F0" />
+      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-rnds)" stroke="#36373C" />
       <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-light)" />
       <g clipPath="url(#bld-clip-rnds)" filter="url(#bld-blur-m)" fill="#2E3470" fillOpacity="0.09">
         <polygon points={points(R, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
@@ -1515,6 +1581,7 @@ function ClubFloorArt() {
       <DiceTable cx={392} cy={398} rx={56} ry={31} rolling />
       <DiceTable cx={500} cy={468} rx={34} ry={19} />
       <People origin={C} figures={CLUB_PEOPLE} prefix="c" />
+      <DjBooth origin={C} />
       <Bartender origin={C} />
     </>
   );
@@ -1596,39 +1663,55 @@ function BuildingArt() {
 type Block = { s0: number; s1: number; t0: number; t1: number; h: number };
 
 /** A neighbouring block in white clay, with two rows of windows on the face turned to us. */
+/** Window grid of a block's two faces turned to us: columns along the face, rows up the height. */
+function blockGrid(b: Block) {
+  const cols = (from: number, to: number) => Array.from({ length: Math.max(0, Math.floor((to - from - 12) / 16)) }, (_, i) => from + 10 + i * 16);
+  const rows = Array.from({ length: Math.max(0, Math.floor((b.h - 22) / 14)) }, (_, i) => 16 + i * 14);
+  return { front: cols(b.s0, b.s1), side: cols(b.t0, b.t1), rows };
+}
+
+/**
+ * A neighbouring block in white clay: a plinth, a grid of windows on both faces turned to us, a
+ * parapet round the roof and a small plant room on top.
+ */
 function BlockArt({ g, b }: { g: Point; b: Block }) {
+  const { front, side, rows } = blockGrid(b);
+  const unit = { s: b.s0 + (b.s1 - b.s0) * 0.55, t: b.t0 + (b.t1 - b.t0) * 0.3 };
   return (
     <g>
       <polygon points={points(g, [[b.s0, b.t0], [b.s1 + 12, b.t0], [b.s1 + 12, b.t1 + 12], [b.s0, b.t1]])} fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-m)" />
       <polygon points={solid(g, [[b.s1, b.t0, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s1, b.t0, b.h]])} fill="#D3D6E8" />
       <polygon points={solid(g, [[b.s0, b.t1, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#EBEDF5" />
+      {/* Plinth */}
+      <polygon points={solid(g, [[b.s1, b.t0, 0], [b.s1, b.t1, 0], [b.s1, b.t1, 8], [b.s1, b.t0, 8]])} fill="#C8CCE0" />
+      <polygon points={solid(g, [[b.s0, b.t1, 0], [b.s1, b.t1, 0], [b.s1, b.t1, 8], [b.s0, b.t1, 8]])} fill="#DFE2EE" />
+      {/* Windows */}
+      {rows.flatMap((h) =>
+        front.map((s) => <polygon key={`f-${s}-${h}`} points={solid(g, [[s, b.t1, h], [s + 8, b.t1, h], [s + 8, b.t1, h + 7], [s, b.t1, h + 7]])} fill="#DCE0EC" />),
+      )}
+      {rows.flatMap((h) =>
+        side.map((t) => <polygon key={`s-${t}-${h}`} points={solid(g, [[b.s1, t, h], [b.s1, t + 8, h], [b.s1, t + 8, h + 7], [b.s1, t, h + 7]])} fill="#C4C9DC" />),
+      )}
+      {/* Roof with its parapet, and a plant room */}
       <polygon points={solid(g, [[b.s0, b.t0, b.h], [b.s1, b.t0, b.h], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#F9FAFD" />
-      {[0.35, 0.62].map((level) => (
-        <polygon key={level} points={solid(g, [[b.s0 + 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level + 5], [b.s0 + 8, b.t1, b.h * level + 5]])} fill="#E1E3F0" />
-      ))}
+      <polygon points={solid(g, [[b.s0 + 4, b.t0 + 4, b.h], [b.s1 - 4, b.t0 + 4, b.h], [b.s1 - 4, b.t1 - 4, b.h], [b.s0 + 4, b.t1 - 4, b.h]])} fill="#EEF0F6" />
+      <polygon points={solid(g, [[unit.s + 22, unit.t, b.h], [unit.s + 22, unit.t + 18, b.h], [unit.s + 22, unit.t + 18, b.h + 9], [unit.s + 22, unit.t, b.h + 9]])} fill="#D3D6E8" />
+      <polygon points={solid(g, [[unit.s, unit.t + 18, b.h], [unit.s + 22, unit.t + 18, b.h], [unit.s + 22, unit.t + 18, b.h + 9], [unit.s, unit.t + 18, b.h + 9]])} fill="#E9EBF4" />
+      <polygon points={solid(g, [[unit.s, unit.t, b.h + 9], [unit.s + 22, unit.t, b.h + 9], [unit.s + 22, unit.t + 18, b.h + 9], [unit.s, unit.t + 18, b.h + 9]])} fill="#FBFBFE" />
     </g>
   );
 }
 
-/** Its lit windows at night: a few small warm panes, not every one. */
+/** Its lit windows at night: a few of the front panes, warm and soft, not every one. */
 function BlockWindows({ g, b, seed }: { g: Point; b: Block; seed: number }) {
+  const { front, rows } = blockGrid(b);
   return (
     <>
-      {/* One lit window in three, on one floor, square and soft: a building where people live */}
-      {Array.from({ length: Math.max(0, Math.floor((b.s1 - b.s0 - 16) / 22)) }, (_, i) => i)
-        .filter((i) => (i + seed) % 3 === 0)
-        .map((i) => {
-          const s0 = b.s0 + 12 + i * 22;
-          const h = b.h * 0.5;
-          return (
-            <polygon
-              key={i}
-              points={solid(g, [[s0, b.t1, h], [s0 + 10, b.t1, h], [s0 + 10, b.t1, h + 10], [s0, b.t1, h + 10]])}
-              fill="#FFD98A"
-              fillOpacity="0.4"
-            />
-          );
-        })}
+      {rows.flatMap((h, ri) =>
+        front
+          .filter((_, ci) => (ci * 3 + ri * 2 + seed) % 5 === 0)
+          .map((s) => <polygon key={`${s}-${h}`} points={solid(g, [[s, b.t1, h], [s + 8, b.t1, h], [s + 8, b.t1, h + 7], [s, b.t1, h + 7]])} fill="#FFD98A" fillOpacity="0.55" />),
+      )}
     </>
   );
 }

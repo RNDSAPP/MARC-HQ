@@ -280,6 +280,10 @@
 }
 
 /* Revenue towers: past months grey, the current one in the project colour */
+.accent-stroke {
+  stroke: var(--accent);
+}
+
 .tower-cap {
   fill: #c4c4c4;
 }

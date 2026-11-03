@@ -182,3 +182,9 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 112. **BDE et clubs plus parlants** : chaque bâtiment a un toit à deux pentes dans la couleur de son étape, une porte et des fenêtres. Devant ceux qui ont un nom, quelqu'un : qui fait la fête chez les partenaires, qui discute chez ceux en discussion. Les bâtiments nommés sont répartis pour que leurs numéros ne s'empilent plus.
 113. **Barre latérale réglable** : un bouton en bas de la barre l'agrandit (icônes et noms complets côte à côte) ou la réduit (icônes et noms courts). Le choix est gardé dans le navigateur.
 114. **Coin du 421** : le bord du plancher du 421 ne dépasse plus de la plaque à l'angle de devant.
+115. **Banque plus poussée** : sol en damier de marbre, plinthe et deux pilastres cannelés sur chaque mur, une grande porte de salle forte ronde (boulons, volant à six branches, moyeu dans la couleur du projet) gardée par le vigile. Le guichet a une vitre, une lampe et une sonnette. La file d'attente a un tapis dans la couleur du projet, des poteaux dorés et des cordons. Le tas de dés dorés est devant le coffre du mois. Des plantes en pot. La nuit, la lampe du guichet, la salle forte et le coffre du mois s'éclairent.
+116. **Arbres vert clair** partout, au lieu du blanc.
+117. **Immeubles voisins détaillés** : un socle, une grille de fenêtres sur les deux faces visibles, un parapet autour du toit et un local technique dessus. La nuit, quelques fenêtres de la grille s'allument.
+118. **RNDS STUDIO** est décalé vers la gauche sur le fond papier du studio.
+119. **Un DJ au 421**, dans le coin de devant : il hoche la tête au rythme et scratche, avec casque et casquette violette, derrière une cabine violette (deux platines et une table de mixage), une enceinte à côté, des notes qui montent. Un client danse devant.
+120. **Sol de la salle de boxe en noir clair** : des dalles en caoutchouc de salle de sport, avec quelques mouchetures.
