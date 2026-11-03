@@ -17,7 +17,7 @@ import TabBar from '../components/TabBar';
 import WorkspaceHeader from '../components/WorkspaceHeader';
 import { getProjects } from '../data/api';
 import { TOOLS, isTool } from '../data/sections';
-import { useIdeas, useNotes, useTasks } from '../data/tools';
+import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { useData } from '../data/useData';
 import { dayLabel, isoDate } from '../lib/dates';
@@ -25,6 +25,10 @@ import { statusTone } from '../lib/format';
 import IdeasPage from './tools/IdeasPage';
 import NotesPage from './tools/NotesPage';
 import TodoPage from './tools/TodoPage';
+import FeedbackPage from './tools/FeedbackPage';
+import GoalsPage from './tools/GoalsPage';
+import LinksPage from './tools/LinksPage';
+import VersionsPage from './tools/VersionsPage';
 import './Workspace.css';
 
 type Props = {
@@ -54,6 +58,10 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   const tasks = useTasks(project);
   const notes = useNotes(project);
   const ideas = useIdeas(project);
+  const versions = useVersions(project);
+  const feedback = useFeedback(project);
+  const goals = useGoals(project);
+  const links = useLinks(project);
   const [search, setSearch] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -112,6 +120,10 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'todo' && <TodoPage tasks={tasks.tasks} query={matches} onAdd={tasks.add} onToggle={tasks.toggle} onRemove={tasks.remove} />}
           {tool?.slug === 'notes' && <NotesPage notes={notes.notes} query={matches} onAdd={notes.add} onUpdate={notes.update} onRemove={notes.remove} />}
           {tool?.slug === 'idees' && <IdeasPage ideas={ideas.ideas} query={matches} onAdd={ideas.add} onUpdate={ideas.update} onRemove={ideas.remove} />}
+          {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} />}
+          {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
+          {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
+          {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
           {module && (
             <ModuleView
               project={project}

@@ -138,3 +138,42 @@ export type Idea = {
   stage: IdeaStage;
   createdAt: number;
 };
+
+export type VersionStatus = 'prevue' | 'en-cours' | 'review' | 'publiee';
+
+export type Version = {
+  id: string;
+  name: string;
+  status: VersionStatus;
+  /** Target or release date, YYYY-MM-DD. */
+  date: string | null;
+  items: { id: string; text: string; done: boolean }[];
+};
+
+export type FeedbackKind = 'bug' | 'demande' | 'avis';
+export type FeedbackPriority = 'haute' | 'moyenne' | 'basse';
+export type FeedbackStatus = 'ouvert' | 'en-cours' | 'resolu';
+
+export type Feedback = {
+  id: string;
+  text: string;
+  kind: FeedbackKind;
+  priority: FeedbackPriority;
+  status: FeedbackStatus;
+  createdAt: number;
+};
+
+export type Goal = {
+  id: string;
+  title: string;
+  current: number;
+  target: number;
+  unit: string;
+  due: string | null;
+};
+
+export type ToolLink = {
+  id: string;
+  label: string;
+  url: string;
+};

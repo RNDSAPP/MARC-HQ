@@ -20,10 +20,11 @@ type Props = {
 export default function WorkspaceHeader({ project, projects, search, onSearch, placeholder }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ⌘K (or Ctrl+K) jumps to the search field from anywhere in the workspace.
+  // "/" jumps to the search field (⌘K opens the palette, CommandPalette.tsx).
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      const typing = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable]');
+      if (event.key === '/' && !typing) {
         event.preventDefault();
         inputRef.current?.focus();
         inputRef.current?.select();
@@ -70,7 +71,7 @@ export default function WorkspaceHeader({ project, projects, search, onSearch, p
           }}
         />
         <kbd className="wh-kbd" aria-hidden="true">
-          ⌘K
+          /
         </kbd>
       </label>
 

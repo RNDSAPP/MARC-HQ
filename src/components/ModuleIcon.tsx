@@ -90,6 +90,38 @@ const paths: Record<string, ReactNode> = {
       <path d="M9.5 20.5h5" />
     </>
   ),
+  // Versions: a tag with a branch
+  versions: (
+    <>
+      <circle cx="6.5" cy="6" r="2.2" />
+      <circle cx="6.5" cy="18" r="2.2" />
+      <circle cx="17.5" cy="9" r="2.2" />
+      <path d="M6.5 8.2v7.6M17.5 11.2c0 3-3 3.8-6 3.8H8.6" />
+    </>
+  ),
+  // Feedback: a speech bubble with an exclamation mark
+  retours: (
+    <>
+      <path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z" />
+      <path d="M12 8.2v3.6" />
+      <circle cx="12" cy="13.8" r="0.9" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // Goals: a target
+  objectifs: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // Links: a chain
+  liens: (
+    <>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2" />
+    </>
+  ),
   // More: three rows
   plus: (
     <>
