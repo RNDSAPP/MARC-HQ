@@ -259,7 +259,20 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           ) : module.slug === 'publications' ? (
             <StudioScene project={project} module={module} icon={logoRnds} onSelect={setOpen} />
           ) : module.slug === 'app-store' ? (
-            <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} live={store.data} />
+            <>
+              <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} live={store.data} />
+              {store.session === null && (
+                <AccountGate
+                  title="Voir les vrais avis"
+                  text={`Connecte-toi à Marc HQ avec ton adresse : la fiche, les versions et les avis de ${project.name} viendront en direct d'App Store Connect, et tu pourras y répondre.`}
+                />
+              )}
+              {store.error && (
+                <p className="mail-message" role="status">
+                  {store.error}
+                </p>
+              )}
+            </>
           ) : (
             <ProjectScene project={project} current={module.slug} />
           )}
