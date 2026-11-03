@@ -31,20 +31,109 @@
   gap: 16px;
 }
 
-.home-account {
+.home-phone {
   display: none;
 }
 
 @media (max-width: 860px) {
-  .home-title-block {
-    width: 100%;
+  .home-header {
+    display: none;
   }
 
-  .home-account {
-    display: block;
-    align-self: flex-start;
-    margin-left: auto;
+  .home-phone {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
+}
+
+.home-phone-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home-phone-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.home-phone-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.home-phone-hello {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-phone-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.home-phone-date {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The two counts share one card, split down the middle */
+.home-phone-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.home-phone-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.home-phone-stat + .home-phone-stat {
+  border-left: 1px solid var(--hairline-strong);
+}
+
+.home-phone-stat-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-phone-stat-label {
+  font-size: 13px;
+  color: var(--text-muted);
 }
 
 /* The HQ logo is in the side rail; the header shows it on phones only */

@@ -153,15 +153,13 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #39ff14;
+  box-shadow: 0 0 6px rgb(57 255 20 / 0.7);
 }
 
-.wh-switch-dot--wait {
-  box-shadow: 0 0 0 3px var(--accent-tint);
-}
-
-.wh-switch-dot--done {
-  background: var(--text-muted);
+.wh-switch-dot--offline {
+  background: #ff2d2d;
+  box-shadow: 0 0 6px rgb(255 45 45 / 0.6);
 }
 
 @media (max-width: 860px) {

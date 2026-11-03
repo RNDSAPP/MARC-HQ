@@ -28,6 +28,42 @@ export default function Home() {
     <div className="home">
       <AppRail projects={projects} />
       <main className="home-inner">
+        {/* On phones, an iPhone-style top: the app bar (logo, name, Marc's round), a large hello
+            and the two agent counts side by side. The desktop header below is hidden there. */}
+        <header className="home-phone">
+          <div className="home-phone-bar">
+            <span className="home-phone-brand">
+              <span className="home-phone-logo" aria-hidden="true">
+                <HqMark size={18} />
+              </span>
+              Marc HQ
+            </span>
+            <AccountButton placement="down" />
+          </div>
+          <div className="home-phone-hello">
+            <h1 className="home-phone-title">{greeting()} Marc</h1>
+            <p className="home-phone-date">
+              {dayLabel()} · {timeLabel()} · RNDS et Club 421
+            </p>
+          </div>
+          <ul className="home-phone-stats" aria-label="État des agents">
+            <li className="home-phone-stat">
+              <span className="home-phone-stat-num">
+                <span className="home-pill-dot home-pill-dot--work" aria-hidden="true" />
+                {active}
+              </span>
+              <span className="home-phone-stat-label">{active > 1 ? 'agents au travail' : 'agent au travail'}</span>
+            </li>
+            <li className="home-phone-stat">
+              <span className="home-phone-stat-num">
+                <span className="home-pill-dot home-pill-dot--wait" aria-hidden="true" />
+                {waiting}
+              </span>
+              <span className="home-phone-stat-label">{waiting > 1 ? 'attendent ta réponse' : 'attend ta réponse'}</span>
+            </li>
+          </ul>
+        </header>
+
         <header className="home-header">
           <div className="home-title-block">
             <span className="home-logo" aria-hidden="true">
@@ -41,10 +77,6 @@ export default function Home() {
                 <span className="home-title-light">Marc HQ</span> <span className="home-title-bold">RNDS et Club 421</span>
               </h1>
             </div>
-            {/* On phones the side rail is hidden: Marc's round sits here */}
-            <span className="home-account">
-              <AccountButton placement="down" />
-            </span>
           </div>
           <ul className="home-pills" aria-label="État des agents">
             <li className="home-pill">

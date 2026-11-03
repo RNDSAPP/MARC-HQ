@@ -88,6 +88,19 @@
     display: flex;
   }
 
+  .tabbar-logo {
+    display: block;
+    width: 26px;
+    height: 26px;
+  }
+
+  /* The king and its dice fill less of their square than the R: drawn a bit larger */
+  .tabbar-logo--club421 {
+    width: 32px;
+    height: 32px;
+    margin: -3px;
+  }
+
   .tabbar-badge {
     position: absolute;
     top: -2px;
