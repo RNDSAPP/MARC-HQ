@@ -14,10 +14,12 @@ export default function ModuleStrip({ project }: { project: Project }) {
   const list = useRef<HTMLUListElement>(null);
   const { pathname } = useLocation();
   useEffect(() => {
-    const active = list.current?.querySelector<HTMLElement>('.mstrip-item.active');
-    if (active && list.current) {
-      list.current.scrollTo({ left: active.offsetLeft - 16, behavior: 'smooth' });
-    }
+    const box = list.current;
+    const active = box?.querySelector<HTMLElement>('.mstrip-item.active');
+    if (!box || !active) return;
+    // Where the pill sits inside the row, measured on screen, kept at the page margin
+    const left = active.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft - 16;
+    box.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
   }, [pathname]);
   return (
     <nav className="mstrip" aria-label={`Rubriques ${project.name}`}>

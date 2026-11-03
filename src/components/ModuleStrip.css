@@ -17,6 +17,8 @@
     list-style: none;
     overflow-x: auto;
     scroll-snap-type: x proximity;
+    /* Snap the pills to the page margin, not to the screen edge */
+    scroll-padding-inline: 16px;
     scrollbar-width: none;
   }
 
