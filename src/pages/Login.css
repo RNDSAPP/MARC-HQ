@@ -1,0 +1,129 @@
+/* The door of Marc HQ: one white card in the middle of the light grey page */
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  color: var(--text);
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: min(400px, 100%);
+  padding: 36px 28px 30px;
+  border: 1px solid var(--hairline);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 19px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.login-title {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.login-light {
+  font-weight: 300;
+}
+
+.login-bold {
+  font-weight: 600;
+}
+
+.login-text {
+  margin: 0 0 6px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.login-google,
+.login-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.login-google:hover:not(:disabled) {
+  background: var(--fill);
+}
+
+.login-send {
+  border: 0;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.login-google:disabled,
+.login-send:disabled {
+  opacity: 0.5;
+}
+
+.login-other {
+  padding: 4px;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+.login-mail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.login-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--fill);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.login-message {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text-2);
+}

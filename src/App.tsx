@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import AuthGate from './components/AuthGate';
 import CommandPalette from './components/CommandPalette';
 import NewProjectDialog from './components/NewProjectDialog';
 import PhaseTheme from './components/PhaseTheme';
@@ -19,7 +20,7 @@ function ProjectHome() {
 
 export default function App() {
   return (
-    <>
+    <AuthGate>
       <PhaseTheme />
       <ProjectStyles />
       <CommandPalette />
@@ -30,6 +31,6 @@ export default function App() {
         <Route path="/:project/:module" element={<ProjectRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </>
+    </AuthGate>
   );
 }
