@@ -23,6 +23,8 @@ import ProjectMap from '../components/ProjectMap';
 import { useAppStore } from '../lib/appstore';
 import { useCalendarSync } from '../lib/calendar';
 import AccountGate from '../components/AccountGate';
+import AgentDialog from '../components/AgentDialog';
+import { ago, useLiveAgents } from '../lib/agents';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { dayLabel, isoDate } from '../lib/dates';
@@ -114,7 +116,11 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   }, [pageLabel, project.name]);
 
   const showAction = (label: string) =>
-    setNotice(`« ${label} » n'est pas encore branché : ce sera fait avec les vraies données.`);
+    setNotice(
+      label.startsWith('Confié aux agents')
+        ? 'Demande confiée aux agents : elle apparaît sous les agents jusqu’à ce qu’un agent la termine.'
+        : `« ${label} » n'est pas encore branché : ce sera fait avec les vraies données.`,
+    );
 
   const placeholder = tool ? `Rechercher dans ${tool.label === 'To do' ? 'les tâches' : `les ${tool.label.toLowerCase()}`}` : project.searchPlaceholder;
 
@@ -223,6 +229,10 @@ type ModuleViewProps = {
 function ModuleView({ project, module, columns, rows, query, onAction, onAddTask }: ModuleViewProps) {
   // App Store Connect, live once signed in (the App Store module only)
   const store = useAppStore(project.id, module.slug === 'app-store');
+  // "Confier à l'agent": the request sheet, and the requests still being worked on
+  const [handing, setHanding] = useState<string | null>(null);
+  const live = useLiveAgents();
+  const pending = live.requests.filter((r) => r.project_id === project.id && r.status !== 'faite');
   const [open, setOpen] = useState<string | null>(null);
   const entity = open ? findEntity(project, module, open) : null;
   const navigate = useNavigate();
@@ -246,7 +256,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             headline={module.headline}
             sub={module.sub}
             cta={module.cta}
-            onAction={(label) => (project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : onAction(label))}
+            onAction={(label) => (label === 'Confier à l’agent' && live.ready ? setHanding(module.headline) : project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : onAction(label))}
           />
           {module.view.kind === 'pipeline' && module.slug !== 'vue-d-ensemble' ? (
             <PipelineCity project={project} module={module} onSelect={setOpen} />
@@ -286,6 +296,18 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             {project.agents.map((agent) => (
               <AgentCard key={agent.name} agent={agent} onAction={onAction} />
             ))}
+            {pending.length > 0 && (
+              <ul className="agent-requests" aria-label="Demandes confiées aux agents">
+                {pending.map((request) => (
+                  <li key={request.id} className="agent-request">
+                    {request.text}
+                    <span className="agent-request-meta">
+                      {request.status === 'prise' ? `Prise par ${request.agent ?? 'un agent'}` : 'En attente d’un agent'} · {ago(request.created_at)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
             {project.agents.length === 0 && (
               <p className="workspace-empty">
                 Pas encore d'agent pour ce projet. Ouvre Claude depuis <Link to={`/${project.id}/connexions`}>Connexions</Link>.
@@ -336,6 +358,18 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
       </section>
 
       {entity && <EntitySheet project={project} entity={entity} onClose={() => setOpen(null)} onAction={onAction} onAddTask={onAddTask} />}
+      {handing !== null && (
+        <AgentDialog
+          projectId={project.id}
+          projectName={project.name}
+          draft={handing}
+          onClose={() => setHanding(null)}
+          onSent={(text) => {
+            setHanding(null);
+            onAction(`Confié aux agents : ${text}`);
+          }}
+        />
+      )}
     </>
   );
 }

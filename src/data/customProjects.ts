@@ -1,6 +1,7 @@
 // Projects Marc adds from the app, kept in this browser's local storage next to the two that
 // come with it. Each one gets a full workspace (tools, connections) that starts empty.
 import { getProjects } from './api';
+import { useLiveAgents } from '../lib/agents';
 import { useData } from './useData';
 import { useStored } from '../hooks/useStored';
 import type { Project } from './types';
@@ -101,7 +102,9 @@ export function useCustomProjects() {
 export function useProjects(): Project[] | undefined {
   const builtIn = useData('projects', getProjects);
   const { list } = useCustomProjects();
+  // Real agents replace a project's sample ones as soon as one has reported (lib/agents.ts)
+  const live = useLiveAgents();
   if (!builtIn) return undefined;
-  return [...builtIn, ...list.map(buildProject)];
+  return [...builtIn, ...list.map(buildProject)].map((project) => (live.agents[project.id]?.length ? { ...project, agents: live.agents[project.id] } : project));
 }
 

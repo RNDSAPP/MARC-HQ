@@ -1,0 +1,116 @@
+/* "Confier à l'agent": a small sheet over the page */
+.agent-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.agent-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.3);
+}
+
+.agent-dialog-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(520px, 100%);
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.4);
+}
+
+.agent-dialog-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.agent-dialog-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.agent-dialog-input {
+  padding: 12px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--fill);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  resize: vertical;
+}
+
+.agent-dialog-error {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--alert);
+}
+
+.agent-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.agent-dialog-cancel,
+.agent-dialog-send {
+  height: 42px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.agent-dialog-cancel {
+  background: var(--fill);
+  color: var(--text-2);
+}
+
+.agent-dialog-send {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.agent-dialog-send:disabled {
+  opacity: 0.5;
+}
+
+/* The requests handed out, under the agents */
+.agent-requests {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agent-request {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: 14px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+
+.agent-request-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
