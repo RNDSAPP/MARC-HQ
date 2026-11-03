@@ -52,7 +52,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 ## Points à valider avec toi
 
-1. **Couleurs de l'accueil.** Dans la maquette, l'accueil avait sa propre palette (fond plus noir, Inter, vert `#4ADE80`). J'ai aligné l'accueil sur les tokens du brief, comme le reste de l'outil. Seul le dessin du bâtiment garde ses couleurs d'origine (orange `#FF7A45` et vert `#4ADE80`), comme demandé, donc ses verts et oranges sont un peu différents de ceux des étiquettes et des cartes. Veux-tu tout aligner sur les accents du brief, y compris le bâtiment ?
+1. ~~**Couleurs de l'accueil.**~~ Validé par Marc : l'accueil suit les tokens du brief et le bâtiment garde ses couleurs d'origine.
 2. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
 3. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
 4. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
