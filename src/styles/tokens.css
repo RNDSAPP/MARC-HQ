@@ -1,0 +1,68 @@
+/* Design tokens of Marc HQ (see BRIEF.md). Every color, font and radius lives here. */
+:root {
+  /* Surfaces */
+  --bg: #121110;
+  --sidebar: #0e0d0c;
+  --surface: #1a1917;
+  --surface-low: #161513;
+  --card: #1f1d1a;
+  --border: #2e2b27;
+  --border-soft: #24221f;
+  --border-strong: #3a3631;
+
+  /* Text */
+  --text: #f2eee6;
+  --text-2: #c8c2b8;
+  --text-muted: #9a948a;
+  --text-card: #e4ded4;
+
+  /* Alert (waiting for Marc) */
+  --alert: #f0b44c;
+  --alert-text: #f0c46a;
+  --alert-tint: #2b2213;
+  --alert-border: #5a4520;
+  --alert-ink: #1a1206;
+
+  /* Project accents */
+  --rnds: #ff5a36;
+  --rnds-soft: #ff8a6b;
+  --rnds-tint: #2a1712;
+  --club: #8fe0b0;
+  --club-soft: #a9eac4;
+  --club-tint: #14261c;
+
+  /* Current project accent (overridden by [data-project]) */
+  --accent: var(--text);
+  --accent-soft: var(--text-2);
+  --accent-tint: var(--surface);
+
+  /* Pipeline column greys */
+  --col-new: #4a453e;
+  --bar: #33302b;
+  --bar-recent: #4a453e;
+
+  /* Fonts */
+  --font-display: 'Big Shoulders Display', 'Geist', system-ui, sans-serif;
+  --font-text: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-2xl: 18px;
+  --r-pill: 999px;
+}
+
+[data-project='rnds'] {
+  --accent: var(--rnds);
+  --accent-soft: var(--rnds-soft);
+  --accent-tint: var(--rnds-tint);
+}
+
+[data-project='club421'] {
+  --accent: var(--club);
+  --accent-soft: var(--club-soft);
+  --accent-tint: var(--club-tint);
+}
