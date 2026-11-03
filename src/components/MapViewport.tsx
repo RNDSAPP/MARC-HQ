@@ -136,6 +136,11 @@ export default function MapViewport({ children, markers, label }: {
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      // Older browsers without overflow: clip may still scroll it on focus: undo that
+      onScroll={(event) => {
+        event.currentTarget.scrollLeft = 0;
+        event.currentTarget.scrollTop = 0;
+      }}
       // A drag must not end as a click on a marker
       onClickCapture={(event) => {
         if (moved.current) {

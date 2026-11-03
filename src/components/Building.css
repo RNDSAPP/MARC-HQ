@@ -737,3 +737,58 @@
   display: inline;
   filter: brightness(0.55) saturate(0.9);
 }
+
+/* Push-ups: lying from the feet, the body rises and falls */
+.fig-pushup {
+  transform: rotate(-80deg);
+  animation: pushup 1.4s ease-in-out infinite;
+}
+
+@keyframes pushup {
+  0%,
+  100% {
+    transform: rotate(-82deg);
+  }
+
+  50% {
+    transform: rotate(-70deg);
+  }
+}
+
+/* Runners on the home map: they follow their route there and back, upright, at a steady pace */
+.runner {
+  offset-rotate: 0deg;
+  animation: run-route 26s linear infinite alternate;
+}
+
+@keyframes run-route {
+  from {
+    offset-distance: 0%;
+  }
+
+  to {
+    offset-distance: 100%;
+  }
+}
+
+.fig--run .fig-body {
+  animation: fig-step 0.18s ease-in-out infinite alternate;
+}
+
+.fig--run .fig-leg {
+  animation: fig-leg 0.36s ease-in-out infinite;
+}
+
+.fig--run .fig-leg--r {
+  animation-delay: -0.18s;
+}
+
+.fig--run .fig-arm {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: fig-arm 0.36s ease-in-out infinite;
+}
+
+.fig--run .fig-arm--l {
+  animation-delay: -0.18s;
+}

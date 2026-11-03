@@ -687,27 +687,56 @@ export function RevenueCards({ rows, onOpen }: { rows: string[][]; onOpen: (name
 /** A post thumbnail's shape: tall for reels, TikToks and stories, square for carousels. */
 const isTall = (format: string) => !normalize(format).includes('carrousel');
 
+/** A white clay box standing on the plate (desk, platform): two faces and its top. */
+function Box3({ o, s0, s1, t0, t1, h0 = 0, h1, top = '#FFFFFF' }: { o: Point; s0: number; s1: number; t0: number; t1: number; h0?: number; h1: number; top?: string }) {
+  return (
+    <g>
+      <polygon points={solid(o, [[s1, t0, h0], [s1, t1, h0], [s1, t1, h1], [s1, t0, h1]])} fill="#D3D6E8" />
+      <polygon points={solid(o, [[s0, t1, h0], [s1, t1, h0], [s1, t1, h1], [s0, t1, h1]])} fill="#EBEDF5" />
+      <polygon points={solid(o, [[s0, t0, h1], [s1, t0, h1], [s1, t1, h1], [s0, t1, h1]])} fill={top} />
+    </g>
+  );
+}
+
+/** A softbox on its stand: a white glowing panel turned towards the subject. */
+function Softbox({ o, s, t, b }: { o: Point; s: number; t: number; b: number }) {
+  const [x, y] = iso(o, s, t);
+  const foot = y - b;
+  return (
+    <g>
+      <ellipse cx={x + 3} cy={foot + 2} rx="9" ry="3.4" fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+      <line x1={x} y1={foot} x2={x - 7} y2={foot + 5} stroke="#8E93AB" strokeWidth="1.4" />
+      <line x1={x} y1={foot} x2={x + 7} y2={foot + 5} stroke="#8E93AB" strokeWidth="1.4" />
+      <line x1={x} y1={foot} x2={x} y2={foot - 58} stroke="#8E93AB" strokeWidth="1.6" />
+      <polygon points={`${x - 13},${foot - 82} ${x + 13},${foot - 70} ${x + 13},${foot - 46} ${x - 13},${foot - 58}`} fill="#3A3F52" />
+      <polygon points={`${x - 11},${foot - 79} ${x + 11},${foot - 69} ${x + 11},${foot - 49} ${x - 11},${foot - 59}`} className="softbox-panel" fill="#FFFFFF" />
+    </g>
+  );
+}
+
 /**
- * The Publications module as a content studio: a white backdrop with the project's logo, a boxer
- * posing, a phone on a tripod filming him and a ring light. The week's posts float around as
- * thumbnails in their format, with their day; those waiting for approval are amber.
+ * The Publications module as a production studio: a paper backdrop on stands with the project's
+ * logo, the boxer posing on a low platform, a photographer shooting him between two softboxes,
+ * and an editing corner (desk, iMac with a timeline, keyboard, an editor on a stool). The week's
+ * posts float around as thumbnails in their format, with their day; those to approve are orange.
  */
 export function StudioScene({ project, module, icon, onSelect }: { project: Project; module: Module; icon: string; onSelect: (name: string) => void }) {
   if (module.view.kind !== 'table') return null;
   const posts = module.view.rows.map(([title, format, date, status]) => ({ title, format, date, status }));
-  const size = 360;
+  const size = 380;
   const o: Point = [0.866 * size + 60, 130];
   const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 180];
   const b = 8;
+  const ob: Point = [o[0], o[1] - b];
   // Backdrop along the back left edge, logo in the middle
-  const [lx, ly] = iso(o, 30, 150);
-  // Thumbnails around the set, rising on thin stems
+  const [lx, ly] = iso(o, 30, 170);
+  // Thumbnails out of the way of the set: front left and along the right edge
   const spots: Point[] = [
-    [70, 290],
-    [310, 90],
-    [300, 290],
-    [70, 70],
-    [190, 330],
+    [60, 330],
+    [170, 350],
+    [345, 150],
+    [345, 60],
+    [300, 350],
   ];
   const items: SceneItem[] = posts.map((post, i) => {
     const [s, t] = spots[i % spots.length];
@@ -715,44 +744,87 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
     const waiting = normalize(post.status).startsWith('a ');
     return { id: post.title, x, y: y - (isTall(post.format) ? 92 : 78), label: post.title, sub: `${post.format} · ${post.date} · ${post.status}`, tone: waiting ? 'alert' : 'accent' };
   });
-  const [px, py] = iso(o, 230, 200);
+  // Desk with the iMac, front right
+  const desk = { s0: 238, s1: 318, t0: 238, t1: 286 };
+  const [mx, my] = iso(o, 262, desk.t1 - 14);
 
   return (
     <SceneFrame
       project={project}
       box={box}
-      title="Le studio et les contenus de la semaine"
+      title="Le studio de production et les contenus de la semaine"
       items={items}
       onSelect={onSelect}
       hood={{ ground: o, size: [size, size] }}
       lit={[
-        points([o[0], o[1] - b], [[0, 0], [size, 0], [size, size], [0, size]]),
-        solid(o, [[18, 40, b], [18, 300, b], [18, 300, b + 120], [18, 40, b + 120]]),
+        points(ob, [[0, 0], [size, 0], [size, size], [0, size]]),
+        solid(o, [[18, 40, b], [18, 320, b], [18, 320, b + 140], [18, 40, b + 140]]),
       ]}
       art={
         <>
           <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          <FloorText origin={[o[0], o[1] - b]} s={30} t={size - 16} size={18}>
-            {`${posts.length} CONTENUS CETTE SEMAINE`}
+          <FloorText origin={ob} s={30} t={size - 16} size={16}>
+            {`STUDIO · ${posts.length} CONTENUS CETTE SEMAINE`}
           </FloorText>
-          {/* Backdrop: a curved white sheet hanging on a bar, the logo on it */}
-          <polygon points={solid(o, [[14, 40, b], [14, 300, b], [14, 300, b + 120], [14, 40, b + 120]])} fill="#F9FAFD" stroke="#E1E3F0" />
-          <polygon points={solid(o, [[14, 40, b], [14, 300, b], [60, 300, b], [60, 40, b]])} fill="#FFFFFF" />
-          <line {...lineOf(iso(o, 14, 34), iso(o, 14, 306), b + 124)} stroke="#BBC0D6" strokeWidth="2.4" />
-          <g transform={`matrix(0.866 -0.5 0 1 ${lx} ${ly - b - 92})`}>
-            <rect x="30" y="0" width="44" height="44" rx="10" className="lot-cap" />
-            <image href={icon} x="34" y="4" width="36" height="36" />
+
+          {/* Paper backdrop on two stands, curving onto the floor, the logo on it */}
+          <line {...lineOf(iso(o, 16, 34), iso(o, 16, 34), b)} />
+          <line x1={iso(o, 14, 34)[0]} y1={iso(o, 14, 34)[1] - b} x2={iso(o, 14, 34)[0]} y2={iso(o, 14, 34)[1] - b - 146} stroke="#8E93AB" strokeWidth="2" />
+          <line x1={iso(o, 14, 326)[0]} y1={iso(o, 14, 326)[1] - b} x2={iso(o, 14, 326)[0]} y2={iso(o, 14, 326)[1] - b - 146} stroke="#8E93AB" strokeWidth="2" />
+          <polygon points={solid(o, [[16, 44, b], [16, 316, b], [16, 316, b + 138], [16, 44, b + 138]])} fill="#FBFBFE" stroke="#E2E4F0" />
+          <polygon points={solid(o, [[16, 44, b], [16, 316, b], [92, 316, b], [92, 44, b]])} fill="#FFFFFF" />
+          <line {...lineOf(iso(o, 14, 30), iso(o, 14, 330), b + 144)} stroke="#8E93AB" strokeWidth="3" strokeLinecap="round" />
+          {/* The project's name in text on the paper, like the gym's wall (RNDS: Kode Mono and its red dot) */}
+          <g transform={`matrix(0.866 -0.5 0 1 ${lx} ${ly - b - 60})`}>
+            {project.id === 'rnds' ? (
+              <>
+                <text fontFamily="'Kode Mono', ui-monospace, monospace" fontWeight="700" fontSize="40" fill="#000000" textLength="104" lengthAdjust="spacing">
+                  RNDS
+                </text>
+                <circle cx="112" cy="-28" r="4.2" fill="#FF0A3C" />
+                <text y="18" fontFamily="'Kode Mono', ui-monospace, monospace" fontSize="10" fill="#8E93AB" letterSpacing="2.6">
+                  STUDIO
+                </text>
+              </>
+            ) : (
+              <image href={icon} x="30" y="-48" width="48" height="48" />
+            )}
           </g>
-          {/* Ring light and tripod phone, turned to the boxer */}
-          <line x1={px + 40} y1={py - b} x2={px + 40} y2={py - b - 70} stroke="#9A9A9A" strokeWidth="2" />
-          <ellipse cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#E7E9F3" strokeWidth="5" />
-          <ellipse className="ring-light" cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2" />
-          <line x1={px} y1={py - b} x2={px - 8} y2={py - b + 8} stroke="#7A7A7A" strokeWidth="1.6" />
-          <line x1={px} y1={py - b} x2={px + 9} y2={py - b + 6} stroke="#7A7A7A" strokeWidth="1.6" />
-          <line x1={px} y1={py - b} x2={px} y2={py - b - 52} stroke="#7A7A7A" strokeWidth="1.8" />
-          <rect x={px - 5} y={py - b - 66} width="10" height="16" rx="2.5" fill="#1C1C1E" />
-          <circle cx={px - 1.5} cy={py - b - 62} r="1.4" fill="#5A5A5E" />
-          <Person origin={[o[0], o[1] - b]} s={120} t={150} look={{ skin: SKIN.tan, top: '#1F1F1F', bottom: '#FF0A3C', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: '#FF0A3C' }} />
+
+          {/* Low platform with the boxer posing */}
+          <Box3 o={o} s0={70} s1={150} t0={140} t1={220} h0={b} h1={b + 8} top="#FFFFFF" />
+          <Person origin={[o[0], o[1] - b - 8]} s={110} t={180} look={{ skin: SKIN.tan, top: '#1F1F1F', bottom: '#FF0A3C', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: '#FF0A3C' }} />
+
+          {/* Softboxes on each side of the subject */}
+          <Softbox o={o} s={70} t={96} b={b} />
+          <Softbox o={o} s={176} t={250} b={b} />
+
+          {/* The photographer, camera up */}
+          <Person origin={ob} s={214} t={168} pose="camera" look={{ skin: SKIN.light, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F' }} />
+
+          {/* Editing corner: desk, iMac showing a timeline, keyboard, editor on a stool */}
+          <Box3 o={o} s0={desk.s0} s1={desk.s1} t0={desk.t0} t1={desk.t1} h0={b} h1={b + 24} />
+          <polygon points={solid(o, [[desk.s0 + 4, desk.t0 + 4, b], [desk.s0 + 8, desk.t0 + 4, b], [desk.s0 + 8, desk.t0 + 4, b + 24], [desk.s0 + 4, desk.t0 + 4, b + 24]])} fill="#C3C8E0" />
+          <rect x={mx - 2} y={my - b - 24 - 12} width="4" height="12" fill="#C3C8E0" />
+          <polygon points={solid(o, [[250, desk.t1 - 14, b + 34], [300, desk.t1 - 14, b + 34], [300, desk.t1 - 14, b + 70], [250, desk.t1 - 14, b + 70]])} fill="#2A2D3A" />
+          <polygon points={solid(o, [[252, desk.t1 - 14, b + 40], [298, desk.t1 - 14, b + 40], [298, desk.t1 - 14, b + 68], [252, desk.t1 - 14, b + 68]])} fill="#1C1F2B" />
+          {/* Timeline on the screen: tracks of clips */}
+          {[
+            [255, 272, 60, 'lot-cap'],
+            [274, 296, 60, ''],
+            [255, 266, 54, ''],
+            [268, 290, 54, 'lot-cap'],
+            [255, 284, 48, ''],
+          ].map(([s0, s1, h, cls], i) => (
+            <polygon key={i} className={(cls as string) || undefined} points={solid(o, [[s0 as number, desk.t1 - 14, b + (h as number)], [s1 as number, desk.t1 - 14, b + (h as number)], [s1 as number, desk.t1 - 14, b + (h as number) + 3.5], [s0 as number, desk.t1 - 14, b + (h as number) + 3.5]])} fill={cls ? undefined : '#5B6178'} />
+          ))}
+          <polygon points={solid(o, [[250, desk.t1 - 14, b + 34], [300, desk.t1 - 14, b + 34], [300, desk.t1 - 14, b + 40], [250, desk.t1 - 14, b + 40]])} fill="#EDEFF6" />
+          <polygon points={solid(o, [[256, desk.t1 - 9, b + 24], [290, desk.t1 - 9, b + 24], [290, desk.t1 - 3, b + 24], [256, desk.t1 - 3, b + 24]])} fill="#E2E4F0" stroke="#C6CADF" strokeWidth="0.5" />
+          <Person origin={ob} s={330} t={262} pose="sit" look={{ skin: SKIN.rose, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'hair', headColor: '#3A2A20', headphones: true }} />
+
+          {/* A plant in the corner */}
+          <Tree origin={o} s={350} t={20} size={0.6} base={b} />
+
           {/* Thumbnails of the week's posts */}
           {posts.map((post, i) => {
             const [s, t] = spots[i % spots.length];
@@ -776,7 +848,14 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
           })}
         </>
       }
-      lights={<ellipse cx={px + 40} cy={py - b - 86} rx="22" ry="24" fill="#FFFFFF" fillOpacity="0.6" filter="url(#bld-blur-s)" />}
+      lights={
+        <>
+          {/* The softboxes and the iMac screen glow a little at night */}
+          <ellipse cx={iso(o, 70, 96)[0]} cy={iso(o, 70, 96)[1] - b - 64} rx="22" ry="18" fill="#FFFFFF" fillOpacity="0.45" filter="url(#bld-blur-m)" />
+          <ellipse cx={iso(o, 176, 250)[0]} cy={iso(o, 176, 250)[1] - b - 64} rx="22" ry="18" fill="#FFFFFF" fillOpacity="0.45" filter="url(#bld-blur-m)" />
+          <ellipse cx={mx + 18} cy={my - b - 64} rx="26" ry="14" fill="#9DB4FF" fillOpacity="0.35" filter="url(#bld-blur-m)" />
+        </>
+      }
     />
   );
 }

@@ -432,6 +432,8 @@ export type Look = {
  * `rope`: skipping rope. `cheer`: hops for joy (the podium).
  */
 export type Figure = {
+  /** Running in a group (the runners' loop on the home map moves them). */
+  run?: boolean;
   s: number;
   t: number;
   look: Look;
@@ -439,8 +441,11 @@ export type Figure = {
   fight?: 'a' | 'b' | 'bag';
   rope?: boolean;
   cheer?: boolean;
-  /** selfie: phone held up to film; nap: asleep on a stool; chat: talking, with a speech bubble. */
-  pose?: 'selfie' | 'nap' | 'chat';
+  /**
+   * selfie: phone held up to film; nap: asleep on a stool; chat: talking, with a speech bubble;
+   * sit: seated on a stool, awake; camera: a photographer, camera up to the eye; pushup: doing push-ups.
+   */
+  pose?: 'selfie' | 'nap' | 'chat' | 'sit' | 'camera' | 'pushup';
 };
 
 export const SKIN = { light: '#F3C9AE', rose: '#EDB89A', tan: '#C98B62', deep: '#8A5636' };
@@ -512,7 +517,7 @@ function limb(x1: number, y1: number, x2: number, y2: number, width: number) {
 }
 
 /** A designer-toy figure standing at floor point (s, t). */
-export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: Figure & { origin: Point }) {
+export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run }: Figure & { origin: Point }) {
   const [x, y] = iso(origin, s, t);
   // Small idle motions (Building.css): boxers hop and jab, walkers stroll, the others breathe.
   // Each figure starts at a different point of its loop so they never move in step.
@@ -521,16 +526,21 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
     '--dx': walk ? `${(0.866 * (walk[0] - walk[1])).toFixed(1)}px` : '0px',
     '--dy': walk ? `${(0.5 * (walk[0] + walk[1])).toFixed(1)}px` : '0px',
   } as CSSProperties;
-  const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : cheer ? ' fig--cheer' : walk ? ' fig--walk' : '';
+  const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : cheer ? ' fig--cheer' : run ? ' fig--run' : walk ? ' fig--walk' : '';
   const sleeve = shade(look.top, 0.08);
   const legBottom = look.shorts ? -6.6 : -2.4;
   const crease = shade(look.top, 0.28);
   const selfie = pose === 'selfie';
+  const camera = pose === 'camera';
   const arms = look.gloves
     ? [limb(-6, -21, -6.6, -24.6, 4), limb(6, -21, 6.8, -25.2, 4)]
-    : [limb(-6.2, -22.4, -8, -14, 4), selfie ? limb(6.2, -22.4, 9.6, -30, 4) : limb(6.2, -22.4, 8, -14, 4)];
-  const rightHand: Point = selfie ? [9.8, -31.4] : [8.2, -12.6];
-  const nap = pose === 'nap';
+    : camera
+      ? [limb(-6.2, -22.4, -5, -27, 4), limb(6.2, -22.4, 5, -27, 4)]
+      : [limb(-6.2, -22.4, -8, -14, 4), selfie ? limb(6.2, -22.4, 9.6, -30, 4) : limb(6.2, -22.4, 8, -14, 4)];
+  const leftHand: Point = camera ? [-5.4, -28] : [-8.2, -12.6];
+  const rightHand: Point = selfie ? [9.8, -31.4] : camera ? [5.4, -28] : [8.2, -12.6];
+  // Seated on a stool: asleep (nap) or awake (sit)
+  const nap = pose === 'nap' || pose === 'sit';
   return (
     <g className={`fig${kind}${nap ? ' fig--nap' : ''}`} style={motion}>
     {nap && (
@@ -543,6 +553,8 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
     <g className="fig-body">
     <g transform={`translate(${x.toFixed(1)} ${(y - (nap ? 6 : 0)).toFixed(1)}) scale(0.92${nap ? ' 0.86' : ''}) rotate(${nap ? -6 : 0})`}>
       <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#2E3470" fillOpacity="0.2" filter="url(#bld-blur-s)" />
+      {/* For push-ups the whole body tips over from the feet, and rises and falls (Building.css) */}
+      <g className={pose === 'pushup' ? 'fig-pushup' : undefined}>
 
       {look.head === 'long' && vinyl((f) => <rect x="-9.6" y="-40" width="19.2" height="25" rx="8" fill={f} />, look.headColor)}
 
@@ -574,7 +586,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
           <g className="fig-arm fig-arm--l">
             {vinyl(arms[0], sleeve)}
             {look.holds === 'cup' && vinyl((f) => <path d="M-11.2,-17.8 L-5.4,-17.8 L-6.3,-10.8 L-10.3,-10.8 Z" fill={f} />, '#5B8DEF')}
-            {vinyl((f) => <circle cx="-8.2" cy="-12.6" r="2.8" fill={f} />, look.skin)}
+            {vinyl((f) => <circle cx={leftHand[0]} cy={leftHand[1]} r="2.8" fill={f} />, look.skin)}
           </g>
           <g className="fig-arm fig-arm--r">
             {vinyl(arms[1], sleeve)}
@@ -648,6 +660,16 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
         </>
       )}
 
+      {/* The photographer's camera, held up in front of the face */}
+      {camera && (
+        <g>
+          {vinyl((f) => <rect x="-6" y="-33" width="12" height="7.4" rx="1.6" fill={f} />, '#2B2B2B')}
+          <rect x="-4" y="-34.6" width="3.6" height="2" rx="0.6" fill="#3A3A3A" />
+          <circle cx="0.6" cy="-29.3" r="2.7" fill="#4A5160" stroke="#1A1A1A" strokeWidth="0.8" />
+          <circle cx="-0.2" cy="-30.1" r="0.8" fill="#FFFFFF" fillOpacity="0.7" />
+        </g>
+      )}
+
       {pose === 'nap' && (
         <text className="fig-zzz" x="8" y="-44" fontSize="7" fontWeight="700" fill="#8A93A6">
           z<tspan dx="1" dy="-4" fontSize="9">Z</tspan>
@@ -672,6 +694,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
           {vinyl((f) => <circle cx="6.8" cy="-26.2" r="3.9" fill={f} />, look.gloves)}
         </g>
       )}
+      </g>
     </g>
     </g>
     </g>
@@ -850,8 +873,8 @@ const RNDS_PEOPLE: Figure[] = [
   { s: 262, t: 46, fight: 'bag', look: { skin: SKIN.deep, top: RNDS, bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F', shorts: true, gloves: '#1F1F1F' } },
   // Skipping rope beside the ring
   { s: 60, t: 212, rope: true, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#EFEBE3', shoes: '#F4F4F4', head: 'hair', headColor: '#4A3A30', eyes: 'glasses' } },
-  { s: 300, t: 200, walk: [0, -60], look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#D8DBEB', shorts: true } },
-  { s: 300, t: 110, look: { skin: SKIN.rose, top: '#F1F2F8', bottom: '#F1F2F8', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' } },
+  // Doing push-ups by the ring
+  { s: 300, t: 200, pose: 'pushup', look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#D8DBEB', shorts: true } },
 ];
 
 const CLUB_PEOPLE: Figure[] = [
@@ -1011,6 +1034,31 @@ function NightLights({ only }: { only?: ProjectId }) {
   );
 }
 
+// The runners: the one in white with the blue cap left the gym to run with three friends,
+// along the front roads and back (Building.css, .runner).
+const RUNNERS: Look[] = [
+  { skin: SKIN.rose, top: '#F2F2F2', bottom: '#F2F2F2', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' },
+  { skin: SKIN.deep, top: '#FF0A3C', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'buzz', headColor: '#1F1F1F' },
+  { skin: SKIN.light, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'long', headColor: '#8A5A3C' },
+  { skin: SKIN.tan, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F' },
+];
+
+function Runners() {
+  // An L along the right road then the front road, run there and back, on the sidewalk side
+  const route = [iso(SITE_GROUND, 392, -60), iso(SITE_GROUND, 392, 612), iso(SITE_GROUND, -80, 612)]
+    .map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`)
+    .join(' L ');
+  return (
+    <g>
+      {RUNNERS.map((look, i) => (
+        <g key={i} className="runner" style={{ offsetPath: `path('M ${route}')`, animationDelay: `${-i * 0.9}s` } as CSSProperties}>
+          <Person origin={[i % 2 === 0 ? -4 : 6, 0]} s={0} t={0} look={look} run />
+        </g>
+      ))}
+    </g>
+  );
+}
+
 /** Gradients, filters and clips shared by the scenes. */
 export function SceneDefs() {
   const R = RNDS_FLOOR;
@@ -1070,14 +1118,15 @@ export function SceneDefs() {
           <path d="M0 0H80M0 40H80M0 0V80M40 0V80" stroke="#E1E3F0" strokeWidth="1" fill="none" />
         </pattern>
         <pattern id="bld-floor-club" patternUnits="userSpaceOnUse" width="160" height="40" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${C[0]} ${C[1]})`}>
-          <rect width="160" height="40" fill="#EFE6D7" />
-          <rect width="80" height="20" fill="#F2EADD" />
-          <rect x="80" width="80" height="20" fill="#ECE2D1" />
-          <rect x="-40" y="20" width="80" height="20" fill="#EDE3D3" />
-          <rect x="40" y="20" width="80" height="20" fill="#F3EBDF" />
-          <rect x="120" y="20" width="80" height="20" fill="#EDE3D3" />
-          <path d="M0 0H160M0 20H160M0 0V20M80 0V20M40 20V40M120 20V40" stroke="#DDD1BD" strokeWidth="0.8" fill="none" />
-          <path d="M8 7H60M92 13H150M50 27H104M130 33H158M4 33H30" stroke="#E6DBC8" strokeWidth="0.6" fill="none" />
+          {/* Dark brown bar parquet */}
+          <rect width="160" height="40" fill="#5A3A27" />
+          <rect width="80" height="20" fill="#634130" />
+          <rect x="80" width="80" height="20" fill="#56372A" />
+          <rect x="-40" y="20" width="80" height="20" fill="#5D3C2A" />
+          <rect x="40" y="20" width="80" height="20" fill="#6A4733" />
+          <rect x="120" y="20" width="80" height="20" fill="#5D3C2A" />
+          <path d="M0 0H160M0 20H160M0 0V20M80 0V20M40 20V40M120 20V40" stroke="#3B2519" strokeWidth="0.9" fill="none" />
+          <path d="M8 7H60M92 13H150M50 27H104M130 33H158M4 33H30" stroke="#714D38" strokeWidth="0.6" fill="none" />
         </pattern>
         <radialGradient id="bld-floor-light" cx="0.35" cy="0.3" r="0.9">
           <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.45" />
@@ -1217,7 +1266,7 @@ function ClubFloorArt() {
       <polygon points="626,425 626,443 409.5,568 409.5,550" fill="url(#bld-side-right)" />
       <polygon points="409.5,550 409.5,568 132.4,408 132.4,390" fill="url(#bld-side-left)" />
       {/* Bar floor: light oak planks, staggered */}
-      <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-club)" stroke="#E0D6C6" />
+      <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-club)" stroke="#3B2519" />
       <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-light)" />
       <g clipPath="url(#bld-clip-club)" filter="url(#bld-blur-m)" fill="#2E3470" fillOpacity="0.09">
         <polygon points={points(C, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
@@ -1322,6 +1371,7 @@ function BuildingArt() {
       {LAMP_POSTS.map(([ls, lt]) => (
         <Lamp key={`${ls}-${lt}`} s={ls} t={lt} />
       ))}
+      <Runners />
       <Tree s={482} t={130} />
       <Tree s={500} t={230} size={1.1} />
       <Tree s={480} t={340} size={0.9} />

@@ -2,6 +2,8 @@
 .map {
   position: relative;
   overflow: hidden;
+  /* clip, not just hidden: a focused button must not scroll the map sideways */
+  overflow: clip;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
@@ -16,10 +18,11 @@
   cursor: grabbing;
 }
 
+/* No will-change here: the browser would keep the drawing rasterised at scale 1 and blur it when
+   zoomed. Without it, the SVG is redrawn sharp at each zoom level. */
 .map-pan {
   position: relative;
   transform-origin: 0 0;
-  will-change: transform;
 }
 
 .map-controls {
