@@ -1,45 +1,73 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { supabase } from '../lib/supabase';
+import { setRemember, supabase } from '../lib/supabase';
 import './Login.css';
 
-/** Where to come back after signing in: the page Marc asked for. */
+/** Where to come back after an e-mail link: the page Marc asked for. */
 const back = () => window.location.href.split('#')[0];
 
+type Mode = 'login' | 'signup' | 'forgot';
+
+/** Supabase's refusals, in Marc's words. */
+function explain(message: string) {
+  if (/invalid login credentials/i.test(message)) return 'Adresse ou mot de passe incorrect.';
+  if (/email not confirmed/i.test(message)) return 'Confirme d’abord ton adresse avec le lien reçu par e-mail.';
+  if (/rate|limit|seconds/i.test(message)) return 'Trop de mails envoyés cette heure-ci. Réessaie un peu plus tard.';
+  if (/password/i.test(message)) return 'Le mot de passe doit faire au moins 6 caractères.';
+  return 'Ça n’a pas marché. Réessaie.';
+}
+
 /**
- * The door of Marc HQ: sign in with Google in one click, or with a link sent by e-mail. Only the
- * addresses allowed on the server get past it (AuthGate).
+ * The door of Marc HQ: an e-mail and a password. First time (or forgotten password), a link by
+ * e-mail lets Marc choose one. Only the addresses allowed on the server get past it (AuthGate).
  */
-export default function Login({ refused, onSignOut }: { refused?: string; onSignOut?: () => void }) {
+export default function Login({ refused, recovering, onSignOut, onPasswordSet }: {
+  refused?: string;
+  /** Back from a "choose your password" link: ask for the new password. */
+  recovering?: boolean;
+  onSignOut?: () => void;
+  onPasswordSet?: () => void;
+}) {
+  const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [byMail, setByMail] = useState(false);
+  const [remember, setRememberChoice] = useState(true);
 
-  async function google() {
+  async function submit(event: FormEvent) {
+    event.preventDefault();
     if (!supabase) return;
     setBusy(true);
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back() } });
-    if (error) {
+    setMessage('');
+    if (recovering) {
+      const { error } = await supabase.auth.updateUser({ password });
       setBusy(false);
-      setMessage('La connexion Google n’est pas encore activée. Utilise le lien par e-mail.');
+      if (error) setMessage(explain(error.message));
+      else onPasswordSet?.();
+      return;
     }
+    if (mode === 'login') {
+      setRemember(remember);
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      setBusy(false);
+      if (error) setMessage(explain(error.message));
+      return;
+    }
+    if (mode === 'signup') {
+      const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: back() } });
+      setBusy(false);
+      if (error) setMessage(explain(error.message));
+      else if (!data.session) setMessage(`Presque fini : ouvre le lien envoyé à ${email.trim()} pour confirmer ton adresse.`);
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: back() });
+    setBusy(false);
+    setMessage(error ? explain(error.message) : `Lien envoyé à ${email.trim()} : ouvre-le sur cet appareil pour choisir ton mot de passe.`);
   }
 
-  async function sendLink(event: FormEvent) {
-    event.preventDefault();
-    if (!supabase || !email.trim()) return;
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: back() } });
-    setBusy(false);
-    setMessage(
-      error
-        ? /rate|limit/i.test(error.message)
-          ? 'Trop de liens envoyés cette heure-ci. Réessaie un peu plus tard, ou continue avec Google.'
-          : 'Le lien n’a pas pu partir. Vérifie l’adresse.'
-        : `Lien envoyé à ${email.trim()}. Ouvre-le sur cet appareil.`,
-    );
-  }
+  const title = recovering ? 'Choisis ton mot de passe' : mode === 'signup' ? 'Créer ton accès' : mode === 'forgot' ? 'Mot de passe oublié' : 'Connexion';
+  const action = recovering ? 'Enregistrer' : mode === 'signup' ? 'Créer mon accès' : mode === 'forgot' ? 'Recevoir le lien' : 'Se connecter';
 
   return (
     <main className="login">
@@ -53,43 +81,73 @@ export default function Login({ refused, onSignOut }: { refused?: string; onSign
         {refused ? (
           <>
             <p className="login-text">{refused} n’a pas accès à Marc HQ.</p>
-            <button type="button" className="login-google" onClick={onSignOut}>
+            <button type="button" className="login-send" onClick={onSignOut}>
               Utiliser une autre adresse
             </button>
           </>
         ) : (
-          <>
-            <p className="login-text">Connecte-toi pour retrouver tes projets, tes tâches et ton agenda, sur tous tes appareils.</p>
-            <button type="button" className="login-google" onClick={google} disabled={busy}>
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z" />
-                <path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z" />
-                <path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9l3.7-2.8z" />
-                <path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z" />
-              </svg>
-              Continuer avec Google
-            </button>
-            {byMail ? (
-              <form className="login-mail" onSubmit={sendLink}>
+          <form className="login-mail" onSubmit={submit}>
+            <p className="login-step">{title}</p>
+            {!recovering && (
+              <>
                 <label className="visually-hidden" htmlFor="login-email">
-                  Ton adresse e-mail
+                  Adresse e-mail
                 </label>
-                <input id="login-email" className="login-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Ton adresse e-mail" autoComplete="email" />
-                <button type="submit" className="login-send" disabled={busy || !email.trim()}>
-                  Recevoir le lien
-                </button>
-              </form>
-            ) : (
-              <button type="button" className="login-other" onClick={() => setByMail(true)}>
-                Recevoir un lien par e-mail
-              </button>
+                <input id="login-email" className="login-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Adresse e-mail" autoComplete="email" required />
+              </>
             )}
-          </>
+            {mode !== 'forgot' || recovering ? (
+              <>
+                <label className="visually-hidden" htmlFor="login-password">
+                  Mot de passe
+                </label>
+                <input
+                  id="login-password"
+                  className="login-input"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={recovering || mode === 'signup' ? 'Nouveau mot de passe (6 caractères min.)' : 'Mot de passe'}
+                  autoComplete={recovering || mode === 'signup' ? 'new-password' : 'current-password'}
+                  minLength={6}
+                  required
+                />
+              </>
+            ) : null}
+            {mode === 'login' && !recovering && (
+              <label className="login-remember">
+                <input type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} />
+                Rester connecté sur cet appareil
+              </label>
+            )}
+            <button type="submit" className="login-send" disabled={busy}>
+              {busy ? '…' : action}
+            </button>
+          </form>
         )}
         {message && (
           <p className="login-message" role="status">
             {message}
           </p>
+        )}
+        {!refused && !recovering && (
+          <div className="login-links">
+            {mode !== 'login' && (
+              <button type="button" className="login-other" onClick={() => { setMode('login'); setMessage(''); }}>
+                J’ai déjà un mot de passe
+              </button>
+            )}
+            {mode !== 'forgot' && (
+              <button type="button" className="login-other" onClick={() => { setMode('forgot'); setMessage(''); }}>
+                Mot de passe oublié ou première fois
+              </button>
+            )}
+            {mode !== 'signup' && (
+              <button type="button" className="login-other" onClick={() => { setMode('signup'); setMessage(''); }}>
+                Créer un accès
+              </button>
+            )}
+          </div>
         )}
       </div>
     </main>
