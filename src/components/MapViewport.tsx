@@ -18,20 +18,41 @@ export default function MapViewport({ children, markers, label }: {
   label: string;
 }) {
   const frame = useRef<HTMLDivElement>(null);
+  const pan = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>({ k: 1, x: 0, y: 0 });
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const moved = useRef(false);
   const pinch = useRef<{ distance: number; view: View; mid: { x: number; y: number } } | null>(null);
 
-  // Keep the content covering the frame: no empty margin when zoomed in.
+  // Keep the content covering the frame: no empty margin. The content can be wider than the frame
+  // (on a phone the drawing keeps its height and you pan sideways).
   const clamp = useCallback((next: View): View => {
     const box = frame.current?.getBoundingClientRect();
     const k = Math.min(MAX, Math.max(MIN, next.k));
-    if (!box) return { k, x: 0, y: 0 };
-    const minX = box.width - box.width * k;
-    const minY = box.height - box.height * k;
-    return { k, x: Math.min(0, Math.max(minX, next.x)), y: Math.min(0, Math.max(minY, next.y)) };
+    if (!box || !pan.current) return { k, x: 0, y: 0 };
+    const width = pan.current.offsetWidth * k;
+    const height = pan.current.offsetHeight * k;
+    const x = width <= box.width ? (box.width - width) / 2 : Math.min(0, Math.max(box.width - width, next.x));
+    const y = height <= box.height ? (box.height - height) / 2 : Math.min(0, Math.max(box.height - height, next.y));
+    return { k, x, y };
   }, []);
+
+  /** The whole drawing, centred. */
+  const home = useCallback(() => {
+    const box = frame.current?.getBoundingClientRect();
+    if (!box || !pan.current) return { k: 1, x: 0, y: 0 };
+    return clamp({ k: 1, x: (box.width - pan.current.offsetWidth) / 2, y: (box.height - pan.current.offsetHeight) / 2 });
+  }, [clamp]);
+
+  // Centre on first show and whenever the frame changes size (rotation, window resize).
+  useEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    setView(home());
+    const observer = new ResizeObserver(() => setView(home()));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [home]);
 
   /** Zoom by `factor` around a point of the frame (in px from its top left). */
   const zoomAt = useCallback(
@@ -126,7 +147,7 @@ export default function MapViewport({ children, markers, label }: {
       aria-label={label}
       role="group"
     >
-      <div className="map-pan" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})` }}>
+      <div ref={pan} className="map-pan" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})` }}>
         {children}
         {markers?.(view.k)}
       </div>
@@ -137,7 +158,7 @@ export default function MapViewport({ children, markers, label }: {
         <button type="button" onClick={() => center(1 / 1.5)} aria-label="Dézoomer" disabled={view.k <= MIN}>
           −
         </button>
-        <button type="button" onClick={() => setView({ k: 1, x: 0, y: 0 })} aria-label="Revoir tout" disabled={view.k === 1}>
+        <button type="button" onClick={() => setView(home())} aria-label="Revoir tout" disabled={view.k === 1}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
           </svg>

@@ -21,6 +21,7 @@ export default function Building({ projects }: Props) {
   const phase = usePhase(choice);
   return (
     <div className="building" data-phase={phase}>
+      <div className="building-stage">
       <MapViewport label="Le site Marc HQ. Glisse pour te déplacer, pince ou ⌘ + molette pour zoomer.">
         <BuildingArt />
         {/* Large invisible click zones over each floor. Keyboard users get the labels below instead. */}
@@ -35,6 +36,11 @@ export default function Building({ projects }: Props) {
           />
         ))}
       </MapViewport>
+      <span className="building-hint" aria-hidden="true">
+        Clique sur un étage · glisse pour te déplacer
+      </span>
+      <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
+      </div>
 
       <ul className="building-labels">
         {projects.map((project) => {
@@ -62,10 +68,6 @@ export default function Building({ projects }: Props) {
         })}
       </ul>
 
-      <span className="building-hint" aria-hidden="true">
-        Clique sur un étage · glisse pour te déplacer
-      </span>
-      <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
     </div>
   );
 }

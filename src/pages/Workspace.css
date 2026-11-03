@@ -233,7 +233,10 @@
     gap: 28px;
   }
 
-  /* Full width, the scene would be taller than the screen */
+}
+
+/* Full width on a tablet, the scene would be taller than the screen (phones get a fixed-height map) */
+@media (min-width: 861px) and (max-width: 960px) {
   .workspace-center .scene {
     width: 100%;
     max-width: 620px;

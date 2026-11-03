@@ -204,3 +204,14 @@
     padding: 0 10px 0 4px;
   }
 }
+
+/* Small phones: name and project switch on one line */
+@media (max-width: 480px) {
+  .wh-tag {
+    display: none;
+  }
+
+  .wh-identity {
+    gap: 10px;
+  }
+}

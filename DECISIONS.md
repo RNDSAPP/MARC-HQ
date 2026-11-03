@@ -142,3 +142,9 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     3. **Retours** : bugs, demandes et avis, avec une priorité (haute, moyenne, basse) et un état (ouvert, en cours, résolu), triés par priorité. Au départ : la demande de mode équipe (avis App Store) pour Club 421.
     4. **Objectifs** : cibles chiffrées avec la valeur actuelle, une barre de progression, une échéance et « en retard » si elle est dépassée. Au départ : 3 412 / 5 000 abonnés pour RNDS (le chiffre « Objectif 5 000 » des données).
     5. **Liens** : raccourcis du projet, avec ajout en un clic d'App Store Connect, GitHub, Supabase, Figma, Instagram, TikTok, Meta Business, Gmail et Claude.
+80. **Passe responsive** (vérifiée sur les 18 pages de 320 à 1 440 px, aucun débordement) :
+    1. sur téléphone, les cartes (accueil et scènes) gardent une hauteur confortable de 340 px : le dessin est plus large que l'écran, centré au départ, et l'on glisse sur le côté pour l'explorer ; les boutons de zoom passent en haut à droite ;
+    2. sur l'accueil, le bouton jour/nuit et le zoom sont rattachés à la carte, et les étiquettes des étages passent dessous ;
+    3. l'en-tête d'un projet tient sur une ligne (logo, nom, sélecteur) sur petit téléphone ;
+    4. les fiches s'ouvrent depuis le bas, la palette ⌘K reste en haut ;
+    5. sur tablette, la scène prend toute la largeur.

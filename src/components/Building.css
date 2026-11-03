@@ -8,6 +8,11 @@
   overflow: hidden;
 }
 
+/* The map and what floats over it (hint, zoom, day/night); on a phone the floor labels go below */
+.building-stage {
+  position: relative;
+}
+
 .building-art {
   display: block;
   width: 100%;
@@ -163,6 +168,14 @@
   top: auto;
   bottom: 60px;
   right: 3%;
+}
+
+@media (max-width: 860px) {
+  .building .map-controls {
+    top: 10px;
+    bottom: auto;
+    right: 10px;
+  }
 }
 
 .building-hint {
