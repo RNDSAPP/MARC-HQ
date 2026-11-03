@@ -43,7 +43,7 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 
 ## Passe de design « style Apple » (demandée par Marc)
 
-25. **Police d'Apple.** Le texte, les titres et les chiffres utilisent la police système d'Apple (San Francisco) sur Mac, iPhone et iPad, et Geist sur les autres appareils. Big Shoulders Display (titres en capitales façon affiche) n'est plus utilisée : les titres sont en minuscules, gras et serrés, comme sur apple.com. Pour revenir au style affiche, il suffit de changer `--font-display` dans `src/styles/tokens.css` et de remettre la police dans `index.html`.
+25. **Police d'Apple.** Le texte, les titres et les chiffres utilisent la police système d'Apple (San Francisco) sur Mac, iPhone et iPad, et Geist sur les autres appareils. Big Shoulders Display (titres en capitales façon affiche) n'est plus utilisée : les titres sont en minuscules, gras et serrés, comme sur apple.com. Validé par Marc le 3 novembre. Pour revenir au style affiche, il suffit de changer `--font-display` dans `src/styles/tokens.css` et de remettre la police dans `index.html`.
 26. **Les couleurs ne changent pas.** Fond, surfaces, accents RNDS et Club 421, ambre d'alerte : ce sont toujours les tokens du brief. J'ai ajouté des remplissages et des séparateurs translucides (`--fill`, `--hairline`) et un effet verre dépoli (`--glass`) pour les barres qui flottent au-dessus du contenu.
 27. **Boutons en pilule**, arrondis plus généreux (14 à 28 px), petit effet d'enfoncement au clic, cases « À faire » rondes comme dans l'app Rappels, compteurs en pastille grise.
 28. **Icônes de rubrique** dessinées dans l'esprit des SF Symbols (`src/components/ModuleIcon.tsx`), dans la barre latérale et dans la barre d'onglets.

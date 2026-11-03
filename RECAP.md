@@ -55,7 +55,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 ## Points à valider avec toi
 
 1. ~~**Couleurs de l'accueil.**~~ Réglé : l'accueil suit les tokens du brief, et le bâtiment a pris la couleur de chaque projet (orange RNDS, menthe Club 421).
-2. **Titres façon Apple ou façon affiche ?** Pour le style Apple, les grands titres ne sont plus en Big Shoulders (capitales condensées de la maquette) mais dans la police d'Apple, en minuscules. Si tu veux retrouver le côté affiche sur les titres seulement, c'est une ligne à changer.
+2. ~~**Titres façon Apple ou façon affiche ?**~~ Réglé : les grands titres restent dans la police d'Apple, en minuscules (validé par Marc le 3 novembre).
 3. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
 4. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
 5. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
