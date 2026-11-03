@@ -52,7 +52,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 ## Points à valider avec toi
 
-1. ~~**Couleurs de l'accueil.**~~ Validé par Marc : l'accueil suit les tokens du brief et le bâtiment garde ses couleurs d'origine.
+1. ~~**Couleurs de l'accueil.**~~ Réglé : l'accueil suit les tokens du brief, et le bâtiment a pris la couleur de chaque projet (orange RNDS, menthe Club 421).
 2. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
 3. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
 4. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
