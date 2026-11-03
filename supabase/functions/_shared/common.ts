@@ -1,5 +1,6 @@
-// Shared by the Gmail functions: CORS, the service client, who is signed in, and the signed
-// "state" that carries the project through Google's sign-in and back.
+// Shared by the Google functions (Gmail, Calendar): CORS, the service client, who is signed in,
+// the signed "state" that carries what is being linked through Google's sign-in and back, and
+// a fresh Google access token from a kept refresh token.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 export const cors = {
@@ -19,7 +20,8 @@ export const serviceKey =
 
 export const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
-export const callbackUrl = `${url}/functions/v1/gmail-callback`;
+/** Where Google sends back after sign-in, for every kind of link (Gmail, Calendar). */
+export const callbackUrl = `${url}/functions/v1/google-callback`;
 
 /** The person behind the request, if signed in and on the allowed list (ALLOWED_EMAILS). */
 export async function signedIn(req: Request) {
@@ -45,7 +47,8 @@ async function hmac(text: string) {
   return new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(text)));
 }
 
-export type State = { u: string; p: string; r: string; exp: number };
+/** k: what is being linked; p: the project (Gmail only); r: the page to go back to. */
+export type State = { k: 'gmail' | 'calendar'; u: string; p: string; r: string; exp: number };
 
 export async function signState(state: State) {
   const body = b64url(new TextEncoder().encode(JSON.stringify(state)));
@@ -68,4 +71,34 @@ export function allowedReturn(target: string) {
   } catch {
     return false;
   }
+}
+
+/** A short-lived Google access token from a kept refresh token, or null if Google refuses it. */
+export async function googleAccess(refreshToken: string) {
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
+      client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }),
+  });
+  if (!response.ok) return null;
+  return (await response.json()).access_token as string;
+}
+
+/** The Google sign-in address for these scopes. */
+export function googleSignIn(scopes: string, state: string) {
+  const params = new URLSearchParams({
+    client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
+    redirect_uri: callbackUrl,
+    response_type: 'code',
+    scope: `openid email ${scopes}`,
+    access_type: 'offline',
+    prompt: 'consent select_account',
+    state,
+  });
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
 }

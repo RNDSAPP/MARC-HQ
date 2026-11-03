@@ -10,7 +10,7 @@ import './Tools.css';
 type Mail = { id: string; thread: string; from: string; subject: string; date: number; snippet: string; unread: boolean };
 type Props = { project: Project; query: (text: string) => boolean };
 
-/** The page without its ?gmail=… return flag: where Google sends Marc back. */
+/** The page without its ?google=… return flag: where Google sends Marc back. */
 const here = () => window.location.href.split('?')[0];
 
 /** "Inès D. <ines@…>" → "Inès D." */
@@ -54,7 +54,7 @@ export default function MailsPage({ project, query }: Props) {
 
   // Coming back from Google: say how it went, then clean the address
   useEffect(() => {
-    const result = new URLSearchParams(window.location.search).get('gmail');
+    const result = new URLSearchParams(window.location.search).get('google');
     if (result) {
       setMessage(RETURNS[result] ?? '');
       window.history.replaceState(null, '', here());

@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AccountGate, { here } from '../../components/AccountGate';
 import BrandIcon from '../../components/BrandIcon';
 import type { Brand } from '../../components/BrandIcon';
 import type { Project } from '../../data/types';
 import { useStored } from '../../hooks/useStored';
+import type { useCalendarSync } from '../../lib/calendar';
+import { supabase } from '../../lib/supabase';
 import './Tools.css';
 
 type Service = {
@@ -40,8 +43,9 @@ const withScheme = (url: string) => (/^https?:\/\//.test(url) ? url : `https://$
  * (back comes back to Marc HQ). Each one can point to the project's own page: its Instagram
  * account, its GitHub repo, its App Store Connect app.
  */
-export default function ConnectionsPage({ project, query, onRemoveProject }: {
+export default function ConnectionsPage({ project, calendar, query, onRemoveProject }: {
   project: Project;
+  calendar: ReturnType<typeof useCalendarSync>;
   query: (text: string) => boolean;
   /** Only for projects added from the app. */
   onRemoveProject?: () => void;
@@ -61,6 +65,8 @@ export default function ConnectionsPage({ project, query, onRemoveProject }: {
           <span className="tool-title-light">Connexions</span> <span className="tool-title-bold">{SERVICES.length} outils</span>
         </h1>
       </div>
+      <AgendaCard project={project} calendar={calendar} />
+
       <p className="conn-intro">
         Ouvre chaque outil en un clic, dans cet onglet. Donne l'adresse propre à {project.name} (son compte, son dépôt, son app) pour arriver directement au bon
         endroit{own > 0 ? ` : ${own} déjà réglée${own > 1 ? 's' : ''}` : ''}.
@@ -148,5 +154,111 @@ export default function ConnectionsPage({ project, query, onRemoveProject }: {
         </div>
       )}
     </section>
+  );
+}
+
+const RETURNS: Record<string, string> = {
+  ok: 'Google Agenda est relié.',
+  annule: 'Liaison annulée.',
+  erreur: 'Google n’a pas pu relier l’agenda. Réessaie.',
+};
+
+/**
+ * Google Agenda, at the top of Connexions: sign in to Marc HQ, link Google Calendar once, then
+ * the project's own calendar ("RNDS", "Club 421") follows its dated tasks, soirées and meetings.
+ */
+function AgendaCard({ project, calendar }: { project: Project; calendar: ReturnType<typeof useCalendarSync> }) {
+  const { session, email, status, busy, events, sync, reload } = calendar;
+  const [message, setMessage] = useState('');
+  const [linking, setLinking] = useState(false);
+
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get('google');
+    if (result) {
+      setMessage(RETURNS[result] ?? '');
+      window.history.replaceState(null, '', here());
+      reload();
+    }
+  }, [reload]);
+
+  if (!supabase || session === undefined || (session && email === undefined)) return null;
+  const icon = <BrandIcon brand="agenda" size={26} />;
+  if (!session) {
+    return (
+      <AccountGate
+        icon={icon}
+        title="Google Agenda"
+        text={`Connecte-toi à Marc HQ pour que les tâches datées, les soirées et les rendez-vous de ${project.name} arrivent dans ton Google Agenda.`}
+      />
+    );
+  }
+
+  async function link() {
+    if (!supabase) return;
+    setLinking(true);
+    const { data, error } = await supabase.functions.invoke('calendar-connect', { body: { return_to: here() } });
+    if (error || !data?.url) {
+      setLinking(false);
+      setMessage('Google Agenda ne peut pas encore être relié : l’identifiant Google n’est pas réglé.');
+      return;
+    }
+    window.location.href = data.url as string;
+  }
+
+  async function unlink() {
+    if (!supabase) return;
+    await supabase.from('calendar_connections').delete().not('user_id', 'is', null);
+    reload();
+    setMessage('Google Agenda est délié. Les agendas déjà créés restent dans Google, tu peux les supprimer là-bas.');
+  }
+
+  const time = status ? new Date(status.at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+  return (
+    <div className="tool-card agenda">
+      <div className="agenda-head">
+        <span className="mail-gate-icon" aria-hidden="true">
+          {icon}
+        </span>
+        <div className="agenda-text">
+          <h2 className="mail-gate-title">Google Agenda</h2>
+          <p className="mail-gate-text">
+            {email
+              ? `Relié à ${email} · agenda « ${project.name} » · ${events.length} événement${events.length > 1 ? 's' : ''}`
+              : `Marc HQ crée un agenda « ${project.name} » dans ton Google Agenda et y met les tâches datées, les soirées et les rendez-vous. Il ne touche à aucun de tes autres agendas.`}
+          </p>
+          {email && status && (
+            <p className={`agenda-status${status.error ? ' agenda-status--error' : ''}`}>
+              {status.error
+                ? status.error
+                : `Synchronisé à ${time} · ${status.created} ajouté${status.created > 1 ? 's' : ''}, ${status.changed} modifié${status.changed > 1 ? 's' : ''}, ${status.removed} retiré${status.removed > 1 ? 's' : ''}`}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="agenda-actions">
+        {email ? (
+          <>
+            <button type="button" className="tool-primary tool-primary--small" onClick={sync} disabled={busy}>
+              {busy ? 'Synchronisation…' : 'Synchroniser'}
+            </button>
+            <a className="tool-ghost mail-open" href={`https://calendar.google.com/calendar/u/${email}/r`}>
+              Ouvrir Google Agenda
+            </a>
+            <button type="button" className="tool-ghost" onClick={unlink}>
+              Délier
+            </button>
+          </>
+        ) : (
+          <button type="button" className="tool-primary tool-primary--small" onClick={link} disabled={linking}>
+            Relier Google Agenda
+          </button>
+        )}
+      </div>
+      {message && (
+        <p className="mail-message" role="status">
+          {message}
+        </p>
+      )}
+    </div>
   );
 }

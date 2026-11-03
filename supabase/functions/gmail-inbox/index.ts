@@ -1,5 +1,5 @@
 // The latest mails of a project's box: who, subject, date, a snippet, and whether it is unread.
-import { admin, cors, json, signedIn } from '../_shared/common.ts';
+import { admin, cors, googleAccess, json, signedIn } from '../_shared/common.ts';
 
 const header = (headers: { name: string; value: string }[], name: string) => headers.find((h) => h.name.toLowerCase() === name)?.value ?? '';
 
@@ -12,20 +12,10 @@ Deno.serve(async (req) => {
   const { data: saved } = await admin.from('mail_tokens').select('refresh_token').eq('user_id', who.user.id).eq('project_id', project).maybeSingle();
   if (!saved) return json({ error: 'Aucune boîte connectée pour ce projet.', reconnect: true }, 404);
 
-  const refreshed = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
-      client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
-      refresh_token: saved.refresh_token,
-      grant_type: 'refresh_token',
-    }),
-  });
-  const access = await refreshed.json();
-  if (!refreshed.ok) return json({ error: 'Google demande de reconnecter cette boîte.', reconnect: true }, 401);
+  const access = await googleAccess(saved.refresh_token);
+  if (!access) return json({ error: 'Google demande de reconnecter cette boîte.', reconnect: true }, 401);
 
-  const auth = { Authorization: `Bearer ${access.access_token}` };
+  const auth = { Authorization: `Bearer ${access}` };
   const api = 'https://gmail.googleapis.com/gmail/v1/users/me';
   const list = await (await fetch(`${api}/messages?labelIds=INBOX&maxResults=20`, { headers: auth })).json();
   const messages = await Promise.all(

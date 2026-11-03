@@ -3,7 +3,7 @@ export const TOOLS = [
   { slug: 'todo', label: 'To do' },
   { slug: 'notes', label: 'Notes' },
   { slug: 'idees', label: 'Idées' },
-  { slug: 'mails', label: 'Mails' },
+  // Mails (MailsPage, the gmail-* functions) is ready but on pause until Marc wants it back
   { slug: 'versions', label: 'Versions' },
   { slug: 'retours', label: 'Retours' },
   { slug: 'objectifs', label: 'Objectifs' },

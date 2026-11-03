@@ -20,6 +20,7 @@ import ModuleStrip from '../components/ModuleStrip';
 import { useCustomProjects, useProjects } from '../data/customProjects';
 import { TOOLS, isTool } from '../data/sections';
 import ProjectMap from '../components/ProjectMap';
+import { useCalendarSync } from '../lib/calendar';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { dayLabel, isoDate } from '../lib/dates';
@@ -32,7 +33,6 @@ import GoalsPage from './tools/GoalsPage';
 import LinksPage from './tools/LinksPage';
 import VersionsPage from './tools/VersionsPage';
 import ConnectionsPage from './tools/ConnectionsPage';
-import MailsPage from './tools/MailsPage';
 import './Workspace.css';
 
 type Props = {
@@ -68,6 +68,8 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   const feedback = useFeedback(project);
   const goals = useGoals(project);
   const links = useLinks(project);
+  // The project's Google calendar, kept in step with its dated tasks, soirées and meetings
+  const calendar = useCalendarSync(project, tasks.tasks);
   const { remove: removeProject } = useCustomProjects();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -132,11 +134,11 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} />}
           {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
           {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
-          {tool?.slug === 'mails' && <MailsPage project={project} query={matches} />}
           {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
           {tool?.slug === 'connexions' && (
             <ConnectionsPage
               project={project}
+              calendar={calendar}
               query={matches}
               onRemoveProject={
                 project.custom

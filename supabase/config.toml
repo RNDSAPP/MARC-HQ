@@ -413,12 +413,18 @@ enabled = true
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
 
-# Gmail functions: they check the signed-in person themselves (gmail-callback is reached by Google)
+# Google functions: they check the signed-in person themselves (google-callback is reached by Google)
 [functions.gmail-connect]
 verify_jwt = false
 
-[functions.gmail-callback]
+[functions.gmail-inbox]
 verify_jwt = false
 
-[functions.gmail-inbox]
+[functions.google-callback]
+verify_jwt = false
+
+[functions.calendar-connect]
+verify_jwt = false
+
+[functions.calendar-sync]
 verify_jwt = false
