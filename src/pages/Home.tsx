@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import AppRail from '../components/AppRail';
 import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
+import { HomeTabBar } from '../components/TabBar';
 import TodayTasks from '../components/TodayTasks';
 import { openNewProject } from '../components/NewProjectDialog';
 import { useProjects } from '../data/customProjects';
@@ -70,6 +71,7 @@ export default function Home() {
           <TodayTasks projects={projects} />
         </div>
       </main>
+      <HomeTabBar projects={projects} />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { TOOLS, shortLabel } from '../data/sections';
 import type { Project } from '../data/types';
 import ModuleIcon from './ModuleIcon';
+import { openNewProject } from './NewProjectDialog';
+import ProjectMark from './ProjectMark';
 import './TabBar.css';
 
 type Props = {
@@ -90,5 +92,45 @@ export default function TabBar({ project }: Props) {
         </ul>
       </nav>
     </>
+  );
+}
+
+/**
+ * The same bar on the home page, on phones: home itself, one tab per project (its logo, a dot when
+ * its agent is waiting for Marc) and a tab to add a project. It replaces the side rail there.
+ */
+export function HomeTabBar({ projects }: { projects: Project[] }) {
+  return (
+    <nav className="tabbar" aria-label="Navigation">
+      <ul className="tabbar-list">
+        <li>
+          <Link to="/" className="tabbar-item active" aria-current="page">
+            <span className="tabbar-hq" aria-hidden="true">
+              HQ
+            </span>
+            <span className="tabbar-label">Accueil</span>
+          </Link>
+        </li>
+        {projects.map((project) => (
+          <li key={project.id}>
+            <Link to={`/${project.id}/vue-d-ensemble`} className="tabbar-item" data-project={project.id}>
+              <span className="tabbar-mark" aria-hidden="true">
+                <ProjectMark project={project} />
+              </span>
+              <span className="tabbar-label">{project.name}</span>
+            </Link>
+          </li>
+        ))}
+        <li>
+          <button type="button" className="tabbar-item" onClick={openNewProject}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="5" strokeDasharray="3 2.4" />
+              <path d="M12 8.5v7M8.5 12h7" />
+            </svg>
+            <span className="tabbar-label">Nouveau</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }

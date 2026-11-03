@@ -47,6 +47,32 @@
     color: var(--accent);
   }
 
+  /* Home tab bar: the HQ square and each project's logo, at icon size */
+  .tabbar-hq {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 9.5px;
+    font-weight: 700;
+  }
+
+  .tabbar-item.active .tabbar-label {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .tabbar-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
   .tabbar-item:active {
     transform: scale(0.94);
   }

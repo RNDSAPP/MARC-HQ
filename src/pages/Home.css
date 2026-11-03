@@ -177,7 +177,7 @@
   }
 
   .home-inner {
-    padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+    padding: calc(20px + env(safe-area-inset-top)) 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
     gap: 18px;
   }
 
