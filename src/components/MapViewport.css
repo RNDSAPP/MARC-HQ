@@ -25,6 +25,24 @@
   transform-origin: 0 0;
 }
 
+/* Only while a finger or the mouse moves it (MapViewport.tsx) */
+.map--moving .map-pan {
+  will-change: transform;
+}
+
+/* Out of sight (scrolled away), or when the phone asks for less motion: the figures rest */
+.map--away .map-pan *,
+.map--away .map-pan *::before,
+.map--away .map-pan *::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-pan * {
+    animation-play-state: paused !important;
+  }
+}
+
 .map-controls {
   position: absolute;
   top: 14px;
@@ -40,6 +58,8 @@
 }
 
 .map-controls button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,8 +74,20 @@
   line-height: 1;
 }
 
-.map-controls button:hover:not(:disabled) {
+/* Hover only with a mouse: on a phone, a tapped button must not stay grey */
+@media (hover: hover) {
+  .map-controls button:hover:not(:disabled) {
+    background: var(--fill);
+  }
+}
+
+.map-controls button:active:not(:disabled) {
   background: var(--fill);
+}
+
+/* The focus ring only for the keyboard, not after a tap */
+.map-controls button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .map-controls button:disabled {

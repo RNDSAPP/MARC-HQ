@@ -2,15 +2,9 @@
 // sharp at every size, phones included. The dots and outlines of the dice are holes in the
 // original, painted here in the colour behind the logo (--club-hole, the club's violet by default).
 // `mono` draws it in one colour (currentColor) with real holes, like an iPhone tab bar glyph.
-import { useId, type CSSProperties } from "react";
+import { useId, type CSSProperties } from 'react';
 
-export default function Club421Logo({
-  className,
-  mono = false,
-}: {
-  className?: string;
-  mono?: boolean;
-}) {
+export default function Club421Logo({ className, mono = false }: { className?: string; mono?: boolean }) {
   const id = useId();
   const shapes = (
     <g transform="translate(500.0,500.0) scale(0.8830022075055187) translate(-514.0,-462.0)">
@@ -22,162 +16,36 @@ export default function Club421Logo({
         />
       </g>
       <g transform="translate(730,250) rotate(-18)">
-        <rect
-          x="-87.5"
-          y="-87.5"
-          width="175"
-          height="175"
-          rx="35.0"
-          fill="#FFFFFF"
-        />
-        <rect
-          x="-68.25"
-          y="-68.25"
-          width="136.5"
-          height="136.5"
-          rx="21.0"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="10.5"
-        />
-        <circle
-          cx="-35.0"
-          cy="-35.0"
-          r="15.399999999999999"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="10.85"
-        />
-        <circle
-          cx="35.0"
-          cy="-35.0"
-          r="15.399999999999999"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="10.85"
-        />
-        <circle
-          cx="-35.0"
-          cy="35.0"
-          r="15.399999999999999"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="10.85"
-        />
-        <circle
-          cx="35.0"
-          cy="35.0"
-          r="15.399999999999999"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="10.85"
-        />
+        <rect x="-87.5" y="-87.5" width="175" height="175" rx="35.0" fill="#FFFFFF" />
+        <rect x="-68.25" y="-68.25" width="136.5" height="136.5" rx="21.0" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="10.5" />
+        <circle cx="-35.0" cy="-35.0" r="15.399999999999999" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="10.85" />
+        <circle cx="35.0" cy="-35.0" r="15.399999999999999" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="10.85" />
+        <circle cx="-35.0" cy="35.0" r="15.399999999999999" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="10.85" />
+        <circle cx="35.0" cy="35.0" r="15.399999999999999" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="10.85" />
       </g>
       <g transform="translate(890,420) rotate(14)">
-        <rect
-          x="-69.0"
-          y="-69.0"
-          width="138"
-          height="138"
-          rx="27.6"
-          fill="#FFFFFF"
-        />
-        <rect
-          x="-53.82"
-          y="-53.82"
-          width="107.64"
-          height="107.64"
-          rx="16.56"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="8.28"
-        />
-        <circle
-          cx="-27.6"
-          cy="-27.6"
-          r="12.144"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="8.556"
-        />
-        <circle
-          cx="27.6"
-          cy="27.6"
-          r="12.144"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="8.556"
-        />
+        <rect x="-69.0" y="-69.0" width="138" height="138" rx="27.6" fill="#FFFFFF" />
+        <rect x="-53.82" y="-53.82" width="107.64" height="107.64" rx="16.56" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="8.28" />
+        <circle cx="-27.6" cy="-27.6" r="12.144" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="8.556" />
+        <circle cx="27.6" cy="27.6" r="12.144" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="8.556" />
       </g>
       <g transform="translate(790,575) rotate(-28)">
-        <rect
-          x="-55.0"
-          y="-55.0"
-          width="110"
-          height="110"
-          rx="22.0"
-          fill="#FFFFFF"
-        />
-        <rect
-          x="-42.9"
-          y="-42.9"
-          width="85.8"
-          height="85.8"
-          rx="13.2"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="6.6"
-        />
-        <circle
-          cx="0.0"
-          cy="0.0"
-          r="13.2"
-          fill="none"
-          stroke="var(--club-hole, var(--club))"
-          strokeWidth="6.82"
-        />
+        <rect x="-55.0" y="-55.0" width="110" height="110" rx="22.0" fill="#FFFFFF" />
+        <rect x="-42.9" y="-42.9" width="85.8" height="85.8" rx="13.2" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="6.6" />
+        <circle cx="0.0" cy="0.0" r="13.2" fill="none" stroke="var(--club-hole, var(--club))" strokeWidth="6.82" />
       </g>
-      <rect
-        x="570"
-        y="70"
-        width="14"
-        height="150"
-        rx="7"
-        fill="#FFFFFF"
-        transform="rotate(-38 570 70)"
-      />
-      <rect
-        x="600"
-        y="70"
-        width="14"
-        height="120"
-        rx="7"
-        fill="#FFFFFF"
-        transform="rotate(-38 600 70)"
-      />
-      <rect
-        x="630"
-        y="70"
-        width="14"
-        height="90"
-        rx="7"
-        fill="#FFFFFF"
-        transform="rotate(-38 630 70)"
-      />
+      <rect x="570" y="70" width="14" height="150" rx="7" fill="#FFFFFF" transform="rotate(-38 570 70)" />
+      <rect x="600" y="70" width="14" height="120" rx="7" fill="#FFFFFF" transform="rotate(-38 600 70)" />
+      <rect x="630" y="70" width="14" height="90" rx="7" fill="#FFFFFF" transform="rotate(-38 630 70)" />
     </g>
   );
   if (mono) {
     return (
       <svg viewBox="0 0 1000 1000" className={className} aria-hidden="true">
-        <mask id={id} style={{ "--club-hole": "#000000" } as CSSProperties}>
+        <mask id={id} style={{ '--club-hole': '#000000' } as CSSProperties}>
           {shapes}
         </mask>
-        <rect
-          width="1000"
-          height="1000"
-          fill="currentColor"
-          mask={`url(#${id})`}
-        />
+        <rect width="1000" height="1000" fill="currentColor" mask={`url(#${id})`} />
       </svg>
     );
   }
