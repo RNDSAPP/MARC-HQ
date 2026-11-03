@@ -3,7 +3,7 @@
   width: 100%;
   border-radius: 28px;
   /* Same grey as the table drawn in the SVG, so the edges blend */
-  background: #dcdcdc;
+  background: #dfe2ee;
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
@@ -219,7 +219,7 @@
   position: relative;
   border-radius: 28px;
   overflow: hidden;
-  background: #dcdcdc;
+  background: #dfe2ee;
 }
 
 .scene-art {

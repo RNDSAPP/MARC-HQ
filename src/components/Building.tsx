@@ -152,7 +152,7 @@ function Walls({ origin, left, right, thick }: {
   const o = origin;
   const k = thick;
   return (
-    <g stroke="#DCDCDC" strokeWidth="0.8" strokeLinejoin="round">
+    <g stroke="#DADDED" strokeWidth="0.8" strokeLinejoin="round">
       {left !== undefined && (
         <>
           <polygon points={solid(o, [[k, k, 0], [k, 250, 0], [k, 250, left], [k, k, left]])} fill="url(#bld-wall-left)" />
@@ -224,7 +224,7 @@ export function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12, origin = 
   const raised = outline.map(([x, y]) => [x, y - h] as Point);
   return (
     <g>
-      <polygon points={toPath(outline.map(([x, y]) => [x + 10, y + 12] as Point))} fill="#000" fillOpacity={shadow} filter="url(#bld-blur-l)" />
+      <polygon points={toPath(outline.map(([x, y]) => [x + 10, y + 12] as Point))} fill="#2E3470" fillOpacity={shadow} filter="url(#bld-blur-l)" />
       <polygon points={toPath(hull([...outline, ...raised]))} fill={side} />
       <polygon points={toPath(raised)} fill={top} />
     </g>
@@ -264,7 +264,7 @@ function Roads() {
         </g>
       ))}
       {/* Zebra crossings, one on each front road, near the corner */}
-      <g fill="#F6F6F6">
+      <g fill="#F5F6FA">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <polygon key={`a${i}`} points={quad(382, 428, 548 + i * 7, 552 + i * 7, true)} />
         ))}
@@ -302,7 +302,7 @@ function Car({ s, t, alongT, color, stripes }: { s: number; t: number; alongT: b
   };
   return (
     <g>
-      <polygon points={face([[0, 0, 0], [46, 0, 0], [46, W, 0], [0, W, 0]])} fill="#000" fillOpacity="0.24" filter="url(#bld-blur-m)" transform="translate(3 4)" />
+      <polygon points={face([[0, 0, 0], [46, 0, 0], [46, W, 0], [0, W, 0]])} fill="#2E3470" fillOpacity="0.24" filter="url(#bld-blur-m)" transform="translate(3 4)" />
       {/* Wedge body: side, nose, rear deck and plunging bonnet */}
       <polygon points={face([[1, W, 2.4], [46, W, 2.4], [46, W, 5], [31, W, 8], [1, W, 8.6]])} fill={side} />
       <polygon points={face([[46, 0, 2.4], [46, W, 2.4], [46, W, 5], [46, 0, 5]])} fill={nose} />
@@ -344,11 +344,11 @@ export function Tree({ s, t, size = 1, base = 6, origin = SITE_GROUND }: { s: nu
   const k = size;
   return (
     <g>
-      <ellipse cx={x + 8 * k} cy={y + 2} rx={16 * k} ry={6 * k} fill="#000" fillOpacity="0.16" filter="url(#bld-blur-m)" />
-      <rect x={x - 1.6 * k} y={y - 18 * k} width={3.2 * k} height={18 * k} rx={1.6 * k} fill="#CFCFCF" />
-      {vinyl((f) => <circle cx={x - 6 * k} cy={y - 22 * k} r={8 * k} fill={f} />, '#F2F2F2')}
-      {vinyl((f) => <circle cx={x + 6 * k} cy={y - 24 * k} r={9 * k} fill={f} />, '#F5F5F5')}
-      {vinyl((f) => <circle cx={x} cy={y - 32 * k} r={9.5 * k} fill={f} />, '#F7F7F7')}
+      <ellipse cx={x + 8 * k} cy={y + 2} rx={16 * k} ry={6 * k} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <rect x={x - 1.6 * k} y={y - 18 * k} width={3.2 * k} height={18 * k} rx={1.6 * k} fill="#CDD1E5" />
+      {vinyl((f) => <circle cx={x - 6 * k} cy={y - 22 * k} r={8 * k} fill={f} />, '#F1F2F8')}
+      {vinyl((f) => <circle cx={x + 6 * k} cy={y - 24 * k} r={9 * k} fill={f} />, '#F4F5FA')}
+      {vinyl((f) => <circle cx={x} cy={y - 32 * k} r={9.5 * k} fill={f} />, '#F6F7FB')}
     </g>
   );
 }
@@ -359,10 +359,10 @@ export function Lamp({ s, t, origin = SITE_GROUND }: { s: number; t: number; ori
   const y = y0 - 6;
   return (
     <g>
-      <ellipse cx={x + 3} cy={y + 1} rx="5" ry="2" fill="#000" fillOpacity="0.15" filter="url(#bld-blur-s)" />
-      <rect x={x - 1} y={y - 44} width="2" height="44" rx="1" fill="#BDBDBD" />
-      <path d={`M${x},${y - 43} q -7,-3 -12,2`} fill="none" stroke="#BDBDBD" strokeWidth="2" strokeLinecap="round" />
-      <ellipse cx={x - 12} cy={y - 40} rx="4.5" ry="1.8" fill="#E8E8E8" stroke="#C8C8C8" strokeWidth="0.6" />
+      <ellipse cx={x + 3} cy={y + 1} rx="5" ry="2" fill="#2E3470" fillOpacity="0.15" filter="url(#bld-blur-s)" />
+      <rect x={x - 1} y={y - 44} width="2" height="44" rx="1" fill="#BBC0D6" />
+      <path d={`M${x},${y - 43} q -7,-3 -12,2`} fill="none" stroke="#BBC0D6" strokeWidth="2" strokeLinecap="round" />
+      <ellipse cx={x - 12} cy={y - 40} rx="4.5" ry="1.8" fill="#E7E9F3" stroke="#C6CADF" strokeWidth="0.6" />
     </g>
   );
 }
@@ -391,7 +391,7 @@ export function FloorText({ origin, s, t, alongT = false, size = 20, children }:
   const [x, y] = iso(origin, s, t);
   const matrix = alongT ? `matrix(0.866 -0.5 0.866 0.5 ${x} ${y})` : `matrix(0.866 0.5 -0.866 0.5 ${x} ${y})`;
   return (
-    <text transform={matrix} fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fontWeight="800" fontStyle="italic" fontSize={size} letterSpacing="1" fill="#C9C9C9">
+    <text transform={matrix} fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fontWeight="800" fontStyle="italic" fontSize={size} letterSpacing="1" fill="#C7CBE0">
       {children}
     </text>
   );
@@ -535,14 +535,14 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
     <g className={`fig${kind}${nap ? ' fig--nap' : ''}`} style={motion}>
     {nap && (
       <g>
-        <ellipse cx={x + 2} cy={y + 1} rx="11" ry="3.4" fill="#000" fillOpacity="0.18" filter="url(#bld-blur-s)" />
-        <rect x={x - 9} y={y - 9} width="18" height="9" rx="2" fill="#D9D9D9" />
+        <ellipse cx={x + 2} cy={y + 1} rx="11" ry="3.4" fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-s)" />
+        <rect x={x - 9} y={y - 9} width="18" height="9" rx="2" fill="#D8DBEC" />
         <rect x={x - 9} y={y - 11} width="18" height="3" rx="1.5" fill="#F4F4F4" />
       </g>
     )}
     <g className="fig-body">
     <g transform={`translate(${x.toFixed(1)} ${(y - (nap ? 6 : 0)).toFixed(1)}) scale(0.92${nap ? ' 0.86' : ''}) rotate(${nap ? -6 : 0})`}>
-      <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#000" fillOpacity="0.2" filter="url(#bld-blur-s)" />
+      <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#2E3470" fillOpacity="0.2" filter="url(#bld-blur-s)" />
 
       {look.head === 'long' && vinyl((f) => <rect x="-9.6" y="-40" width="19.2" height="25" rx="8" fill={f} />, look.headColor)}
 
@@ -555,7 +555,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
           {look.shorts && vinyl((f) => <rect x={leg.skinX} y="-7.4" width="3" height="6" rx="1.5" fill={f} />, look.skin)}
           {vinyl((f) => <rect x={leg.x} y="-12.4" width="5.1" height={12.4 + legBottom} rx="2.3" fill={f} />, look.bottom)}
           <line x1={leg.x + 2.6} y1="-10" x2={leg.x + 2.6} y2={legBottom - 0.6} stroke={shade(look.bottom, 0.22)} strokeWidth="0.5" strokeLinecap="round" />
-          <ellipse cx={leg.shoe} cy={-0.7 + leg.drop} rx="3.8" ry="1.2" fill="#FAFAFA" />
+          <ellipse cx={leg.shoe} cy={-0.7 + leg.drop} rx="3.8" ry="1.2" fill="#F9FAFD" />
           {vinyl((f) => <ellipse cx={leg.shoe} cy={-1.8 + leg.drop} rx="3.6" ry="2.1" fill={f} />, look.shoes)}
         </g>
       ))}
@@ -591,7 +591,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
       )}
 
       {/* Shadow of the head on the shoulders */}
-      <ellipse cx="0.8" cy="-24.6" rx="7" ry="2.2" fill="#000" fillOpacity="0.22" filter="url(#bld-blur-s)" />
+      <ellipse cx="0.8" cy="-24.6" rx="7" ry="2.2" fill="#2E3470" fillOpacity="0.22" filter="url(#bld-blur-s)" />
 
       {/* Head: ears, face, hair or hat */}
       {vinyl((f) => <circle cx="-9" cy="-32.5" r="3.5" fill={f} />, shade(look.skin, 0.04))}
@@ -655,7 +655,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose }: F
       )}
       {pose === 'chat' && (
         <g className="fig-bubble">
-          <rect x="4" y="-58" width="17" height="11" rx="5.5" fill="#FFFFFF" stroke="#D6D6D6" strokeWidth="0.6" />
+          <rect x="4" y="-58" width="17" height="11" rx="5.5" fill="#FFFFFF" stroke="#D3D6E8" strokeWidth="0.6" />
           <path d="M8,-47.2 l-1.5,4 l4.5,-4 z" fill="#FFFFFF" />
           <circle cx="8.6" cy="-52.5" r="1.1" fill="#9A9A9A" />
           <circle cx="12.5" cy="-52.5" r="1.1" fill="#9A9A9A" />
@@ -692,9 +692,9 @@ function RingPost({ origin, s, t, pad }: { origin: Point; s: number; t: number; 
   const y = y0 - RING.h;
   return (
     <g>
-      {vinyl((f) => <rect x={x - 2.6} y={y - RING.post - 2} width="5.2" height={RING.post + 2} rx="2.6" fill={f} />, '#D9D9D9')}
+      {vinyl((f) => <rect x={x - 2.6} y={y - RING.post - 2} width="5.2" height={RING.post + 2} rx="2.6" fill={f} />, '#D8DBEC')}
       {vinyl((f) => <rect x={x - 3.6} y={y - RING.post + 2} width="7.2" height={RING.post - 8} rx="3" fill={f} />, pad)}
-      <ellipse cx={x} cy={y - RING.post - 2} rx="2.6" ry="1.2" fill="#F2F2F2" />
+      <ellipse cx={x} cy={y - RING.post - 2} rx="2.6" ry="1.2" fill="#F1F2F8" />
     </g>
   );
 }
@@ -739,7 +739,7 @@ function Ring({ origin, back = false }: { origin: Point; back?: boolean }) {
   const [cx, cy] = iso(o, (s0 + s1) / 2, (t0 + t1) / 2);
   return (
     <g>
-      <polygon points={solid(o, [[s0, t0, 0], [s1, t0, 0], [s1 + 8, t1 + 8, 0], [s0, t1, 0]])} fill="#000" fillOpacity="0.22" filter="url(#bld-blur-m)" />
+      <polygon points={solid(o, [[s0, t0, 0], [s1, t0, 0], [s1 + 8, t1 + 8, 0], [s0, t1, 0]])} fill="#2E3470" fillOpacity="0.22" filter="url(#bld-blur-m)" />
       {/* Apron, black, with the RNDS logo in white and its red dot, as on black in the brand kit */}
       <polygon points={solid(o, [[s0, t1, 0], [s1, t1, 0], [s1, t1, h], [s0, t1, h]])} fill="#1A1A1B" />
       <polygon points={solid(o, [[s1, t0, 0], [s1, t1, 0], [s1, t1, h], [s1, t0, h]])} fill="#0F0F10" />
@@ -791,7 +791,7 @@ function Die({ x, y, face, roll }: { x: number; y: number; face: 1 | 2 | 4; roll
   const size = 8;
   return (
     <g className={roll === undefined ? undefined : `die die--${roll}`}>
-      <rect x={x - size / 2} y={y - size / 2} width={size} height={size} rx="2" fill="#FFFFFF" stroke="#D2D2D2" strokeWidth="0.5" />
+      <rect x={x - size / 2} y={y - size / 2} width={size} height={size} rx="2" fill="#FFFFFF" stroke="#D0D3E6" strokeWidth="0.5" />
       {PIPS[face].map((pip) => (
         <circle key={pip} cx={x - 2.4 + (pip % 3) * 2.4} cy={y - 2.4 + Math.floor(pip / 3) * 2.4} r="0.85" fill={face === 1 ? RNDS : INK} />
       ))}
@@ -807,14 +807,14 @@ function DiceTable({ cx, cy, rx, ry, rolling = false }: { cx: number; cy: number
   const felt = 0.74;
   return (
     <g>
-      <ellipse cx={cx + 4} cy={cy + 28} rx={rx * 0.7} ry={ry * 0.45} fill="#000" fillOpacity="0.16" filter="url(#bld-blur-m)" />
-      <ellipse cx={cx} cy={cy + 26} rx={rx * 0.32} ry={ry * 0.22} fill="#C9C9C9" />
+      <ellipse cx={cx + 4} cy={cy + 28} rx={rx * 0.7} ry={ry * 0.45} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <ellipse cx={cx} cy={cy + 26} rx={rx * 0.32} ry={ry * 0.22} fill="#C7CBE0" />
       <rect x={cx - 2.6} y={cy + 4} width="5.2" height="22" rx="2.6" fill="url(#bld-post)" />
       {/* Thickness of the top, then the white rim and the felt */}
-      <ellipse cx={cx} cy={cy + 5} rx={rx} ry={ry} fill="#C8C8C8" />
-      <rect x={cx - rx} y={cy} width={rx * 2} height="5" fill="#C8C8C8" />
-      {vinyl((f) => <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={f} />, '#F6F6F6')}
-      <ellipse cx={cx} cy={cy + 0.8} rx={rx * felt} ry={ry * felt} fill="#000" fillOpacity="0.18" />
+      <ellipse cx={cx} cy={cy + 5} rx={rx} ry={ry} fill="#C6CADF" />
+      <rect x={cx - rx} y={cy} width={rx * 2} height="5" fill="#C6CADF" />
+      {vinyl((f) => <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={f} />, '#F5F6FA')}
+      <ellipse cx={cx} cy={cy + 0.8} rx={rx * felt} ry={ry * felt} fill="#2E3470" fillOpacity="0.18" />
       <ellipse cx={cx} cy={cy + 1.2} rx={rx * felt} ry={ry * felt} fill={CLUB} />
       <ellipse cx={cx} cy={cy + 1.2} rx={rx * felt} ry={ry * felt} fill="url(#bld-felt)" />
       {/* Dice cup on the rim */}
@@ -850,8 +850,8 @@ const RNDS_PEOPLE: Figure[] = [
   { s: 262, t: 46, fight: 'bag', look: { skin: SKIN.deep, top: RNDS, bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F', shorts: true, gloves: '#1F1F1F' } },
   // Skipping rope beside the ring
   { s: 60, t: 212, rope: true, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#EFEBE3', shoes: '#F4F4F4', head: 'hair', headColor: '#4A3A30', eyes: 'glasses' } },
-  { s: 300, t: 200, walk: [0, -60], look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#DADADA', shorts: true } },
-  { s: 300, t: 110, look: { skin: SKIN.rose, top: '#F2F2F2', bottom: '#F2F2F2', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' } },
+  { s: 300, t: 200, walk: [0, -60], look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#D8DBEB', shorts: true } },
+  { s: 300, t: 110, look: { skin: SKIN.rose, top: '#F1F2F8', bottom: '#F1F2F8', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' } },
 ];
 
 const CLUB_PEOPLE: Figure[] = [
@@ -976,12 +976,6 @@ function NightLights({ only }: { only?: ProjectId }) {
       )}
       {!only && (
         <>
-          <g fill="none" stroke="#FFFFFF" strokeOpacity="0.3" strokeWidth="1.8" strokeDasharray="14 12">
-            {ROADS.map(({ across: [a0, a1], alongT }) => {
-              const mid = (a0 + a1) / 2;
-              return <polyline key={`${a0}-${alongT}`} points={points(SITE_GROUND, alongT ? [[mid, -900], [mid, 1500]] : [[-900, mid], [1500, mid]])} />;
-            })}
-          </g>
           {HOME_BLOCKS.map((b, i) => (
             <BlockWindows key={`${b.s0}-${b.t0}`} g={SITE_GROUND} b={b} seed={i} />
           ))}
@@ -1029,35 +1023,35 @@ export function SceneDefs() {
     <defs>
         <linearGradient id="bld-top" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#FFFFFF" />
-          <stop offset="1" stopColor="#F2F2F2" />
+          <stop offset="1" stopColor="#F1F2F8" />
         </linearGradient>
         <linearGradient id="bld-side-left" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#D4D4D4" />
-          <stop offset="1" stopColor="#C6C6C6" />
+          <stop offset="0" stopColor="#D2D5E7" />
+          <stop offset="1" stopColor="#C3C8E0" />
         </linearGradient>
         <linearGradient id="bld-side-right" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#E6E6E6" />
-          <stop offset="1" stopColor="#D9D9D9" />
+          <stop offset="0" stopColor="#E5E7F2" />
+          <stop offset="1" stopColor="#D8DBEC" />
         </linearGradient>
         <linearGradient id="bld-wall-left" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#EFEFEF" />
-          <stop offset="1" stopColor="#E0E0E0" />
+          <stop offset="0" stopColor="#EEF0F7" />
+          <stop offset="1" stopColor="#DFE1EE" />
         </linearGradient>
         <linearGradient id="bld-wall-right" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FAFAFA" />
-          <stop offset="1" stopColor="#ECECEC" />
+          <stop offset="0" stopColor="#F9FAFD" />
+          <stop offset="1" stopColor="#EBEDF5" />
         </linearGradient>
         <linearGradient id="bld-post" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#E4E4E4" />
-          <stop offset="1" stopColor="#B8B8B8" />
+          <stop offset="0" stopColor="#E3E5F1" />
+          <stop offset="1" stopColor="#B6BBD2" />
         </linearGradient>
         <radialGradient id="bld-vinyl-light" cx="0.3" cy="0.22" r="0.6">
           <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.6" />
           <stop offset="0.6" stopColor="#FFFFFF" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="bld-vinyl-dark" cx="0.32" cy="0.25" r="0.95">
-          <stop offset="0.45" stopColor="#000000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000000" stopOpacity="0.32" />
+          <stop offset="0.45" stopColor="#262B5E" stopOpacity="0" />
+          <stop offset="1" stopColor="#262B5E" stopOpacity="0.3" />
         </radialGradient>
         <radialGradient id="bld-sheen" cx="0.32" cy="0.28" r="0.75">
           <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.6" />
@@ -1074,10 +1068,10 @@ export function SceneDefs() {
         </linearGradient>
         {/* Floor materials, drawn in floor units and laid flat on each floor */}
         <pattern id="bld-floor-rnds" patternUnits="userSpaceOnUse" width="80" height="80" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${R[0]} ${R[1]})`}>
-          <rect width="80" height="80" fill="#F7F7F7" />
+          <rect width="80" height="80" fill="#F6F7FB" />
           <rect x="40" width="40" height="40" fill="#F1F1F1" />
           <rect y="40" width="40" height="40" fill="#F1F1F1" />
-          <path d="M0 0H80M0 40H80M0 0V80M40 0V80" stroke="#E2E2E2" strokeWidth="1" fill="none" />
+          <path d="M0 0H80M0 40H80M0 0V80M40 0V80" stroke="#E1E3F0" strokeWidth="1" fill="none" />
         </pattern>
         <pattern id="bld-floor-club" patternUnits="userSpaceOnUse" width="160" height="40" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${C[0]} ${C[1]})`}>
           <rect width="160" height="40" fill="#EFE6D7" />
@@ -1097,6 +1091,10 @@ export function SceneDefs() {
           <stop offset="0" stopColor="#FFD98A" stopOpacity="0.55" />
           <stop offset="1" stopColor="#FFD98A" stopOpacity="0" />
         </radialGradient>
+        <linearGradient id="bld-arch" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#D2D6EA" />
+          <stop offset="1" stopColor="#E4E6F2" />
+        </linearGradient>
         <linearGradient id="bld-canvas" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#2E2E30" />
           <stop offset="1" stopColor="#111112" />
@@ -1106,16 +1104,16 @@ export function SceneDefs() {
           <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
         </radialGradient>
         <linearGradient id="bld-asphalt" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#CDCDCF" />
-          <stop offset="1" stopColor="#C2C2C4" />
+          <stop offset="0" stopColor="#CFD2E2" />
+          <stop offset="1" stopColor="#C3C7DA" />
         </linearGradient>
         <linearGradient id="bld-glass" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#7C8794" />
           <stop offset="1" stopColor="#3E454E" />
         </linearGradient>
         <radialGradient id="bld-ground" cx="0.5" cy="0.45" r="0.75">
-          <stop offset="0" stopColor="#E9E9E9" />
-          <stop offset="1" stopColor="#D6D6D6" />
+          <stop offset="0" stopColor="#F1F2F8" />
+          <stop offset="1" stopColor="#DEE1EE" />
         </radialGradient>
         {/* Fine grain over the whole scene, like a render */}
         <filter id="bld-grain" x="0" y="0" width="100%" height="100%">
@@ -1141,6 +1139,23 @@ export function SceneDefs() {
   );
 }
 
+/**
+ * An arched doorway on a wall's inner face, like the soft white architecture of a scale model.
+ * `along` is the wall's direction on screen: 'left' for a wall along t (s = const), 'right' for
+ * a wall along s (t = const). (s, t) is where the arch starts on the floor.
+ */
+function Arch({ origin, s, t, along, width = 26, height = 50 }: { origin: Point; s: number; t: number; along: 'left' | 'right'; width?: number; height?: number }) {
+  const [x, y] = iso(origin, s, t);
+  const matrix = along === 'left' ? `matrix(0.866 -0.5 0 1 ${x} ${y})` : `matrix(0.866 0.5 0 1 ${x} ${y})`;
+  const r = width / 2;
+  return (
+    <g transform={matrix}>
+      <path d={`M0 0 V${-height + r} A${r} ${r} 0 0 1 ${width} ${-height + r} V0 Z`} fill="url(#bld-arch)" />
+      <path d={`M0 0 V${-height + r} A${r} ${r} 0 0 1 ${width} ${-height + r}`} fill="none" stroke="#FFFFFF" strokeWidth="1.4" />
+    </g>
+  );
+}
+
 /** RNDS floor: the boxing gym, its walls, logo, ring, bags and boxers. */
 function RndsFloorArt() {
   const R = RNDS_FLOOR;
@@ -1150,21 +1165,23 @@ function RndsFloorArt() {
       <polygon points="877,280 877,298 660.5,423 660.5,405" fill="url(#bld-side-right)" />
       <polygon points="660.5,405 660.5,423 383.5,263 383.5,245" fill="url(#bld-side-left)" />
       {/* Gym floor: square rubber tiles */}
-      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-rnds)" stroke="#E3E3E3" />
+      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-rnds)" stroke="#E2E4F0" />
       <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-light)" />
-      <g clipPath="url(#bld-clip-rnds)" filter="url(#bld-blur-m)" fill="#000" fillOpacity="0.09">
+      <g clipPath="url(#bld-clip-rnds)" filter="url(#bld-blur-m)" fill="#2E3470" fillOpacity="0.09">
         <polygon points={points(R, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
         <polygon points={points(R, [[8, 8], [320, 8], [320, 30], [8, 30]])} />
       </g>
       <Walls origin={R} left={95} right={95} thick={8} />
+      <Arch origin={R} s={8} t={248} along="left" />
+      <Arch origin={R} s={282} t={8} along="right" />
       {/* RNDS logo as in the brand kit: Kode Mono Bold, black on light, red dot top right, no tilt or effect */}
       <g transform={`matrix(0.866 -0.5 0 1 ${iso(R, 8, 196).join(' ')}) translate(0 -40)`}>
         <text fontFamily="'Kode Mono', ui-monospace, monospace" fontWeight="700" fontSize="34" fill="#000000" textLength="88" lengthAdjust="spacing">RNDS</text>
         <circle cx="95" cy="-24" r="3.6" fill={RNDS} />
         <text y="15" fontFamily="'Kode Mono', ui-monospace, monospace" fontSize="9" fill="#8E8E8B" letterSpacing="2.2">BOXING CLUB</text>
       </g>
-      <line x1="626" y1="40" x2="626" y2="92" stroke="#CFCFCF" />
-      <ellipse cx="626" cy="96" rx="16" ry="6" fill="#D4D4D4" />
+      <line x1="626" y1="40" x2="626" y2="92" stroke="#CDD1E5" />
+      <ellipse cx="626" cy="96" rx="16" ry="6" fill="#D2D5E7" />
       <ellipse cx="626" cy="98" rx="10" ry="2.6" fill="#FFF3B0" />
       <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp)" />
 
@@ -1172,16 +1189,16 @@ function RndsFloorArt() {
       <Route origin={R} color={RNDS} solid={[[282, 70], [282, 120], [236, 120]]} dashed={[[294, 70], [294, 132], [236, 132]]} />
 
       {/* Punching bags */}
-      <ellipse cx="812" cy="276" rx="9" ry="3.5" fill="#000" fillOpacity="0.12" filter="url(#bld-blur-s)" />
-      <ellipse cx="846" cy="296" rx="9" ry="3.5" fill="#000" fillOpacity="0.12" filter="url(#bld-blur-s)" />
+      <ellipse cx="812" cy="276" rx="9" ry="3.5" fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-s)" />
+      <ellipse cx="846" cy="296" rx="9" ry="3.5" fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-s)" />
       {/* This one swings each time the boxer beside it lands a punch */}
       <g className="bag-swing">
-        <line x1="808" y1="192" x2="808" y2="228" stroke="#B4B4B4" strokeWidth="2" />
+        <line x1="808" y1="192" x2="808" y2="228" stroke="#B3B8CF" strokeWidth="2" />
         <rect x="801" y="228" width="14" height="38" rx="6" fill={RNDS} />
         <rect x="801" y="236" width="14" height="4" fill={RNDS_DARK} />
         <rect x="801" y="228" width="14" height="38" rx="6" fill="url(#bld-sheen)" />
       </g>
-      <line x1="842" y1="212" x2="842" y2="248" stroke="#B4B4B4" strokeWidth="2" />
+      <line x1="842" y1="212" x2="842" y2="248" stroke="#B3B8CF" strokeWidth="2" />
       <rect x="835" y="248" width="14" height="38" rx="6" fill={RNDS} />
       <rect x="835" y="256" width="14" height="4" fill={RNDS_DARK} />
       <rect x="835" y="248" width="14" height="38" rx="6" fill="url(#bld-sheen)" />
@@ -1206,11 +1223,12 @@ function ClubFloorArt() {
       {/* Bar floor: light oak planks, staggered */}
       <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-club)" stroke="#E0D6C6" />
       <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-light)" />
-      <g clipPath="url(#bld-clip-club)" filter="url(#bld-blur-m)" fill="#000" fillOpacity="0.09">
+      <g clipPath="url(#bld-clip-club)" filter="url(#bld-blur-m)" fill="#2E3470" fillOpacity="0.09">
         <polygon points={points(C, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
         <polygon points={points(C, [[8, 8], [320, 8], [320, 22], [8, 22]])} />
       </g>
       <Walls origin={C} left={95} thick={8} />
+      <Arch origin={C} s={8} t={36} along="left" width={24} height={46} />
       <Walls origin={C} right={24} thick={8} />
       {/* Club 421 logo on the back wall, beside the bar shelf */}
       <image
@@ -1220,8 +1238,8 @@ function ClubFloorArt() {
         transform={`matrix(0.866 -0.5 0 1 ${iso(C, 8, 232).join(' ')}) translate(0 -88)`}
       />
       {/* Shelf of bottles on the wall behind the bar */}
-      <polygon points={solid(C, [[8, 48, 50], [14, 48, 50], [14, 160, 50], [8, 160, 50]])} fill="#FFFFFF" stroke="#D8D8D8" strokeWidth="0.6" />
-      <polygon points={solid(C, [[14, 48, 48], [14, 160, 48], [14, 160, 50], [14, 48, 50]])} fill="#D6D6D6" />
+      <polygon points={solid(C, [[8, 48, 50], [14, 48, 50], [14, 160, 50], [8, 160, 50]])} fill="#FFFFFF" stroke="#D6D9EB" strokeWidth="0.6" />
+      <polygon points={solid(C, [[14, 48, 48], [14, 160, 48], [14, 160, 50], [14, 48, 50]])} fill="#D3D6E8" />
       {[56, 68, 80, 92, 104, 116, 128, 140, 152].map((t, index) => {
         const [x, y] = iso(C, 11, t);
         const colors = ['#3E7D5A', '#8A5A2B', CLUB, '#E9E4D8', '#3E7D5A', '#B23A48', '#8A5A2B', '#E9E4D8', CLUB];
@@ -1233,8 +1251,8 @@ function ClubFloorArt() {
       <Route origin={C} color={CLUB} solid={[[52, 184], [290, 184], [290, 142]]} dashed={[[52, 196], [302, 196], [302, 142]]} />
 
       {/* Bar counter */}
-      <polygon points={points(C, [[16, 44], [46, 44], [46, 208], [16, 208]])} fill="#000" fillOpacity="0.12" filter="url(#bld-blur-m)" />
-      <g stroke="#DCDCDC" strokeWidth="0.8" strokeLinejoin="round">
+      <polygon points={points(C, [[16, 44], [46, 44], [46, 208], [16, 208]])} fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-m)" />
+      <g stroke="#DADDED" strokeWidth="0.8" strokeLinejoin="round">
         <polygon points={solid(C, [[40, 40, 0], [40, 200, 0], [40, 200, 24], [40, 40, 24]])} fill="url(#bld-side-left)" />
         <polygon points={solid(C, [[16, 200, 0], [40, 200, 0], [40, 200, 24], [16, 200, 24]])} fill="url(#bld-side-right)" />
         <polygon points={solid(C, [[16, 40, 24], [40, 40, 24], [40, 200, 24], [16, 200, 24]])} fill="url(#bld-top)" />
@@ -1246,14 +1264,14 @@ function ClubFloorArt() {
       })}
       {[100, 112, 136].map((gt) => {
         const [x, y] = iso(C, 30, gt);
-        return <rect key={gt} x={x - 1.5} y={y - 28.5} width="3" height="4.5" rx="0.8" fill="#FFFFFF" fillOpacity="0.85" stroke="#CFCFCF" strokeWidth="0.5" />;
+        return <rect key={gt} x={x - 1.5} y={y - 28.5} width="3" height="4.5" rx="0.8" fill="#FFFFFF" fillOpacity="0.85" stroke="#CDD1E5" strokeWidth="0.5" />;
       })}
       {(() => {
         const [x, y] = iso(C, 30, 150);
         return vinyl((f) => <rect x={x - 2.4} y={y - 30} width="4.8" height="6" rx="1.4" fill={f} />, '#2B2B2B');
       })()}
-      <line x1="392" y1="318" x2="392" y2="356" stroke="#CFCFCF" />
-      <ellipse cx="392" cy="360" rx="13" ry="5" fill="#D4D4D4" />
+      <line x1="392" y1="318" x2="392" y2="356" stroke="#CDD1E5" />
+      <ellipse cx="392" cy="360" rx="13" ry="5" fill="#D2D5E7" />
       <ellipse cx="392" cy="362" rx="8" ry="2.2" fill="#FFF3B0" />
       <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp)" />
 
@@ -1278,8 +1296,8 @@ function BuildingArt() {
       <Roads />
 
       {/* Plots behind the building */}
-      <Slab s0={-140} t0={40} s1={-56} t1={540} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
-      <Slab s0={30} t0={-140} s1={380} t1={-56} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
+      <Slab s0={-140} t0={40} s1={-56} t1={540} r={22} h={6} top="#EEF0F7" side="#CED2E6" />
+      <Slab s0={30} t0={-140} s1={380} t1={-56} r={22} h={6} top="#EEF0F7" side="#CED2E6" />
       <Tree s={-100} t={110} />
       <Tree s={-92} t={270} size={0.9} />
       <Tree s={-102} t={430} />
@@ -1291,7 +1309,7 @@ function BuildingArt() {
       <Tree s={340} t={-102} size={0.85} />
 
       {/* Base plate */}
-      <Slab s0={0} t0={0} s1={366} t1={586} r={26} h={14} top="#F7F7F7" side="#CFCFCF" shadow={0.16} />
+      <Slab s0={0} t0={0} s1={366} t1={586} r={26} h={14} top="#F6F7FB" side="#CDD1E5" shadow={0.16} />
 
       <RndsFloorArt />
       <ClubFloorArt />
@@ -1300,8 +1318,8 @@ function BuildingArt() {
       {CARS.map((car) => (
         <Car key={`${car.s}-${car.t}`} {...car} />
       ))}
-      <Slab s0={440} t0={70} s1={540} t1={480} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
-      <Slab s0={40} t0={656} s1={400} t1={750} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
+      <Slab s0={440} t0={70} s1={540} t1={480} r={22} h={6} top="#EEF0F7" side="#CED2E6" />
+      <Slab s0={40} t0={656} s1={400} t1={750} r={22} h={6} top="#EEF0F7" side="#CED2E6" />
       {HOME_BLOCKS.filter((b) => b.s1 >= 0 && b.t1 >= 0).map((b) => (
         <BlockArt key={`${b.s0}-${b.t0}`} g={SITE_GROUND} b={b} />
       ))}
@@ -1336,12 +1354,12 @@ type Block = { s0: number; s1: number; t0: number; t1: number; h: number };
 function BlockArt({ g, b }: { g: Point; b: Block }) {
   return (
     <g>
-      <polygon points={points(g, [[b.s0, b.t0], [b.s1 + 12, b.t0], [b.s1 + 12, b.t1 + 12], [b.s0, b.t1]])} fill="#000" fillOpacity="0.12" filter="url(#bld-blur-m)" />
-      <polygon points={solid(g, [[b.s1, b.t0, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s1, b.t0, b.h]])} fill="#D6D6D6" />
-      <polygon points={solid(g, [[b.s0, b.t1, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#ECECEC" />
-      <polygon points={solid(g, [[b.s0, b.t0, b.h], [b.s1, b.t0, b.h], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#FAFAFA" />
+      <polygon points={points(g, [[b.s0, b.t0], [b.s1 + 12, b.t0], [b.s1 + 12, b.t1 + 12], [b.s0, b.t1]])} fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-m)" />
+      <polygon points={solid(g, [[b.s1, b.t0, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s1, b.t0, b.h]])} fill="#D3D6E8" />
+      <polygon points={solid(g, [[b.s0, b.t1, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#EBEDF5" />
+      <polygon points={solid(g, [[b.s0, b.t0, b.h], [b.s1, b.t0, b.h], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#F9FAFD" />
       {[0.35, 0.62].map((level) => (
-        <polygon key={level} points={solid(g, [[b.s0 + 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level + 5], [b.s0 + 8, b.t1, b.h * level + 5]])} fill="#E2E2E2" />
+        <polygon key={level} points={solid(g, [[b.s0 + 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level + 5], [b.s0 + 8, b.t1, b.h * level + 5]])} fill="#E1E3F0" />
       ))}
     </g>
   );
@@ -1426,10 +1444,6 @@ export function Neighbourhood({ ground: g, part, size = [342, 272] }: { ground: 
             </g>
           );
         })}
-        <g fill="none" stroke="#FFFFFF" strokeOpacity="0.3" strokeWidth="1.6" strokeDasharray="12 10">
-          <polyline points={points(g, [[roadS, -400], [roadS, 900]])} />
-          <polyline points={points(g, [[-400, roadT], [900, roadT]])} />
-        </g>
       </>
     );
   }
@@ -1521,16 +1535,16 @@ function EmptyLot({ project }: { project: Project }) {
         <svg viewBox={box.join(' ')} className="scene-art" aria-hidden="true">
           <SceneDefs />
           <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="url(#bld-ground)" />
-          <Slab origin={[o[0], o[1] + 12]} s0={-20} t0={-20} s1={340} t1={270} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
+          <Slab origin={[o[0], o[1] + 12]} s0={-20} t0={-20} s1={340} t1={270} r={26} h={12} top="#F6F7FB" side="#CDD1E5" shadow={0.18} />
           {/* Outline of the building to come */}
           <polygon points={points(o, [[40, 30], [280, 30], [280, 200], [40, 200]])} fill="none" stroke={color} strokeWidth="2" strokeDasharray="10 8" />
           <FloorText origin={o} s={60} t={190} size={20}>
             À BÂTIR
           </FloorText>
           {/* Sign with the project's name */}
-          <line x1={sx - 14} y1={sy} x2={sx - 14} y2={sy - 40} stroke="#BDBDBD" strokeWidth="2" />
-          <line x1={sx + 30} y1={sy - 26} x2={sx + 30} y2={sy - 66} stroke="#BDBDBD" strokeWidth="2" />
-          <polygon points={`${sx - 22},${sy - 36} ${sx + 38},${sy - 70} ${sx + 38},${sy - 50} ${sx - 22},${sy - 16}`} fill="#FFFFFF" stroke="#DADADA" />
+          <line x1={sx - 14} y1={sy} x2={sx - 14} y2={sy - 40} stroke="#BBC0D6" strokeWidth="2" />
+          <line x1={sx + 30} y1={sy - 26} x2={sx + 30} y2={sy - 66} stroke="#BBC0D6" strokeWidth="2" />
+          <polygon points={`${sx - 22},${sy - 36} ${sx + 38},${sy - 70} ${sx + 38},${sy - 50} ${sx - 22},${sy - 16}`} fill="#FFFFFF" stroke="#D8DBEB" />
           <text transform={`matrix(0.866 -0.5 0 1 ${sx - 16} ${sy - 23})`} fontSize="10" fontWeight="700" fill={color}>
             {project.name.slice(0, 12)}
           </text>
@@ -1559,7 +1573,7 @@ function FloorScene({ project, current }: { project: Project; current: string })
         <SceneDefs />
         <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-ground)" />
         <Neighbourhood ground={[ox, oy + 30]} part="back" />
-        <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
+        <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F6F7FB" side="#CDD1E5" shadow={0.18} />
         {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
         <Neighbourhood ground={[ox, oy + 30]} part="front" />
         <SkyTint box={scene.viewBox} lit={LIT_SCENES[project.id] ? [LIT_SCENES[project.id]] : []} />

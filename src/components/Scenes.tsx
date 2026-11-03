@@ -205,8 +205,8 @@ function CityBuilding({ lot, o }: { lot: Lot; o: Point }) {
   const top = base + h;
   return (
     <g className={`lot lot--${tone}`}>
-      <polygon points={points(o, [[s, t], [s + size + 6, t], [s + size + 6, t + size + 6], [s, t + size]])} fill="#000" fillOpacity={ghost ? 0.06 : 0.16} filter="url(#bld-blur-m)" transform={`translate(0 ${-base})`} />
-      <polygon points={solid(o, [[s + size, t, base], [s + size, t + size, base], [s + size, t + size, top], [s + size, t, top]])} fill={ghost ? '#FFFFFF' : '#D6D6D6'} fillOpacity={ghost ? 0.4 : 1} />
+      <polygon points={points(o, [[s, t], [s + size + 6, t], [s + size + 6, t + size + 6], [s, t + size]])} fill="#2E3470" fillOpacity={ghost ? 0.06 : 0.16} filter="url(#bld-blur-m)" transform={`translate(0 ${-base})`} />
+      <polygon points={solid(o, [[s + size, t, base], [s + size, t + size, base], [s + size, t + size, top], [s + size, t, top]])} fill={ghost ? '#FFFFFF' : '#D3D6E8'} fillOpacity={ghost ? 0.4 : 1} />
       <polygon points={solid(o, [[s, t + size, base], [s + size, t + size, base], [s + size, t + size, top], [s, t + size, top]])} fill={ghost ? '#FFFFFF' : '#EBEBEB'} fillOpacity={ghost ? 0.5 : 1} />
       <polygon points={solid(o, [[s, t, top], [s + size, t, top], [s + size, t + size, top], [s, t + size, top]])} fill="#FFFFFF" fillOpacity={ghost ? 0.6 : 1} className={ghost ? 'lot-ghost' : undefined} />
       {!ghost && (
@@ -277,7 +277,7 @@ export function PipelineCity({ project, module, onSelect }: { project: Project; 
           </g>
           {counts.map(({ column }) => {
             const [ds, dt] = at[column.tone];
-            return <Slab key={column.name} origin={o} s0={ds} t0={dt} s1={ds + district} t1={dt + district} r={24} h={8} top="#F6F6F6" side="#CFCFCF" />;
+            return <Slab key={column.name} origin={o} s0={ds} t0={dt} s1={ds + district} t1={dt + district} r={24} h={8} top="#F5F6FA" side="#CDD1E5" />;
           })}
           {counts.map(({ column, count }) => {
             const [ds, dt] = at[column.tone];
@@ -309,7 +309,7 @@ const LOOKS: Look[] = [
   { skin: SKIN.rose, top: '#9CC8F2', bottom: '#EFEBE3', shoes: '#F4F4F4', head: 'hair', headColor: '#3A2A20' },
   { skin: SKIN.light, top: '#EFE7D2', bottom: '#2B2B2B', shoes: '#E9DFC8', head: 'bucket', headColor: '#1F1F1F' },
   { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' },
-  { skin: SKIN.rose, top: '#F2F2F2', bottom: '#F2F2F2', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' },
+  { skin: SKIN.rose, top: '#F1F2F8', bottom: '#F1F2F8', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' },
   { skin: SKIN.deep, top: '#FF0A3C', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A' },
   { skin: SKIN.light, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'hair', headColor: '#4A3A30', eyes: 'glasses' },
 ];
@@ -328,8 +328,8 @@ function Step({ s, t, h, rank, o }: { s: number; t: number; h: number; rank: num
   const [fx, fy] = iso(o, s + size / 2, t + size);
   return (
     <g>
-      <polygon points={solid(o, [[s + size, t, b], [s + size, t + size, b], [s + size, t + size, b + h], [s + size, t, b + h]])} fill="#D2D2D2" />
-      <polygon points={solid(o, [[s, t + size, b], [s + size, t + size, b], [s + size, t + size, b + h], [s, t + size, b + h]])} fill="#EDEDED" />
+      <polygon points={solid(o, [[s + size, t, b], [s + size, t + size, b], [s + size, t + size, b + h], [s + size, t, b + h]])} fill="#D0D3E6" />
+      <polygon points={solid(o, [[s, t + size, b], [s + size, t + size, b], [s + size, t + size, b + h], [s, t + size, b + h]])} fill="#ECEEF6" />
       <polygon points={solid(o, [[s, t, b + h], [s + size, t, b + h], [s + size, t + size, b + h], [s, t + size, b + h]])} fill="#FFFFFF" />
       <polygon className="lot-cap" points={solid(o, [[s, t + size, b + h - 3], [s + size, t + size, b + h - 3], [s + size, t + size, b + h], [s, t + size, b + h]])} />
       <text transform={`matrix(0.866 0.5 0 1 ${fx - 4} ${fy - b - h / 2 + 4})`} fontSize="11" fontWeight="800" fill="#9A9A9A">
@@ -402,8 +402,8 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
       lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={30} h={8} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
-          <ellipse cx={iso(o, c + 20, c + 20)[0]} cy={iso(o, c + 20, c + 20)[1] - 8} rx="120" ry="64" fill="none" stroke="#E2E2E2" strokeWidth="1.2" />
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={30} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
+          <ellipse cx={iso(o, c + 20, c + 20)[0]} cy={iso(o, c + 20, c + 20)[1] - 8} rx="120" ry="64" fill="none" stroke="#E1E3F0" strokeWidth="1.2" />
           <FloorText origin={[o[0], o[1] - 8]} s={40} t={size - 16} size={22}>
             {`${total} AMBASSADEURS`}
           </FloorText>
@@ -486,12 +486,12 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
       lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
           <FloorText origin={[o[0], o[1] - 8]} s={34} t={size - 16} size={20}>
             {`NOTE ${rating} · ${reviews.length} AVIS RÉCENTS`}
           </FloorText>
           {/* Phone: shadow, side, back edge, then the screen face */}
-          <polygon points={points(o, [[p.s0, p.t - 14], [p.s1 + 30, p.t - 14], [p.s1 + 30, p.t + 20], [p.s0, p.t + 6]])} fill="#000" fillOpacity="0.18" filter="url(#bld-blur-m)" />
+          <polygon points={points(o, [[p.s0, p.t - 14], [p.s1 + 30, p.t - 14], [p.s1 + 30, p.t + 20], [p.s0, p.t + 6]])} fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-m)" />
           <polygon points={solid(o, [[p.s1, p.t - 12, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s1, p.t - 12, 8 + p.h]])} fill="#2A2A2C" />
           <polygon points={solid(o, [[p.s0, p.t - 12, 8 + p.h], [p.s1, p.t - 12, 8 + p.h], [p.s1, p.t, 8 + p.h], [p.s0, p.t, 8 + p.h]])} fill="#3A3A3D" />
           <polygon points={solid(o, [[p.s0, p.t, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s0, p.t, 8 + p.h]])} fill="#1C1C1E" />
@@ -518,9 +518,9 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
             const waiting = normalize(review.status).includes('repondre');
             return (
               <g key={review.text}>
-                <ellipse cx={x} cy={y - 8} rx="10" ry="4" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-s)" />
-                <line x1={x} y1={y - 8} x2={x} y2={y - 46} stroke="#CFCFCF" strokeWidth="1.5" />
-                <rect x={x - 36} y={y - 74} width="72" height="28" rx="12" fill="#FFFFFF" stroke={waiting ? '#D97757' : '#E2E2E2'} strokeWidth="1.2" />
+                <ellipse cx={x} cy={y - 8} rx="10" ry="4" fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+                <line x1={x} y1={y - 8} x2={x} y2={y - 46} stroke="#CDD1E5" strokeWidth="1.5" />
+                <rect x={x - 36} y={y - 74} width="72" height="28" rx="12" fill="#FFFFFF" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.2" />
                 <text x={x} y={y - 56} textAnchor="middle" fontSize="11" fill="#F0B44C" letterSpacing="1">
                   {stars(review.note)}
                 </text>
@@ -617,7 +617,7 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
       ]}
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
           <FloorText origin={[o[0], o[1] - 8]} s={30} t={size - 16} size={18}>
             {`${months.length} MOIS · ${months[months.length - 1]?.ca ?? ''} CE MOIS`}
           </FloorText>
@@ -627,9 +627,9 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
             const b = 8;
             return (
               <g key={tower.month} className={tower.now ? 'tower tower--now' : 'tower'}>
-                <polygon points={points(o, [[s, t], [s + w + 10, t], [s + w + 10, t + w + 10], [s, t + w]])} fill="#000" fillOpacity="0.16" filter="url(#bld-blur-m)" transform={`translate(0 ${-b})`} />
-                <polygon points={solid(o, [[s + w, t, b], [s + w, t + w, b], [s + w, t + w, b + h], [s + w, t, b + h]])} fill="#D4D4D4" />
-                <polygon points={solid(o, [[s, t + w, b], [s + w, t + w, b], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#ECECEC" />
+                <polygon points={points(o, [[s, t], [s + w + 10, t], [s + w + 10, t + w + 10], [s, t + w]])} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" transform={`translate(0 ${-b})`} />
+                <polygon points={solid(o, [[s + w, t, b], [s + w, t + w, b], [s + w, t + w, b + h], [s + w, t, b + h]])} fill="#D2D5E7" />
+                <polygon points={solid(o, [[s, t + w, b], [s + w, t + w, b], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#EBEDF5" />
                 <polygon points={solid(o, [[s, t, b + h], [s + w, t, b + h], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#FFFFFF" />
                 <polygon className={tower.now ? 'lot-cap' : 'tower-cap'} points={solid(o, [[s, t + w, b + h - 6], [s + w, t + w, b + h - 6], [s + w, t + w, b + h], [s, t + w, b + h]])} />
                 <FloorText origin={[o[0], o[1] - 8]} s={s - 2} t={t + w + 16} size={11}>
@@ -731,21 +731,21 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
       ]}
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
           <FloorText origin={[o[0], o[1] - b]} s={30} t={size - 16} size={18}>
             {`${posts.length} CONTENUS CETTE SEMAINE`}
           </FloorText>
           {/* Backdrop: a curved white sheet hanging on a bar, the logo on it */}
-          <polygon points={solid(o, [[14, 40, b], [14, 300, b], [14, 300, b + 120], [14, 40, b + 120]])} fill="#FAFAFA" stroke="#E2E2E2" />
+          <polygon points={solid(o, [[14, 40, b], [14, 300, b], [14, 300, b + 120], [14, 40, b + 120]])} fill="#F9FAFD" stroke="#E1E3F0" />
           <polygon points={solid(o, [[14, 40, b], [14, 300, b], [60, 300, b], [60, 40, b]])} fill="#FFFFFF" />
-          <line {...lineOf(iso(o, 14, 34), iso(o, 14, 306), b + 124)} stroke="#BDBDBD" strokeWidth="2.4" />
+          <line {...lineOf(iso(o, 14, 34), iso(o, 14, 306), b + 124)} stroke="#BBC0D6" strokeWidth="2.4" />
           <g transform={`matrix(0.866 -0.5 0 1 ${lx} ${ly - b - 92})`}>
             <rect x="30" y="0" width="44" height="44" rx="10" className="lot-cap" />
             <image href={icon} x="34" y="4" width="36" height="36" />
           </g>
           {/* Ring light and tripod phone, turned to the boxer */}
           <line x1={px + 40} y1={py - b} x2={px + 40} y2={py - b - 70} stroke="#9A9A9A" strokeWidth="2" />
-          <ellipse cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#E8E8E8" strokeWidth="5" />
+          <ellipse cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#E7E9F3" strokeWidth="5" />
           <ellipse className="ring-light" cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2" />
           <line x1={px} y1={py - b} x2={px - 8} y2={py - b + 8} stroke="#7A7A7A" strokeWidth="1.6" />
           <line x1={px} y1={py - b} x2={px + 9} y2={py - b + 6} stroke="#7A7A7A" strokeWidth="1.6" />
@@ -763,9 +763,9 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
             const waiting = normalize(post.status).startsWith('a ');
             return (
               <g key={post.title}>
-                <ellipse cx={x} cy={y - b} rx="10" ry="4" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-s)" />
-                <line x1={x} y1={y - b} x2={x} y2={y - b - 26} stroke="#CFCFCF" strokeWidth="1.5" />
-                <rect x={x - w / 2} y={y - b - 26 - h} width={w} height={h} rx="6" fill="#1C1C1E" stroke={waiting ? '#D97757' : '#E2E2E2'} strokeWidth="1.6" />
+                <ellipse cx={x} cy={y - b} rx="10" ry="4" fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+                <line x1={x} y1={y - b} x2={x} y2={y - b - 26} stroke="#CDD1E5" strokeWidth="1.5" />
+                <rect x={x - w / 2} y={y - b - 26 - h} width={w} height={h} rx="6" fill="#1C1C1E" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.6" />
                 <rect x={x - w / 2 + 3} y={y - b - 23 - h} width={w - 6} height={h - 14} rx="4" className="lot-cap" opacity="0.85" />
                 <path d={`M${x - 3},${y - b - 26 - h / 2 - 9} l7,4 l-7,4 z`} fill="#FFFFFF" />
                 <text x={x} y={y - b - 30} textAnchor="middle" fontSize="7" fontWeight="700" fill="#FFFFFF">
@@ -869,20 +869,20 @@ export function FollowersScene({ project, module, onSelect }: { project: Project
       ]}
       art={
         <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
           {/* Goal painted on the floor, with its progress */}
           {goalTarget > 0 && (
             <>
               <FloorText origin={[o[0], o[1] - b]} s={30} t={size - 40} size={16}>
                 {`OBJECTIF ${new Intl.NumberFormat('fr-FR').format(goalTarget)} · ${goalShare} %`}
               </FloorText>
-              <polygon points={points([o[0], o[1] - b], [[30, size - 30], [330, size - 30], [330, size - 20], [30, size - 20]])} fill="#E4E4E4" />
+              <polygon points={points([o[0], o[1] - b], [[30, size - 30], [330, size - 30], [330, size - 20], [30, size - 20]])} fill="#E3E5F1" />
               <polygon className="lot-cap" points={points([o[0], o[1] - b], [[30, size - 30], [30 + 3 * goalShare, size - 30], [30 + 3 * goalShare, size - 20], [30, size - 20]])} />
             </>
           )}
           {stands.map((stand) => (
             <g key={stand.name}>
-              <polygon points={points([o[0], o[1] - b], [[stand.s, stand.t], [stand.s + width + 12, stand.t], [stand.s + width + 12, stand.t + 70], [stand.s, stand.t + 66]])} fill="#000" fillOpacity="0.14" filter="url(#bld-blur-m)" />
+              <polygon points={points([o[0], o[1] - b], [[stand.s, stand.t], [stand.s + width + 12, stand.t], [stand.s + width + 12, stand.t + 70], [stand.s, stand.t + 66]])} fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-m)" />
               {tiers.map(({ dt, h }, k) => {
                 const s0 = stand.s;
                 const t0 = stand.t + dt;
@@ -892,8 +892,8 @@ export function FollowersScene({ project, module, onSelect }: { project: Project
                 const here = Math.max(0, Math.min(perTier, stand.crowd - k * perTier));
                 return (
                   <g key={dt}>
-                    <polygon points={solid(o, [[s0 + width, t0, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0 + width, t0, b + h]])} fill="#D2D2D2" />
-                    <polygon points={solid(o, [[s0, t1, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#ECECEC" />
+                    <polygon points={solid(o, [[s0 + width, t0, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0 + width, t0, b + h]])} fill="#D0D3E6" />
+                    <polygon points={solid(o, [[s0, t1, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#EBEDF5" />
                     <polygon points={solid(o, [[s0, t0, b + h], [s0 + width, t0, b + h], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#FFFFFF" />
                     {Array.from({ length: here }, (_, j) => {
                       const [x, y] = iso(o, s0 + 8 + j * (width - 12) / Math.max(perTier, 1), t0 + 11);
