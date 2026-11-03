@@ -24,6 +24,9 @@ import { useAppStore } from '../lib/appstore';
 import { useCalendarSync } from '../lib/calendar';
 import AccountGate from '../components/AccountGate';
 import AgentDialog from '../components/AgentDialog';
+import RecordDialog from '../components/RecordDialog';
+import { kindOf, nameOf, saveRecord, useRecords } from '../lib/records';
+import type { RecordKind, RecordRow } from '../lib/records';
 import { ago, useLiveAgents } from '../lib/agents';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
@@ -119,7 +122,15 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
     setNotice(
       label.startsWith('Confié aux agents')
         ? 'Demande confiée aux agents : elle apparaît sous les agents jusqu’à ce qu’un agent la termine.'
-        : `« ${label} » n'est pas encore branché : ce sera fait avec les vraies données.`,
+        : label.startsWith('Fiche : ')
+          ? label.slice(8)
+          : label.startsWith('Signé : ')
+            ? `${label.slice(8)} passe dans les affiliés.`
+            : label.startsWith('Validé : ')
+              ? `${label.slice(9)} est prêt.`
+              : label.startsWith('Exporté : ')
+                ? `${label.slice(10)} téléchargé.`
+                : `« ${label} » n'est pas encore branché.`,
     );
 
   const placeholder = tool ? `Rechercher dans ${tool.label === 'To do' ? 'les tâches' : `les ${tool.label.toLowerCase()}`}` : project.searchPlaceholder;
@@ -145,7 +156,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           )}
           {tool?.slug === 'notes' && <NotesPage notes={notes.notes} query={matches} onAdd={notes.add} onUpdate={notes.update} onRemove={notes.remove} />}
           {tool?.slug === 'idees' && <IdeasPage ideas={ideas.ideas} query={matches} onAdd={ideas.add} onUpdate={ideas.update} onRemove={ideas.remove} />}
-          {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} />}
+          {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} projectId={project.id} />}
           {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
           {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
           {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
@@ -233,9 +244,43 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
   const [handing, setHanding] = useState<string | null>(null);
   const live = useLiveAgents();
   const pending = live.requests.filter((r) => r.project_id === project.id && r.status !== 'faite');
-  const [open, setOpen] = useState<string | null>(null);
-  const entity = open ? findEntity(project, module, open) : null;
+  const [opened, setOpen] = useState<string | null>(null);
   const navigate = useNavigate();
+  // What Marc added (clubs, ambassadors, BDE, soirées, posts): a tap opens its sheet to change it
+  const records = useRecords().filter((r) => r.project_id === project.id);
+  const [editing, setEditing] = useState<{ kind: RecordKind; record?: RecordRow } | null>(null);
+  const recordNamed = (name: string) => records.find((r) => nameOf(r) === name);
+  const open = (name: string) => {
+    const record = recordNamed(name);
+    if (record) setEditing({ kind: record.kind, record });
+    else setOpen(name);
+  };
+  const entity = opened ? findEntity(project, module, opened) : null;
+
+  /** Every button of the page: add, sign, chase up, validate, export… */
+  const act = (label: string) => {
+    if (label === module.cta) {
+      const kind = kindOf(project, module.slug);
+      if (kind) return setEditing({ kind });
+      if (module.slug === 'abonnes') return navigate(`/${project.id}/objectifs`);
+      if (module.slug === 'revenus') return exportTable(project, module, onAction);
+      if (module.slug === 'app-store') return document.querySelector('.workspace-list')?.scrollIntoView({ behavior: 'smooth' });
+    }
+    const [verb, ...rest] = label.split(' : ');
+    const name = rest.join(' : ');
+    const record = name ? recordNamed(name) : undefined;
+    if (record && verb === 'Signer') {
+      saveRecord(project.id, record.kind, { ...record.data, stage: project.id === 'club421' ? 'Partenaires' : 'Affiliés' }, record.id).then(() => onAction(`Signé : ${name}`));
+      return;
+    }
+    if (record && verb === 'Valider') {
+      saveRecord(project.id, record.kind, { ...record.data, status: 'Prêt' }, record.id).then(() => onAction(`Validé : ${name}`));
+      return;
+    }
+    if (name && verb === 'Relancer') return onAddTask(`Relancer ${name}`);
+    if (project.agents.some((agent) => agent.name === name)) return setHanding(`Pour ${name} : `);
+    onAction(label);
+  };
   const isPipeline = module.view.kind === 'pipeline';
   const listTitle = store.data ? 'Avis sur l’App Store' : module.view.kind === 'table' ? module.view.title : project.pipeline.title;
   const total = isPipeline
@@ -256,18 +301,18 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             headline={module.headline}
             sub={module.sub}
             cta={module.cta}
-            onAction={(label) => (label === 'Confier à l’agent' && live.ready ? setHanding(module.headline) : project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : onAction(label))}
+            onAction={(label) => (label === 'Confier à l’agent' && live.ready ? setHanding(module.headline) : project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : act(label))}
           />
           {module.view.kind === 'pipeline' && module.slug !== 'vue-d-ensemble' ? (
-            <PipelineCity project={project} module={module} onSelect={setOpen} />
+            <PipelineCity project={project} module={module} onSelect={open} />
           ) : module.slug === 'ambassadeurs' ? (
-            <AmbassadorsPlaza project={project} module={module} onSelect={setOpen} />
+            <AmbassadorsPlaza project={project} module={module} onSelect={open} />
           ) : module.slug === 'revenus' ? (
-            <RevenueScene project={project} module={module} onSelect={setOpen} />
+            <RevenueScene project={project} module={module} onSelect={open} />
           ) : module.slug === 'abonnes' ? (
-            <FollowersScene project={project} module={module} onSelect={setOpen} />
+            <FollowersScene project={project} module={module} onSelect={open} />
           ) : module.slug === 'publications' ? (
-            <StudioScene project={project} module={module} icon={logoRnds} onSelect={setOpen} />
+            <StudioScene project={project} module={module} icon={logoRnds} onSelect={open} />
           ) : module.slug === 'app-store' ? (
             <>
               <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} live={store.data} />
@@ -294,7 +339,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
               Agents <span className="workspace-h3-count">{project.agents.length}</span>
             </h2>
             {project.agents.map((agent) => (
-              <AgentCard key={agent.name} agent={agent} onAction={onAction} />
+              <AgentCard key={agent.name} agent={agent} onAction={act} />
             ))}
             {pending.length > 0 && (
               <ul className="agent-requests" aria-label="Demandes confiées aux agents">
@@ -343,21 +388,33 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
         {module.slug === 'app-store' && store.data ? (
           <LiveReviewCards reviews={store.data.reviews.filter((r) => !query || normalize(`${r.title} ${r.body} ${r.nickname}`).includes(query))} onReply={store.reply} />
         ) : module.slug === 'app-store' ? (
-          <ReviewCards rows={rows} onOpen={setOpen} onAction={onAction} />
+          <ReviewCards rows={rows} onOpen={open} onAction={act} />
         ) : module.slug === 'revenus' ? (
-          <RevenueCards rows={rows} onOpen={setOpen} />
+          <RevenueCards rows={rows} onOpen={open} />
         ) : module.slug === 'abonnes' ? (
-          <FollowerCards rows={rows} onOpen={setOpen} />
+          <FollowerCards rows={rows} onOpen={open} />
         ) : module.slug === 'publications' ? (
-          <PostCards rows={rows} onOpen={setOpen} onAction={onAction} />
+          <PostCards rows={rows} onOpen={open} onAction={act} />
         ) : module.view.kind === 'table' ? (
-          <DataTable caption={listTitle} columns={module.view.columns} rows={rows} onOpen={setOpen} />
+          <DataTable caption={listTitle} columns={module.view.columns} rows={rows} onOpen={open} />
         ) : (
-          <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={onAction} onOpen={setOpen} />
+          <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={act} onOpen={open} />
         )}
       </section>
 
-      {entity && <EntitySheet project={project} entity={entity} onClose={() => setOpen(null)} onAction={onAction} onAddTask={onAddTask} />}
+      {entity && <EntitySheet project={project} entity={entity} onClose={() => setOpen(null)} onAction={act} onAddTask={onAddTask} />}
+      {editing && (
+        <RecordDialog
+          projectId={project.id}
+          kind={editing.kind}
+          record={editing.record}
+          onClose={() => setEditing(null)}
+          onDone={(message) => {
+            setEditing(null);
+            onAction(`Fiche : ${message}`);
+          }}
+        />
+      )}
       {handing !== null && (
         <AgentDialog
           projectId={project.id}
@@ -402,4 +459,19 @@ function findEntity(project: Project, module: Project['modules'][number], name: 
     };
   }
   return null;
+}
+
+/** "Exporter le mois": the module's table as a CSV file (opens in Numbers or Excel). */
+function exportTable(project: Project, module: Project['modules'][number], onAction: (label: string) => void) {
+  if (module.view.kind !== 'table') return;
+  const cell = (value: string) => `"${value.replace(/"/g, '""')}"`;
+  const lines = [module.view.columns, ...module.view.rows].map((row) => row.map(cell).join(';'));
+  const file = new Blob([`\ufeff${lines.join('\n')}`], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  const name = `${project.name} ${module.label} ${new Date().toISOString().slice(0, 7)}.csv`;
+  link.href = URL.createObjectURL(file);
+  link.download = name;
+  link.click();
+  URL.revokeObjectURL(link.href);
+  onAction(`Exporté : ${name}`);
 }

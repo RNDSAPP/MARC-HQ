@@ -3,6 +3,7 @@
 import { getProjects } from './api';
 import { useLiveAgents } from '../lib/agents';
 import { useStoreOverviews, withStore } from '../lib/appstore';
+import { useRecords, withRecords } from '../lib/records';
 import { useData } from './useData';
 import { useStored } from '../hooks/useStored';
 import type { Project } from './types';
@@ -107,7 +108,8 @@ export function useProjects(): Project[] | undefined {
   // Store live from App Store Connect (lib/appstore.ts)
   const live = useLiveAgents();
   const stores = useStoreOverviews();
+  const records = useRecords();
   if (!builtIn) return undefined;
-  return [...builtIn, ...list.map(buildProject)].map((project) => withStore({ ...project, agents: live.agents[project.id] ?? project.agents }, stores[project.id]));
+  return [...builtIn, ...list.map(buildProject)].map((project) => withStore(withRecords({ ...project, agents: live.agents[project.id] ?? project.agents }, records), stores[project.id]));
 }
 

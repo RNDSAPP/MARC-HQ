@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Version, VersionStatus } from '../../data/types';
 import type { useVersions } from '../../data/tools';
+import { VERSION_STATE, useAppStore } from '../../lib/appstore';
 import { dueLabel } from '../../lib/dates';
 import './Tools.css';
 
-type Props = { api: ReturnType<typeof useVersions>; query: (text: string) => boolean };
+type Props = { api: ReturnType<typeof useVersions>; query: (text: string) => boolean; projectId: string };
 
 const STATUS: { key: VersionStatus; label: string }[] = [
   { key: 'prevue', label: 'Prévue' },
@@ -15,8 +16,10 @@ const STATUS: { key: VersionStatus; label: string }[] = [
 ];
 
 /** Roadmap and release notes: each version, its state, its date and what goes in it. */
-export default function VersionsPage({ api, query }: Props) {
+export default function VersionsPage({ api, query, projectId }: Props) {
   const [name, setName] = useState('');
+  // The versions as Apple sees them, live from App Store Connect
+  const store = useAppStore(projectId, true).data;
   const order = (v: Version) => STATUS.findIndex((s) => s.key === v.status);
   // What is being built comes first, then what is planned, then what is out
   const sorted = [...api.versions].sort((a, b) => ((order(a) + 2) % 4) - ((order(b) + 2) % 4));
@@ -36,6 +39,21 @@ export default function VersionsPage({ api, query }: Props) {
           <span className="tool-title-light">Versions</span> <span className="tool-title-bold">{api.versions.length}</span>
         </h1>
       </div>
+      {store && store.versions.length > 0 && (
+        <div className="tool-group">
+          <h2 className="tool-group-title">Sur l’App Store, en direct</h2>
+          <ul className="store-versions">
+            {store.versions.map((v) => (
+              <li key={`${v.version}-${v.platform}`} className="store-version">
+                <span className="store-version-num">{v.version}</span>
+                <span className={`store-version-state${VERSION_STATE[v.state] === 'En ligne' ? ' store-version-state--live' : ''}`}>{VERSION_STATE[v.state] ?? v.state}</span>
+                <span className="store-version-date">Créée le {new Date(v.created).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <h2 className="tool-group-title">Tes prochaines versions</h2>
       <form className="tool-add" onSubmit={submit}>
         <label className="visually-hidden" htmlFor="version-name">
           Nouvelle version

@@ -114,3 +114,62 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* Add / change sheet: the fields, two per row when there is room */
+.record-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: 12px;
+}
+
+.record-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.record-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.record-input {
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--fill);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.record-delete {
+  margin-right: auto;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--alert);
+}
+
+@media (max-width: 600px) {
+  .agent-dialog {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .agent-dialog-panel {
+    width: 100%;
+    max-height: 92dvh;
+    overflow-y: auto;
+    padding: 22px 18px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 24px 24px 0 0;
+  }
+
+  .agent-dialog-actions {
+    flex-wrap: wrap;
+  }
+}
