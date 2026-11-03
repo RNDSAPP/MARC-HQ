@@ -2,8 +2,8 @@
   position: relative;
   width: 100%;
   border-radius: 28px;
-  /* Light grey ground under a soft top light, like the table of a scale model */
-  background: radial-gradient(120% 90% at 50% 0%, #fafafa 0%, #ececec 70%, #e6e6e6 100%);
+  /* Same grey as the table drawn in the SVG, so the edges blend */
+  background: #dcdcdc;
   box-shadow: var(--shadow-card);
   overflow: hidden;
 }
@@ -12,8 +12,6 @@
   display: block;
   width: 100%;
   height: auto;
-  /* Soft contact shadow, so the model sits on the table */
-  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 0.08));
 }
 
 /* Invisible click zones over the floors (positions from the mockup). */
@@ -22,18 +20,19 @@
   cursor: pointer;
 }
 
+/* Positions in % of the drawing (viewBox -80 -40 1170 730) */
 .building-zone--rnds {
-  left: 40%;
-  top: 14%;
-  width: 48%;
-  height: 56%;
+  left: 41%;
+  top: 17%;
+  width: 41%;
+  height: 46%;
 }
 
 .building-zone--club421 {
-  left: 12%;
-  top: 40%;
-  width: 37%;
-  height: 54%;
+  left: 17%;
+  top: 38%;
+  width: 32%;
+  height: 44%;
 }
 
 .building-labels {

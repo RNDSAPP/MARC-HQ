@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import type { Project } from '../data/types';
 import { agentStatusLabel, projectStatus } from '../lib/format';
 import ModuleIcon from './ModuleIcon';
+import ProjectMark from './ProjectMark';
 import './Sidebar.css';
 
 type Props = {
@@ -44,7 +45,7 @@ export default function Sidebar({ current, projects }: Props) {
                     data-project={project.id}
                   >
                     <span className="sidebar-mark" aria-hidden="true">
-                      {project.mark}
+                      <ProjectMark id={project.id} />
                     </span>
                     <span className="sidebar-project-text">
                       <span className="sidebar-project-name">{project.name}</span>

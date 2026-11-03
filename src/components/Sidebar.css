@@ -112,11 +112,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--mark-font);
-  font-weight: 700;
-  font-size: 17px;
-  background: var(--mark-bg);
-  color: var(--mark-ink);
+  overflow: hidden;
+}
+
+/* Project logos (src/components/ProjectMark.tsx) */
+.project-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.project-mark--club421 {
+  padding: 3px;
+  background: var(--club);
+}
+
+.project-mark--club421 img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .sidebar-project-text {
@@ -145,12 +159,14 @@
   border-radius: 50%;
 }
 
-.sidebar-dot--wait {
-  background: var(--alert);
-}
-
+/* In the project's colour; a project waiting for Marc gets a halo around its dot */
+.sidebar-dot--wait,
 .sidebar-dot--work {
   background: var(--accent);
+}
+
+.sidebar-dot--wait {
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 .sidebar-dot--done {

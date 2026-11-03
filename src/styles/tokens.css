@@ -40,12 +40,10 @@
   --rnds-soft: #c8002c;
   --rnds-tint: #ffe7ec;
   --rnds-ink: #000000;
-  --rnds-black: #000000;
-  --rnds-chalk: #ececea;
-  /* Club 421: violet, as asked by Marc on 3 November (until its brand kit arrives) */
-  --club: #7c4dff;
-  --club-soft: #5b2fd6;
-  --club-tint: #efe9ff;
+  /* Club 421: the violet of its logo (Documents/club 421/Logo/logo-421-club-violet.svg) */
+  --club: #7c3aed;
+  --club-soft: #6d28d9;
+  --club-tint: #f1eafe;
 
   /* Current project accent (overridden by [data-project]) */
   --accent: var(--text);
@@ -85,23 +83,17 @@
   --tabbar-h: 58px;
 }
 
-/* Recomputed on each project element, so they pick up that project's accent */
+/* Recomputed on each project element, so it picks up that project's accent */
 [data-project] {
   --on-accent: var(--bg);
-  --mark-bg: var(--accent);
-  --mark-ink: var(--on-accent);
-  --mark-font: var(--font-display);
 }
 
 [data-project='rnds'] {
   --accent: var(--rnds);
   --accent-soft: var(--rnds-soft);
   --accent-tint: var(--rnds-tint);
-  /* The brand kit puts black on red, and the mark on black in Kode Mono */
+  /* The brand kit puts black on red */
   --on-accent: var(--rnds-ink);
-  --mark-bg: var(--rnds-black);
-  --mark-ink: var(--rnds-chalk);
-  --mark-font: 'Kode Mono', var(--font-mono);
 }
 
 [data-project='club421'] {
