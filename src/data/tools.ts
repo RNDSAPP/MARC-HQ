@@ -49,13 +49,15 @@ export function useTasks(project: Project) {
     if (!supabase || !session) return;
     const { data, error } = await supabase.from('tasks').select('id, project_id, text, due, done, created_at').eq('project_id', project.id).order('created_at');
     if (error) return;
-    if (data.length === 0 && !moved && local.length > 0) {
-      // First time on this account: bring this browser's tasks over, once
-      const rows = local.map((task) => ({ id: task.id, project_id: project.id, text: task.text, due: task.due, done: task.done, created_at: new Date(task.createdAt || Date.now()).toISOString() }));
+    // The old example tasks (ids "rnds-1", "club421-2"…) that a browser may still hold are left behind
+    const own = local.filter((task) => !/^(rnds|club421)-\d+$/.test(task.id));
+    if (data.length === 0 && !moved && own.length > 0) {
+      // First time on this account: bring this browser's own tasks over, once
+      const rows = own.map((task) => ({ id: task.id, project_id: project.id, text: task.text, due: task.due, done: task.done, created_at: new Date(task.createdAt || Date.now()).toISOString() }));
       const { error: copyError } = await supabase.from('tasks').upsert(rows);
       if (!copyError) {
         setMoved(() => true);
-        setRemote(local);
+        setRemote(own);
       }
       return;
     }
