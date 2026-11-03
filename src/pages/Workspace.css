@@ -97,6 +97,20 @@
   font-size: 22px;
 }
 
+.workspace-empty {
+  padding: 16px 18px;
+  border: 1.5px dashed var(--hairline-strong);
+  border-radius: var(--r-xl);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.workspace-empty a {
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+
 .workspace-list {
   min-width: 0;
   display: flex;

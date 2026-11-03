@@ -43,7 +43,7 @@ export default function WorkspaceHeader({ project, projects, search, onSearch, p
           </svg>
         </Link>
         <span className="wh-mark" aria-hidden="true">
-          <ProjectMark id={project.id} />
+          <ProjectMark project={project} />
         </span>
         <span className="wh-name">
           <span className="wh-title">{project.name}</span>
@@ -88,7 +88,7 @@ export default function WorkspaceHeader({ project, projects, search, onSearch, p
               data-project={item.id}
             >
               <span className="wh-switch-mark" aria-hidden="true">
-                <ProjectMark id={item.id} />
+                <ProjectMark project={item} />
               </span>
               <span className="wh-switch-name">{item.name}</span>
               <span className={`wh-switch-dot wh-switch-dot--${status}`} aria-hidden="true" />

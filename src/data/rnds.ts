@@ -197,6 +197,37 @@ export const rnds: Project = {
         ],
       },
     },
+    // App Store: the reviews below are SAMPLES written for the design (the mockup has no RNDS
+    // reviews). They give way to the real ones when App Store Connect is plugged in.
+    {
+      slug: 'app-store',
+      label: 'App Store',
+      count: '3',
+      headline: '3 avis attendent une réponse',
+      sub: 'Avis d’exemple pour l’instant : les vrais arriveront quand App Store Connect sera branché.',
+      cta: 'Répondre aux avis',
+      heroLabel: 'Note moyenne (exemple)',
+      heroNum: '4,8',
+      heroDelta: '+0,1',
+      series: [4.5, 4.5, 4.6, 4.6, 4.6, 4.7, 4.7, 4.7, 4.7, 4.8, 4.8, 4.8],
+      kpis: [
+        { label: 'Inscrits app', value: '1 108', delta: '+14 %' },
+        { label: 'Note', value: '4,8', delta: '+0,1' },
+        { label: 'Avis récents', value: '4', delta: 'exemple' },
+        { label: 'À répondre', value: '3', delta: 'exemple' },
+      ],
+      view: {
+        kind: 'table',
+        title: 'Derniers avis (exemple)',
+        columns: ['Avis', 'Note', 'Date', 'Statut'],
+        rows: [
+          ['La détection des coups est bluffante', '5', 'Hier', 'À répondre'],
+          ['Il manque un mode sparring à deux', '4', 'Lun.', 'À répondre'],
+          ['Le timer de rounds, parfait pour le sac', '5', 'Sam.', 'À répondre'],
+          ['8 rounds hier soir, tout est compté', '5', 'Ven.', 'Répondu'],
+        ],
+      },
+    },
   ],
 
   home: {

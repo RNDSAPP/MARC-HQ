@@ -1,21 +1,34 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import CommandPalette from './components/CommandPalette';
+import NewProjectDialog from './components/NewProjectDialog';
 import PhaseTheme from './components/PhaseTheme';
+import ProjectStyles from './components/ProjectStyles';
 import Home from './pages/Home';
 import Workspace from './pages/Workspace';
+
+/** Any project, built in or added: /rnds/clubs, /club421/bde, /mon-projet/todo… */
+function ProjectRoute() {
+  const { project } = useParams();
+  return <Workspace key={project} project={project ?? ''} />;
+}
+
+function ProjectHome() {
+  const { project } = useParams();
+  return <Navigate to={`/${project}/vue-d-ensemble`} replace />;
+}
 
 export default function App() {
   return (
     <>
       <PhaseTheme />
+      <ProjectStyles />
       <CommandPalette />
+      <NewProjectDialog />
       <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/rnds" element={<Navigate to="/rnds/vue-d-ensemble" replace />} />
-      <Route path="/club421" element={<Navigate to="/club421/vue-d-ensemble" replace />} />
-      <Route path="/rnds/:module" element={<Workspace key="rnds" project="rnds" />} />
-      <Route path="/club421/:module" element={<Workspace key="club421" project="club421" />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/:project" element={<ProjectHome />} />
+        <Route path="/:project/:module" element={<ProjectRoute />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

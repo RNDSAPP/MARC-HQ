@@ -552,3 +552,116 @@ export function ReviewCards({ rows, onOpen, onAction }: { rows: string[][]; onOp
     </ul>
   );
 }
+
+// ---------------------------------------------------------------------------------------------
+// Revenue: one tower per month, as high as its takings, and the golden dice that sell the most.
+
+const euros = (text: string) => parseFloat(text.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+
+/**
+ * The Revenus module as a scene: on a plate, one tower per month (oldest at the back), as high as
+ * its takings, the current month in the project's colour; beside them a pile of golden dice, as
+ * big as their share of sales.
+ */
+export function RevenueScene({ project, module, onSelect }: { project: Project; module: Module; onSelect: (name: string) => void }) {
+  if (module.view.kind !== 'table') return null;
+  const months = [...module.view.rows].reverse().map(([month, ca, buys, trend]) => ({ month, ca, value: euros(ca), buys, trend }));
+  const max = Math.max(...months.map((m) => m.value), 1);
+  const shareKpi = module.kpis.find((k) => normalize(k.label).includes('dore'));
+  const share = shareKpi ? parseInt(shareKpi.value, 10) || 0 : 0;
+  const size = 360;
+  const o: Point = [0.866 * size + 60, 150];
+  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 200];
+  // Towers side by side along the plate, oldest month on the left
+  const gap = 84;
+  const start = (size - (months.length - 1) * gap) / 2 - 40;
+  const towers = months.map((m, i) => ({ ...m, s: start + i * gap, t: 150, h: 26 + (m.value / max) * 120, now: i === months.length - 1 }));
+  const items: SceneItem[] = [...towers].reverse().map((tower) => {
+    const [x, y] = iso(o, tower.s + 20, tower.t + 20);
+    return { id: tower.month, x, y: y - 8 - tower.h - 6, label: tower.month, sub: `${tower.buys} achats · ${tower.trend}`, tone: tower.now ? 'accent' : 'muted', value: tower.ca };
+  });
+  // Golden dice: one per 10 % of sales, in a small heap
+  const dice = Math.max(1, Math.round(share / 10));
+  const heap: [number, number, number][] = Array.from({ length: dice }, (_, i) => {
+    const layer = i < 3 ? 0 : i < 5 ? 1 : 2;
+    const index = layer === 0 ? i : layer === 1 ? i - 3 : i - 5;
+    return [250 + index * 18 + layer * 9, 250 + (index % 2) * 10 + layer * 6, 8 + layer * 14];
+  });
+
+  return (
+    <SceneFrame
+      project={project}
+      box={box}
+      title="Les revenus, mois par mois"
+      items={items}
+      onSelect={onSelect}
+      lit={[
+        points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]]),
+        // Each tower's silhouette, so it stays white above the plate at night
+        ...towers.map(({ s, t, h }) => solid(o, [[s, t + 40, 8], [s + 40, t + 40, 8], [s + 40, t, 8], [s + 40, t, 8 + h], [s, t, 8 + h], [s, t + 40, 8 + h]])),
+      ]}
+      art={
+        <>
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <FloorText origin={[o[0], o[1] - 8]} s={30} t={size - 16} size={18}>
+            {`${months.length} MOIS · ${months[months.length - 1]?.ca ?? ''} CE MOIS`}
+          </FloorText>
+          {towers.map((tower) => {
+            const { s, t, h } = tower;
+            const w = 40;
+            const b = 8;
+            return (
+              <g key={tower.month} className={tower.now ? 'tower tower--now' : 'tower'}>
+                <polygon points={points(o, [[s, t], [s + w + 10, t], [s + w + 10, t + w + 10], [s, t + w]])} fill="#000" fillOpacity="0.16" filter="url(#bld-blur-m)" transform={`translate(0 ${-b})`} />
+                <polygon points={solid(o, [[s + w, t, b], [s + w, t + w, b], [s + w, t + w, b + h], [s + w, t, b + h]])} fill="#D4D4D4" />
+                <polygon points={solid(o, [[s, t + w, b], [s + w, t + w, b], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#ECECEC" />
+                <polygon points={solid(o, [[s, t, b + h], [s + w, t, b + h], [s + w, t + w, b + h], [s, t + w, b + h]])} fill="#FFFFFF" />
+                <polygon className={tower.now ? 'lot-cap' : 'tower-cap'} points={solid(o, [[s, t + w, b + h - 6], [s + w, t + w, b + h - 6], [s + w, t + w, b + h], [s, t + w, b + h]])} />
+                <FloorText origin={[o[0], o[1] - 8]} s={s - 2} t={t + w + 16} size={11}>
+                  {tower.month.slice(0, 4).toUpperCase()}
+                </FloorText>
+              </g>
+            );
+          })}
+          {heap.map(([s, t, h], i) => (
+            <g key={i}>
+              <polygon points={solid(o, [[s + 14, t, h], [s + 14, t + 14, h], [s + 14, t + 14, h + 14], [s + 14, t, h + 14]])} fill="#D9A92E" />
+              <polygon points={solid(o, [[s, t + 14, h], [s + 14, t + 14, h], [s + 14, t + 14, h + 14], [s, t + 14, h + 14]])} fill="#F2C14E" />
+              <polygon points={solid(o, [[s, t, h + 14], [s + 14, t, h + 14], [s + 14, t + 14, h + 14], [s, t + 14, h + 14]])} fill="#FFDB7A" />
+              <circle cx={iso(o, s + 7, t + 7)[0]} cy={iso(o, s + 7, t + 7)[1] - h - 14} r="1.6" fill="#8A6A12" />
+            </g>
+          ))}
+          {share > 0 && (
+            <FloorText origin={[o[0], o[1] - 8]} s={232} t={300} size={11}>
+              {`DÉS DORÉS · ${share} %`}
+            </FloorText>
+          )}
+        </>
+      }
+    />
+  );
+}
+
+/** Months as cards: takings in big, purchases, trend, and a bar against the best month. */
+export function RevenueCards({ rows, onOpen }: { rows: string[][]; onOpen: (name: string) => void }) {
+  const max = Math.max(...rows.map(([, ca]) => euros(ca)), 1);
+  return (
+    <ul className="revenue-cards">
+      {rows.map(([month, ca, buys, trend], i) => (
+        <li key={month} className={`revenue${i === 0 ? ' revenue--now' : ''}`}>
+          <button type="button" className="revenue-open" onClick={() => onOpen(month)}>
+            <span className="revenue-month">{month}</span>
+            <span className="revenue-ca">{ca}</span>
+            <span className="revenue-bar" aria-hidden="true">
+              <span style={{ width: `${(euros(ca) / max) * 100}%` }} />
+            </span>
+            <span className="revenue-foot">
+              <span>{buys} achats</span>
+              <span className={`revenue-trend revenue-trend--${normalize(trend)}`}>{trend}</span>
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}

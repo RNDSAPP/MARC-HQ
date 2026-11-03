@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getProjects } from '../data/api';
+import { useProjects } from '../data/customProjects';
 import { TOOLS } from '../data/sections';
 import { useIdeas, useNotes, useTasks } from '../data/tools';
 import type { Project } from '../data/types';
-import { useData } from '../data/useData';
 import { isoDate } from '../lib/dates';
 import ModuleIcon from './ModuleIcon';
+import { openNewProject } from './NewProjectDialog';
 import './CommandPalette.css';
 
 type Command = { id: string; group: string; label: string; hint?: string; icon: string; run: () => void };
@@ -23,7 +23,7 @@ const normalize = (text: string) =>
  */
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const projects = useData('projects', getProjects);
+  const projects = useProjects();
   const { pathname } = useLocation();
   const current = projects?.find((p) => pathname.startsWith(`/${p.id}`));
 
@@ -108,7 +108,10 @@ function Palette({ projects, current, adds, onClose }: {
   useEffect(() => input.current?.focus(), []);
 
   const pages = useMemo<Command[]>(() => {
-    const list: Command[] = [{ id: 'home', group: 'Aller à', label: 'Accueil Marc HQ', icon: 'vue-d-ensemble', run: () => navigate('/') }];
+    const list: Command[] = [
+      { id: 'home', group: 'Aller à', label: 'Accueil Marc HQ', icon: 'vue-d-ensemble', run: () => navigate('/') },
+      { id: 'new-project', group: 'Aller à', label: 'Nouveau projet', icon: 'plus', run: openNewProject },
+    ];
     // The open project first
     const ordered = current ? [current, ...projects.filter((p) => p.id !== current.id)] : projects;
     for (const project of ordered) {

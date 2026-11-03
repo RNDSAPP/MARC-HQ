@@ -122,6 +122,14 @@ const paths: Record<string, ReactNode> = {
       <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2" />
     </>
   ),
+  // Connections: a plug
+  connexions: (
+    <>
+      <path d="M9 3.5v4M15 3.5v4" />
+      <path d="M6.5 7.5h11v3.5a5.5 5.5 0 0 1-11 0z" />
+      <path d="M12 16.5v4" />
+    </>
+  ),
   // More: three rows
   plus: (
     <>

@@ -901,8 +901,32 @@ export function SkyTint({ box: [x, y, w, h], lit = [] }: { box: [number, number,
   );
 }
 
-/** Floor outlines of the two spaces, which stay lit at night. */
-const LIT_SPACES = { rnds: points(RNDS_FLOOR, [[0, 0], [320, 0], [320, 250], [0, 250]]), club421: points(CLUB_FLOOR, [[0, 0], [320, 0], [320, 250], [0, 250]]) };
+/** Outline (convex hull) of points given as floor coordinates and height: (s, t, h). */
+function litArea(origin: Point, list: [number, number, number][]) {
+  return toPath(hull(list.map(([s, t, h]) => { const [x, y] = iso(origin, s, t); return [x, y - h] as Point; })));
+}
+
+const WALL_TOPS: Record<string, [number, number, number][]> = {
+  rnds: [[0, 250, 95], [0, 0, 95], [320, 0, 95]],
+  club421: [[0, 250, 95], [0, 0, 95], [0, 0, 24], [320, 0, 24]],
+};
+const FLOOR_EDGES = (h: number): [number, number, number][] => [[0, 250, h], [320, 250, h], [320, 0, h], [0, 0, h]];
+
+/**
+ * What stays lit (white) at night: each space with its walls and the edges of its floor, so the
+ * volume still reads. In the workspace scene, the plate under the floor too.
+ */
+const LIT_SPACES: Record<string, string> = {
+  rnds: litArea(RNDS_FLOOR, [...WALL_TOPS.rnds, ...FLOOR_EDGES(-18)]),
+  club421: litArea(CLUB_FLOOR, [...WALL_TOPS.club421, ...FLOOR_EDGES(-18)]),
+};
+const LIT_SCENES: Record<string, string> = Object.fromEntries(
+  Object.entries(WALL_TOPS).map(([id, tops]) => {
+    const origin = id === 'rnds' ? RNDS_FLOOR : CLUB_FLOOR;
+    const plate: [number, number, number][] = [[-22, -22, -30], [342, -22, -30], [342, 272, -30], [-22, 272, -30]];
+    return [id, litArea(origin, [...tops, ...FLOOR_EDGES(-18), ...plate])];
+  }),
+);
 
 /** Neon line along the two front edges of a floor, with its glow. */
 function Neon({ origin, color }: { origin: Point; color: string }) {
@@ -944,7 +968,7 @@ function NightLights({ only }: { only?: ProjectId }) {
           <WindowBand origin={R} from={[30, 8]} to={[306, 8]} h={60} />
           <ellipse cx={iso(R, 8, 152)[0]} cy={iso(R, 8, 152)[1] - 58} rx="42" ry="22" fill="#FFFFFF" fillOpacity="0.35" filter="url(#bld-blur-m)" />
           <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp-night)" />
-          <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="#FFCF5C" fillOpacity="0.75" filter="url(#bld-blur-m)" />
+          <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="#FFCF5C" fillOpacity="0.28" filter="url(#bld-blur-m)" />
           <ellipse cx="626" cy="98" rx="12" ry="4" fill="#FFF3B0" filter="url(#bld-blur-s)" />
         </>
       )}
@@ -954,7 +978,7 @@ function NightLights({ only }: { only?: ProjectId }) {
           <WindowBand origin={C} from={[8, 24]} to={[8, 150]} h={80} />
           <ellipse cx={iso(C, 8, 202)[0]} cy={iso(C, 8, 202)[1] - 58} rx="36" ry="24" fill={CLUB} fillOpacity="0.55" filter="url(#bld-blur-m)" />
           <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp-night)" />
-          <ellipse cx="392" cy="400" rx="52" ry="28" fill="#FFCF5C" fillOpacity="0.7" filter="url(#bld-blur-m)" />
+          <ellipse cx="392" cy="400" rx="52" ry="28" fill="#FFCF5C" fillOpacity="0.25" filter="url(#bld-blur-m)" />
           <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
           {/* The bottles on the bar shelf catch the light */}
           <polygon points={solid(C, [[10, 48, 50], [14, 48, 50], [14, 160, 50], [10, 160, 50]])} fill="#FFE7A0" fillOpacity="0.5" filter="url(#bld-blur-s)" />
@@ -1037,8 +1061,8 @@ export function SceneDefs() {
           <stop offset="1" stopColor="#FFF3B8" stopOpacity="0.12" />
         </linearGradient>
         <linearGradient id="bld-lamp-night" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FFE07A" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#FFD060" stopOpacity="0.15" />
+          <stop offset="0" stopColor="#FFE07A" stopOpacity="0.45" />
+          <stop offset="1" stopColor="#FFD060" stopOpacity="0.04" />
         </linearGradient>
         <linearGradient id="bld-canvas" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#2E2E30" />
@@ -1292,6 +1316,54 @@ const SCENES: Record<ProjectId, {
  * the drawing that open the matching modules.
  */
 export function ProjectScene({ project, current }: { project: Project; current: string }) {
+  if (!SCENES[project.id]) return <EmptyLot project={project} />;
+  return <FloorScene project={project} current={current} />;
+}
+
+/**
+ * A new project's scene: an empty plot waiting to be built, with the outline of the future
+ * building, a sign with its name and a few trees.
+ */
+function EmptyLot({ project }: { project: Project }) {
+  const [choice, setChoice] = usePhaseChoice();
+  const phase = usePhase(choice);
+  const o: Point = [500, 110];
+  const box: [number, number, number, number] = [180, 0, 640, 470];
+  const color = project.custom?.color ?? '#8E8E93';
+  const [sx, sy] = iso(o, 70, 230);
+  const plate = litArea([o[0], o[1] + 12], [[-20, -20, 0], [340, -20, 0], [340, 270, 0], [-20, 270, 0], [-20, 270, -12], [340, 270, -12], [340, -20, -12]]);
+  return (
+    <div className="scene" data-project={project.id} data-phase={phase}>
+      <MapViewport label={`Terrain de ${project.name}, encore à bâtir`}>
+        <svg viewBox={box.join(' ')} className="scene-art" aria-hidden="true">
+          <SceneDefs />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="url(#bld-ground)" />
+          <Slab origin={[o[0], o[1] + 12]} s0={-20} t0={-20} s1={340} t1={270} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
+          {/* Outline of the building to come */}
+          <polygon points={points(o, [[40, 30], [280, 30], [280, 200], [40, 200]])} fill="none" stroke={color} strokeWidth="2" strokeDasharray="10 8" />
+          <FloorText origin={o} s={60} t={190} size={20}>
+            À BÂTIR
+          </FloorText>
+          {/* Sign with the project's name */}
+          <line x1={sx - 14} y1={sy} x2={sx - 14} y2={sy - 40} stroke="#BDBDBD" strokeWidth="2" />
+          <line x1={sx + 30} y1={sy - 26} x2={sx + 30} y2={sy - 66} stroke="#BDBDBD" strokeWidth="2" />
+          <polygon points={`${sx - 22},${sy - 36} ${sx + 38},${sy - 70} ${sx + 38},${sy - 50} ${sx - 22},${sy - 16}`} fill="#FFFFFF" stroke="#DADADA" />
+          <text transform={`matrix(0.866 -0.5 0 1 ${sx - 16} ${sy - 23})`} fontSize="10" fontWeight="700" fill={color}>
+            {project.name.slice(0, 12)}
+          </text>
+          <Tree origin={o} s={300} t={230} size={0.9} base={0} />
+          <Tree origin={o} s={-4} t={20} size={0.8} base={0} />
+          <Tree origin={o} s={310} t={-6} size={0.7} base={0} />
+          <SkyTint box={box} lit={[plate]} />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} filter="url(#bld-grain)" />
+        </svg>
+      </MapViewport>
+      <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
+    </div>
+  );
+}
+
+function FloorScene({ project, current }: { project: Project; current: string }) {
   const scene = SCENES[project.id];
   const [choice, setChoice] = usePhaseChoice();
   const phase = usePhase(choice);
@@ -1305,7 +1377,7 @@ export function ProjectScene({ project, current }: { project: Project; current: 
         <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-ground)" />
         <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
         {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
-        <SkyTint box={scene.viewBox} lit={[LIT_SPACES[project.id]]} />
+        <SkyTint box={scene.viewBox} lit={LIT_SCENES[project.id] ? [LIT_SCENES[project.id]] : []} />
         <NightLights only={project.id} />
         <rect x={vx} y={vy} width={vw} height={vh} filter="url(#bld-grain)" />
       </svg>

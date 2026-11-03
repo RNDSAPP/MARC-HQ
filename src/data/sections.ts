@@ -7,6 +7,7 @@ export const TOOLS = [
   { slug: 'retours', label: 'Retours' },
   { slug: 'objectifs', label: 'Objectifs' },
   { slug: 'liens', label: 'Liens' },
+  { slug: 'connexions', label: 'Connexions' },
 ] as const;
 
 export type ToolSlug = (typeof TOOLS)[number]['slug'];

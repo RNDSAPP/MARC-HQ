@@ -3,13 +3,13 @@ import AppRail from '../components/AppRail';
 import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
 import TodayTasks from '../components/TodayTasks';
-import { getProjects } from '../data/api';
-import { useData } from '../data/useData';
+import { openNewProject } from '../components/NewProjectDialog';
+import { useProjects } from '../data/customProjects';
 import { dayLabel, greeting, timeLabel } from '../lib/dates';
 import './Home.css';
 
 export default function Home() {
-  const projects = useData('projects', getProjects);
+  const projects = useProjects();
 
   useEffect(() => {
     document.title = 'Marc HQ';
@@ -51,12 +51,21 @@ export default function Home() {
           </ul>
         </header>
 
-        <Building projects={projects} />
+        {/* The building has a floor for each of the two original projects; added ones get a card */}
+        <Building projects={projects.filter((project) => !project.custom)} />
 
         <div className="home-grid">
           {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
+
+          <button type="button" className="home-new" onClick={openNewProject}>
+            <span className="home-new-plus" aria-hidden="true">
+              +
+            </span>
+            <span className="home-new-title">Nouveau projet</span>
+            <span className="home-new-sub">Son espace, ses outils, ses connexions</span>
+          </button>
 
           <TodayTasks projects={projects} />
         </div>

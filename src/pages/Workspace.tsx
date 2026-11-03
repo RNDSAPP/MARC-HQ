@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import Activity from '../components/Activity';
 import AgentCard from '../components/AgentCard';
 import AppRail from '../components/AppRail';
@@ -10,16 +10,16 @@ import type { Entity } from '../components/EntitySheet';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
-import { AmbassadorsPlaza, AppStoreScene, PipelineCity, ReviewCards } from '../components/Scenes';
+import { AmbassadorsPlaza, AppStoreScene, PipelineCity, RevenueCards, RevenueScene, ReviewCards } from '../components/Scenes';
 import logo421 from '../assets/logo-421-blanc.svg';
+import logoRnds from '../assets/logo-rnds.svg';
 import StatPanel from '../components/StatPanel';
 import TabBar from '../components/TabBar';
 import WorkspaceHeader from '../components/WorkspaceHeader';
-import { getProjects } from '../data/api';
+import { useCustomProjects, useProjects } from '../data/customProjects';
 import { TOOLS, isTool } from '../data/sections';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
-import { useData } from '../data/useData';
 import { dayLabel, isoDate } from '../lib/dates';
 import { statusTone } from '../lib/format';
 import IdeasPage from './tools/IdeasPage';
@@ -29,6 +29,7 @@ import FeedbackPage from './tools/FeedbackPage';
 import GoalsPage from './tools/GoalsPage';
 import LinksPage from './tools/LinksPage';
 import VersionsPage from './tools/VersionsPage';
+import ConnectionsPage from './tools/ConnectionsPage';
 import './Workspace.css';
 
 type Props = {
@@ -41,13 +42,15 @@ const normalize = (text: string) =>
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '');
 
-/** The workspace of one project: same screens for RNDS and Club 421, only the data changes. */
+/** The workspace of one project: same screens for every project, only the data changes. */
 export default function Workspace({ project: projectId }: Props) {
   const { module: slug } = useParams();
-  const projects = useData('projects', getProjects);
+  const projects = useProjects();
   const project = projects?.find((p) => p.id === projectId);
 
-  if (!projects || !project) return <div className="workspace-loading" data-project={projectId} />;
+  if (!projects) return <div className="workspace-loading" data-project={projectId} />;
+  // An address that matches no project (a deleted one, a typo) goes back home
+  if (!project) return <Navigate to="/" replace />;
   if (!slug || (!isTool(slug) && !project.modules.some((m) => m.slug === slug))) {
     return <Navigate to={`/${projectId}/vue-d-ensemble`} replace />;
   }
@@ -62,6 +65,8 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   const feedback = useFeedback(project);
   const goals = useGoals(project);
   const links = useLinks(project);
+  const { remove: removeProject } = useCustomProjects();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -124,6 +129,20 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
           {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
           {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
+          {tool?.slug === 'connexions' && (
+            <ConnectionsPage
+              project={project}
+              query={matches}
+              onRemoveProject={
+                project.custom
+                  ? () => {
+                      removeProject(project.id);
+                      navigate('/');
+                    }
+                  : undefined
+              }
+            />
+          )}
           {module && (
             <ModuleView
               project={project}
@@ -175,6 +194,7 @@ type ModuleViewProps = {
 function ModuleView({ project, module, columns, rows, query, onAction, onAddTask }: ModuleViewProps) {
   const [open, setOpen] = useState<string | null>(null);
   const entity = open ? findEntity(project, module, open) : null;
+  const navigate = useNavigate();
   const isPipeline = module.view.kind === 'pipeline';
   const listTitle = module.view.kind === 'table' ? module.view.title : project.pipeline.title;
   const total = isPipeline
@@ -190,13 +210,21 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
     <>
       <div className="workspace-stage">
         <div className="workspace-center">
-          <Hero eyebrow={`${project.name} · ${dayLabel()}`} headline={module.headline} sub={module.sub} cta={module.cta} onAction={onAction} />
+          <Hero
+            eyebrow={`${project.name} · ${dayLabel()}`}
+            headline={module.headline}
+            sub={module.sub}
+            cta={module.cta}
+            onAction={(label) => (project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : onAction(label))}
+          />
           {module.view.kind === 'pipeline' && module.slug !== 'vue-d-ensemble' ? (
             <PipelineCity project={project} module={module} onSelect={setOpen} />
           ) : module.slug === 'ambassadeurs' ? (
             <AmbassadorsPlaza project={project} module={module} onSelect={setOpen} />
+          ) : module.slug === 'revenus' ? (
+            <RevenueScene project={project} module={module} onSelect={setOpen} />
           ) : module.slug === 'app-store' ? (
-            <AppStoreScene project={project} module={module} rating={module.heroNum} icon={logo421} onSelect={setOpen} />
+            <AppStoreScene project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} onSelect={setOpen} />
           ) : (
             <ProjectScene project={project} current={module.slug} />
           )}
@@ -210,13 +238,25 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             {project.agents.map((agent) => (
               <AgentCard key={agent.name} agent={agent} onAction={onAction} />
             ))}
+            {project.agents.length === 0 && (
+              <p className="workspace-empty">
+                Pas encore d'agent. Ils arriveront avec Claude, dans <Link to={`/${project.id}/connexions`}>Connexions</Link>.
+              </p>
+            )}
           </section>
 
           <section className="workspace-group" aria-labelledby="figures-title">
             <h2 id="figures-title" className="workspace-h3">
               Chiffres <span className="workspace-h3-count">{module.kpis.length}</span>
             </h2>
-            <KpiStrip kpis={module.kpis} />
+            {module.kpis.length > 0 ? (
+              <KpiStrip kpis={module.kpis} />
+            ) : (
+              <p className="workspace-empty">
+                Pas encore de chiffres. Branche Instagram, App Store Connect ou Stripe dans <Link to={`/${project.id}/connexions`}>Connexions</Link>, ou fixe-toi un{' '}
+                <Link to={`/${project.id}/objectifs`}>objectif</Link>.
+              </p>
+            )}
           </section>
         </div>
       </div>
@@ -232,6 +272,8 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
         </div>
         {module.slug === 'app-store' ? (
           <ReviewCards rows={rows} onOpen={setOpen} onAction={onAction} />
+        ) : module.slug === 'revenus' ? (
+          <RevenueCards rows={rows} onOpen={setOpen} />
         ) : module.view.kind === 'table' ? (
           <DataTable caption={listTitle} columns={module.view.columns} rows={rows} onOpen={setOpen} />
         ) : (

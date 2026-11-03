@@ -3,6 +3,7 @@ import type { Project } from '../data/types';
 import { TOOLS, shortLabel } from '../data/sections';
 import { agentStatusLabel, projectStatus } from '../lib/format';
 import ModuleIcon from './ModuleIcon';
+import { openNewProject } from './NewProjectDialog';
 import ProjectMark from './ProjectMark';
 import './AppRail.css';
 
@@ -33,7 +34,7 @@ export default function AppRail({ projects, current }: Props) {
                 aria-current={active ? 'true' : undefined}
               >
                 <span className="rail-project-mark" aria-hidden="true">
-                  <ProjectMark id={project.id} />
+                  <ProjectMark project={project} />
                 </span>
                 <span className={`rail-project-dot rail-project-dot--${status}`} aria-hidden="true" />
                 <span className="rail-label">{project.name}</span>
@@ -42,6 +43,13 @@ export default function AppRail({ projects, current }: Props) {
             </li>
           );
         })}
+        <li>
+          <button type="button" className="rail-add" onClick={openNewProject} aria-label="Nouveau projet" title="Nouveau projet">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </li>
       </ul>
 
       {current && (

@@ -32,7 +32,7 @@ function ProjectToday({ project }: { project: Project }) {
     <div className="today-group" data-project={project.id}>
       <div className="today-group-head">
         <span className="today-mark" aria-hidden="true">
-          <ProjectMark id={project.id} />
+          <ProjectMark project={project} />
         </span>
         <span className="today-group-name">{project.name}</span>
         <Link to={`/${project.id}/todo`} className="today-all">

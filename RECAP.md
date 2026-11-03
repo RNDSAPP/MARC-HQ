@@ -24,7 +24,7 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (80 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (85 points).
 
 ## Lancer l'app
 
@@ -54,7 +54,8 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 2. **Brancher les boutons d'action** : « Signer les contrats », « Confier à l'agent », « Valider », « Signer », « Relancer », « Ajouter un club »… Ils affichent pour l'instant un message « pas encore branché ».
 3. **Synchroniser tâches, notes et idées entre appareils** : aujourd'hui elles sont enregistrées dans le navigateur seulement. Avec Supabase, elles seront les mêmes partout.
 4. **Choisir le compte GitHub** puis créer le dépôt distant et pousser.
-5. **Mettre l'app en ligne**, si tu veux y accéder depuis ton téléphone.
+5. **Brancher les connexions pour de vrai**, dans l'ordre de ta liste « À brancher » (page Connexions de chaque projet) : il faut d'abord Supabase, puis une application déclarée chez chaque service.
+6. **Mettre l'app en ligne**, si tu veux y accéder depuis ton téléphone.
 
 ## Points à valider avec toi
 

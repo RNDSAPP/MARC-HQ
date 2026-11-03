@@ -19,7 +19,7 @@ export default function ProjectCard({ project }: Props) {
     <article className="pcard" data-project={project.id}>
       <header className="pcard-head">
         <span className="pcard-mark" aria-hidden="true">
-          <ProjectMark id={project.id} />
+          <ProjectMark project={project} />
         </span>
         <span className="pcard-name">
           <span className="pcard-title">{project.name}</span>

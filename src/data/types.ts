@@ -1,7 +1,8 @@
 // Shape of the data shown by Marc HQ. Both projects share these types:
 // same engine, same building blocks, only the names and numbers change.
 
-export type ProjectId = 'rnds' | 'club421';
+/** 'rnds' and 'club421' come with the app; projects added by Marc get an id from their name. */
+export type ProjectId = string;
 
 /** wait = waits for Marc's answer, work = working, done = finished. */
 export type AgentStatus = 'wait' | 'work' | 'done';
@@ -108,6 +109,8 @@ export type Project = {
   pipeline: Pipeline;
   modules: Module[];
   home: HomeSummary;
+  /** Added by Marc from the app (not in the sample data): its colour and optional logo. */
+  custom?: { color: string; logo?: string };
 };
 
 // Project tools (To do, Notes, Idées). Kept in the browser for now (src/data/tools.ts).

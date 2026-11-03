@@ -1,12 +1,26 @@
-import type { ProjectId } from '../data/types';
+import type { Project } from '../data/types';
 import logo421White from '../assets/logo-421-blanc.svg';
 import './ProjectMark.css';
 
 /**
- * Each project's own logo, as supplied by Marc: the RNDS "R" on Rouge Gong,
- * and the Club 421 king of clubs with its dice, in white on the club's violet.
+ * Each project's own logo, as supplied by Marc: the RNDS "R" on Rouge Gong, the Club 421 king of
+ * clubs with its dice in white on the club's violet. A project added from the app shows the logo
+ * uploaded with it, or its initial on its colour.
  */
-export default function ProjectMark({ id }: { id: ProjectId }) {
+export default function ProjectMark({ project }: { project: Project }) {
+  const id = project.id;
+  if (project.custom) {
+    return project.custom.logo ? (
+      <img className="project-mark project-mark--image" src={project.custom.logo} alt="" />
+    ) : (
+      <svg viewBox="0 0 40 40" className="project-mark" aria-hidden="true">
+        <rect width="40" height="40" fill={project.custom.color} />
+        <text x="20" y="27.5" textAnchor="middle" fontSize="21" fontWeight="700" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fill="#FFFFFF">
+          {project.mark}
+        </text>
+      </svg>
+    );
+  }
   if (id === 'rnds') {
     return (
       <svg viewBox="80 80 782 782" className="project-mark project-mark--rnds" aria-hidden="true">

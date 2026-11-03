@@ -126,6 +126,47 @@
   align-items: start;
 }
 
+.home-new {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1.5px dashed var(--hairline-strong);
+  border-radius: var(--r-2xl);
+  background: transparent;
+  color: var(--text);
+}
+
+.home-new:hover {
+  border-color: var(--text-muted);
+  background: var(--fill);
+}
+
+.home-new-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 6px;
+  border-radius: 15px;
+  background: var(--fill-strong);
+  font-size: 26px;
+  font-weight: 300;
+}
+
+.home-new-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.home-new-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 @media (max-width: 860px) {
   .home {
     grid-template-columns: minmax(0, 1fr);
