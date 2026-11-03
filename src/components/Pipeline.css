@@ -154,9 +154,29 @@
   filter: brightness(1.08);
 }
 
-@media (max-width: 520px) {
+/* Phones: the columns side by side, swiped one at a time, instead of one long stack */
+@media (max-width: 860px) {
+  .pipeline {
+    display: flex;
+    gap: 12px;
+    margin: 0 -16px;
+    padding: 0 16px 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    scrollbar-width: none;
+    align-items: flex-start;
+  }
+
+  .pipeline::-webkit-scrollbar {
+    display: none;
+  }
+
   .pipeline-col {
+    flex: none;
+    width: min(82vw, 320px);
     min-height: 0;
+    scroll-snap-align: start;
   }
 }
 

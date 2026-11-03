@@ -16,6 +16,7 @@ import logoRnds from '../assets/logo-rnds.svg';
 import StatPanel from '../components/StatPanel';
 import TabBar from '../components/TabBar';
 import WorkspaceHeader from '../components/WorkspaceHeader';
+import ModuleStrip from '../components/ModuleStrip';
 import { useCustomProjects, useProjects } from '../data/customProjects';
 import { TOOLS, isTool } from '../data/sections';
 import ProjectMap from '../components/ProjectMap';
@@ -121,6 +122,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
 
       <div className="workspace-main">
         <WorkspaceHeader project={project} projects={projects} search={search} onSearch={setSearch} placeholder={placeholder} />
+        <ModuleStrip project={project} />
 
         <main className="workspace-body" id="contenu" tabIndex={-1}>
           {tool?.slug === 'todo' && <TodoPage tasks={tasks.tasks} query={matches} onAdd={tasks.add} onToggle={tasks.toggle} onRemove={tasks.remove} />}

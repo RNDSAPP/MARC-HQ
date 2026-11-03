@@ -47,8 +47,10 @@ export default function DataTable({ caption, columns, rows, onOpen }: Props) {
                       </button>
                     </span>
                   </th>
-                  <td>{second}</td>
-                  <td className="table-mono">{third}</td>
+                  <td data-label={columns[1]}>{second}</td>
+                  <td className="table-mono" data-label={columns[2]}>
+                    {third}
+                  </td>
                   <td>
                     <StatusBadge label={status} />
                   </td>

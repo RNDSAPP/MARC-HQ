@@ -113,3 +113,71 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Phones: each row becomes a small card (name and status on top, the two details under it),
+   with no sideways scrolling */
+@media (max-width: 600px) {
+  .table {
+    min-width: 0;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2px 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .table tbody th,
+  .table tbody td {
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .table tbody th {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .table tbody td:last-child {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .table tbody td:nth-of-type(1),
+  .table tbody td:nth-of-type(2) {
+    grid-column: 1 / -1;
+    padding-left: 42px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .table tbody td:nth-of-type(1) {
+    grid-row: 2;
+  }
+
+  .table tbody td:nth-of-type(2) {
+    grid-row: 3;
+  }
+
+  /* Each detail says what it is, since the column headings are hidden */
+  .table tbody td[data-label]::before {
+    content: attr(data-label) ' · ';
+    color: var(--text-muted);
+    opacity: 0.8;
+  }
+}

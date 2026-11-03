@@ -1,0 +1,52 @@
+/* Phones only: the modules as pills under the header, scrolled sideways */
+.mstrip {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .mstrip {
+    display: block;
+    margin: 0 -16px;
+  }
+
+  .mstrip-list {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 2px 16px 6px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .mstrip-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mstrip-list li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .mstrip-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--text-2);
+  }
+
+  .mstrip-item.active {
+    border-color: transparent;
+    background: var(--accent);
+    color: #ffffff;
+  }
+}

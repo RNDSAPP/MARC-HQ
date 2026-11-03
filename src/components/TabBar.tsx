@@ -11,14 +11,16 @@ type Props = {
 
 /**
  * iPhone-style tab bar, on small screens only: the overview, the three daily tools, and "Plus",
- * which opens a sheet with the project's other modules and tools.
+ * which opens a sheet with the project's other modules and tools. The modules are also in the
+ * row of pills under the header.
  */
 export default function TabBar({ project }: Props) {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const others = project.modules.filter((module) => module.slug !== 'vue-d-ensemble');
   const moreTools = TOOLS.slice(3);
-  const inOther = [...others, ...moreTools].some((item) => pathname.endsWith(`/${item.slug}`));
+  // Modules have their own row of pills at the top (ModuleStrip): « Plus » lights up for the tools only
+  const inOther = moreTools.some((item) => pathname.endsWith(`/${item.slug}`));
 
   // Close the sheet when a page is chosen, and with Escape.
   useEffect(() => setOpen(false), [pathname]);

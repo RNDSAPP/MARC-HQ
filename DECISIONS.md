@@ -195,3 +195,6 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 125. **App Store en fiche de l'App Store** : au lieu de la scène, une fiche comme celle d'Apple. Icône et nom, bandeau des chiffres clés, puis « Notes et avis » avec la note en grand, la répartition des étoiles, le nombre d'avis et ceux à qui répondre. Les cartes d'avis restent dessous.
 126. **Plan du projet en bas de l'aperçu** : toutes les rubriques (avec leur chiffre clé et leur phrase du moment) et tous les outils (avec ce qu'ils contiennent), dans le même ordre et avec les mêmes icônes que la barre latérale.
 127. **Passages piétons** sans pointillés dessus. **Nuit** : la bande de route vue par-dessus le muret du 421 n'est plus éclairée en blanc.
+128. **Navigation sur téléphone** : sous l'en-tête, les rubriques du projet en pastilles qui défilent sur le côté (celle ouverte en couleur et ramenée en vue). Les rubriques sont en haut, les outils dans la barre du bas, et « Plus » ne s'allume que pour les outils.
+129. **Pipeline sur téléphone** : les colonnes côte à côte, à faire glisser une par une, au lieu d'une très longue pile.
+130. **Tableaux sur téléphone** : chaque ligne devient une petite carte (nom et statut en haut, les deux détails dessous avec le nom de leur colonne), sans défilement sur le côté.
