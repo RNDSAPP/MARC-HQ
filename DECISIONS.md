@@ -105,3 +105,5 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 57. **Pistes de 421** : table ronde sur pied, rebord blanc, tapis violet, gobelet ; sur la première, les trois dés d'un 421 (4, 2, 1) sont lancés, roulent et retombent en boucle.
 58. **Lumière jaune pâle** sous les lampes, et une tache de lumière douce sur le tapis du ring.
 59. **Routes et voitures** : bitume gris avec lignes de rive, ligne centrale en pointillés et passages piétons. Voitures en pâte : carrosserie, vitres teintées, pare-brise incliné, roues avec jantes, phares et feux arrière.
+60. **Titre de l'accueil** : « Deux étages, une seule boutique » ne plaisait pas à Marc. Il devient « Marc HQ » en fin et « RNDS et Club 421 » en gras, comme le titre du panneau des tableaux de bord. La salutation reste dans la petite ligne au-dessus.
+61. **Routes jusqu'aux bords** : les routes de l'arrière s'arrêtaient net dans le dessin ; elles filent maintenant hors du cadre. Les ombres floues des arbres et des voitures n'ont plus de bord carré (zone de flou agrandie).

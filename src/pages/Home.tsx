@@ -34,7 +34,9 @@ export default function Home() {
               <span className="home-eyebrow">
                 {greeting()} Marc · {dayLabel()} · {timeLabel()}
               </span>
-              <h1 className="home-title">Deux étages, une seule boutique</h1>
+              <h1 className="home-title">
+                <span className="home-title-light">Marc HQ</span> <span className="home-title-bold">RNDS et Club 421</span>
+              </h1>
             </div>
           </div>
           <ul className="home-pills" aria-label="État des agents">

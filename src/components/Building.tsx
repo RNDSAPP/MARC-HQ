@@ -196,7 +196,8 @@ const ROADS: { across: [number, number]; alongT: boolean }[] = [
 
 /** Asphalt bands with edge lines, a dashed centre line and zebra crossings by the front corner. */
 function Roads() {
-  const far = [-200, 820] as const;
+  // Far enough that every road runs off the edges of the drawing
+  const far = [-900, 1500] as const;
   const quad = (a0: number, a1: number, b0: number, b1: number, alongT: boolean) =>
     points(SITE_GROUND, alongT ? [[a0, b0], [a1, b0], [a1, b1], [a0, b1]] : [[b0, a0], [b1, a0], [b1, a1], [b0, a1]]);
   const line = (a: number, alongT: boolean) =>
@@ -835,10 +836,10 @@ function SceneDefs() {
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
           <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 0.07" />
         </filter>
-        <filter id="bld-blur-l" x="-20%" y="-20%" width="140%" height="140%">
+        <filter id="bld-blur-l" x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="14" />
         </filter>
-        <filter id="bld-blur-m" x="-20%" y="-20%" width="140%" height="140%">
+        <filter id="bld-blur-m" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="6" />
         </filter>
         <filter id="bld-blur-s" x="-50%" y="-50%" width="200%" height="200%">
