@@ -67,14 +67,14 @@ export default function Building({ projects }: Props) {
 }
 
 /** Day or night on the model: by default it follows the clock; the choice is kept in this browser. */
-function usePhaseChoice() {
+export function usePhaseChoice() {
   return useStored<PhaseChoice>('marc-hq:phase', () => 'auto');
 }
 
 const NEXT_CHOICE: Record<PhaseChoice, PhaseChoice> = { auto: 'day', day: 'night', night: 'auto' };
 
 /** Small pill on the model: shows the light of the moment and cycles Auto → Jour → Nuit. */
-function PhaseButton({ choice, phase, onChange }: { choice: PhaseChoice; phase: ReturnType<typeof usePhase>; onChange: (update: (prev: PhaseChoice) => PhaseChoice) => void }) {
+export function PhaseButton({ choice, phase, onChange }: { choice: PhaseChoice; phase: ReturnType<typeof usePhase>; onChange: (update: (prev: PhaseChoice) => PhaseChoice) => void }) {
   const night = phase === 'night' || phase === 'dusk';
   return (
     <button
@@ -104,7 +104,7 @@ const RNDS = '#FF0A3C';
 const RNDS_DARK = '#C8002C';
 const CLUB = '#7C3AED';
 
-type Point = [number, number];
+export type Point = [number, number];
 
 // Back corner of each floor. Both floors are 320 units deep along s (towards the bottom right)
 // and 250 units along t (towards the bottom left), on a 30° isometric grid.
@@ -115,16 +115,16 @@ const RNDS_FLOOR: Point = [600, 120];
 const CLUB_FLOOR: Point = [348.9, 265];
 
 /** Floor coordinates (s, t) to drawing coordinates. */
-function iso([x, y]: Point, s: number, t: number): Point {
+export function iso([x, y]: Point, s: number, t: number): Point {
   return [x + 0.866 * (s - t), y + 0.5 * (s + t)];
 }
 
-function points(origin: Point, list: Point[]) {
+export function points(origin: Point, list: Point[]) {
   return list.map(([s, t]) => iso(origin, s, t).map((n) => n.toFixed(1)).join(',')).join(' ');
 }
 
 /** Same as points(), with a height h above the floor for each point: (s, t, h). */
-function solid(origin: Point, list: [number, number, number][]) {
+export function solid(origin: Point, list: [number, number, number][]) {
   return list
     .map(([s, t, h]) => {
       const [x, y] = iso(origin, s, t);
@@ -202,7 +202,7 @@ function roundedRect(s0: number, t0: number, s1: number, t1: number, r: number):
 const toPath = (list: Point[]) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
 
 /** A slab with rounded corners standing on the table, `h` high, with its soft shadow. */
-function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12, origin = SITE_GROUND }: {
+export function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12, origin = SITE_GROUND }: {
   origin?: Point;
   s0: number;
   t0: number;
@@ -328,8 +328,8 @@ function lineAt(pair: string) {
 }
 
 /** A white clay tree: a trunk and three round crowns. */
-function Tree({ s, t, size = 1, base = 6 }: { s: number; t: number; size?: number; base?: number }) {
-  const [x, y0] = iso(SITE_GROUND, s, t);
+export function Tree({ s, t, size = 1, base = 6, origin = SITE_GROUND }: { s: number; t: number; size?: number; base?: number; origin?: Point }) {
+  const [x, y0] = iso(origin, s, t);
   const y = y0 - base;
   const k = size;
   return (
@@ -370,7 +370,7 @@ function Bottle({ x, y, color, tall = 1 }: { x: number; y: number; color: string
 }
 
 /** A word painted on the floor, read along s (or along t with `alongT`). */
-function FloorText({ origin, s, t, alongT = false, size = 20, children }: {
+export function FloorText({ origin, s, t, alongT = false, size = 20, children }: {
   origin: Point;
   s: number;
   t: number;
@@ -400,7 +400,7 @@ function Route({ origin, solid, dashed, color }: { origin: Point; solid: Point[]
 // Designer-toy figures: big round head with ears, small eyes under thick brows, round hands,
 // clothes and sneakers in colour. Drawn facing us, feet at (0, 0), about 45 units tall.
 type Headwear = 'cap' | 'bucket' | 'hair' | 'buzz' | 'long';
-type Look = {
+export type Look = {
   skin: string;
   top: string;
   bottom: string;
@@ -419,15 +419,15 @@ type Look = {
 /**
  * A figure at floor point (s, t). `walk`: it strolls there and back by (ds, dt).
  * `fight`: one of the two sparring boxers, 'a' on the left, 'b' on the right, or 'bag' for the one on the punching bag.
- * `rope`: skipping rope.
+ * `rope`: skipping rope. `cheer`: hops for joy (the podium).
  */
-type Figure = { s: number; t: number; look: Look; walk?: [number, number]; fight?: 'a' | 'b' | 'bag'; rope?: boolean };
+export type Figure = { s: number; t: number; look: Look; walk?: [number, number]; fight?: 'a' | 'b' | 'bag'; rope?: boolean; cheer?: boolean };
 
-const SKIN = { light: '#F3C9AE', rose: '#EDB89A', tan: '#C98B62', deep: '#8A5636' };
+export const SKIN = { light: '#F3C9AE', rose: '#EDB89A', tan: '#C98B62', deep: '#8A5636' };
 const INK = '#1E1E1E';
 
 /** Darker shade of a hex colour, for ears, sleeves and soles. */
-function shade(hex: string, amount = 0.14) {
+export function shade(hex: string, amount = 0.14) {
   const n = parseInt(hex.slice(1), 16);
   const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v * (1 - amount)));
   return `#${c.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
@@ -464,7 +464,7 @@ function Headgear({ look }: { look: Look }) {
  * Vinyl material: the shape in its colour, then a shadow towards the bottom right and a soft
  * highlight at the top left, like a toy lit from above.
  */
-function vinyl(shape: (fill: string) => ReactNode, color: string) {
+export function vinyl(shape: (fill: string) => ReactNode, color: string) {
   return (
     <>
       {shape(color)}
@@ -492,7 +492,7 @@ function limb(x1: number, y1: number, x2: number, y2: number, width: number) {
 }
 
 /** A designer-toy figure standing at floor point (s, t). */
-function Person({ origin, s, t, look, walk, fight, rope }: Figure & { origin: Point }) {
+export function Person({ origin, s, t, look, walk, fight, rope, cheer }: Figure & { origin: Point }) {
   const [x, y] = iso(origin, s, t);
   // Small idle motions (Building.css): boxers hop and jab, walkers stroll, the others breathe.
   // Each figure starts at a different point of its loop so they never move in step.
@@ -501,7 +501,7 @@ function Person({ origin, s, t, look, walk, fight, rope }: Figure & { origin: Po
     '--dx': walk ? `${(0.866 * (walk[0] - walk[1])).toFixed(1)}px` : '0px',
     '--dy': walk ? `${(0.5 * (walk[0] + walk[1])).toFixed(1)}px` : '0px',
   } as CSSProperties;
-  const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : walk ? ' fig--walk' : '';
+  const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : cheer ? ' fig--cheer' : walk ? ' fig--walk' : '';
   const sleeve = shade(look.top, 0.08);
   const legBottom = look.shorts ? -6.6 : -2.4;
   const crease = shade(look.top, 0.28);
@@ -829,7 +829,7 @@ const LAMP_POSTS: Point[] = [
  * Colour of the sky over the model: nothing by day, warm at dawn and dusk, deep blue at night
  * (Building.css, from the scene's data-phase). Laid over everything with a multiply blend.
  */
-function SkyTint({ box: [x, y, w, h] }: { box: [number, number, number, number] }) {
+export function SkyTint({ box: [x, y, w, h] }: { box: [number, number, number, number] }) {
   return <rect className="sky-tint" x={x} y={y} width={w} height={h} />;
 }
 
@@ -883,7 +883,7 @@ function NightLights({ only }: { only?: ProjectId }) {
 }
 
 /** Gradients, filters and clips shared by the scenes. */
-function SceneDefs() {
+export function SceneDefs() {
   const R = RNDS_FLOOR;
   const C = CLUB_FLOOR;
   return (

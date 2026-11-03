@@ -1,0 +1,93 @@
+/* Labels over the module scenes (city of clubs, ambassadors' square) */
+.scene-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scene-tag-item {
+  position: absolute;
+  transform: translate(-50%, -100%);
+}
+
+.scene-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.scene-tag::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.scene-tag:hover {
+  box-shadow: var(--shadow-pop);
+}
+
+.scene-tag--accent::before {
+  background: var(--accent);
+}
+
+.scene-tag--alert::before {
+  background: var(--alert);
+}
+
+.scene-tag--new {
+  background: rgb(255 255 255 / 0.75);
+  color: var(--text-2);
+}
+
+.scene-tag-rank {
+  display: none;
+}
+
+.scene-tag-num {
+  font-weight: 700;
+  color: var(--accent-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Caps of the club buildings and podium steps, in the colour of their stage */
+.lot-cap {
+  fill: var(--accent);
+}
+
+.lot--muted .lot-cap {
+  fill: #c4c4c4;
+}
+
+.lot--alert .lot-cap {
+  fill: #f0b44c;
+}
+
+.lot-ghost {
+  stroke: #b9b9b9;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+@media (max-width: 860px) {
+  .scene-tag {
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .scene-tag-num {
+    display: none;
+  }
+}

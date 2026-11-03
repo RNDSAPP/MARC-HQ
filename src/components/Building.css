@@ -659,3 +659,8 @@
   right: 16px;
   bottom: 16px;
 }
+
+/* The podium winner hops for joy */
+.fig--cheer .fig-body {
+  animation: rope-hop 1.1s ease-in-out infinite;
+}

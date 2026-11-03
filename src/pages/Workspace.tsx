@@ -8,6 +8,7 @@ import DataTable from '../components/DataTable';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
+import { AmbassadorsPlaza, PipelineCity } from '../components/Scenes';
 import StatPanel from '../components/StatPanel';
 import TabBar from '../components/TabBar';
 import WorkspaceHeader from '../components/WorkspaceHeader';
@@ -107,7 +108,20 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'todo' && <TodoPage tasks={tasks.tasks} query={matches} onAdd={tasks.add} onToggle={tasks.toggle} onRemove={tasks.remove} />}
           {tool?.slug === 'notes' && <NotesPage notes={notes.notes} query={matches} onAdd={notes.add} onUpdate={notes.update} onRemove={notes.remove} />}
           {tool?.slug === 'idees' && <IdeasPage ideas={ideas.ideas} query={matches} onAdd={ideas.add} onUpdate={ideas.update} onRemove={ideas.remove} />}
-          {module && <ModuleView project={project} module={module} columns={columns} rows={rows} query={query} onAction={showAction} />}
+          {module && (
+            <ModuleView
+              project={project}
+              module={module}
+              columns={columns}
+              rows={rows}
+              query={query}
+              onAction={showAction}
+              onPick={(name) => {
+                setSearch(name);
+                document.getElementById('list-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            />
+          )}
         </main>
       </div>
 
@@ -138,10 +152,12 @@ type ModuleViewProps = {
   rows: TableRow[];
   query: string;
   onAction: (label: string) => void;
+  /** A name tapped on the scene: filter the list below on it. */
+  onPick: (name: string) => void;
 };
 
 /** A module's dashboard: title and scene, agents and figures, then its pipeline or table. */
-function ModuleView({ project, module, columns, rows, query, onAction }: ModuleViewProps) {
+function ModuleView({ project, module, columns, rows, query, onAction, onPick }: ModuleViewProps) {
   const isPipeline = module.view.kind === 'pipeline';
   const listTitle = module.view.kind === 'table' ? module.view.title : project.pipeline.title;
   const total = isPipeline
@@ -158,7 +174,13 @@ function ModuleView({ project, module, columns, rows, query, onAction }: ModuleV
       <div className="workspace-stage">
         <div className="workspace-center">
           <Hero eyebrow={`${project.name} · ${dayLabel()}`} headline={module.headline} sub={module.sub} cta={module.cta} onAction={onAction} />
-          <ProjectScene project={project} current={module.slug} />
+          {module.view.kind === 'pipeline' && module.slug !== 'vue-d-ensemble' ? (
+            <PipelineCity project={project} module={module} onPick={onPick} />
+          ) : module.slug === 'ambassadeurs' ? (
+            <AmbassadorsPlaza project={project} module={module} onPick={onPick} />
+          ) : (
+            <ProjectScene project={project} current={module.slug} />
+          )}
         </div>
 
         <div className="workspace-side">
