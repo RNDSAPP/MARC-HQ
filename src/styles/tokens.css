@@ -1,4 +1,4 @@
-/* Design tokens of Marc HQ (see BRIEF.md). Every color, font and radius lives here. */
+/* Design tokens of Marc HQ. Colours from BRIEF.md, Apple-style type, radii and materials. */
 :root {
   /* Surfaces */
   --bg: #121110;
@@ -9,6 +9,17 @@
   --border: #2e2b27;
   --border-soft: #24221f;
   --border-strong: #3a3631;
+
+  /* Apple-style fills and hairlines, laid over any surface */
+  --fill: rgb(255 255 255 / 0.06);
+  --fill-strong: rgb(255 255 255 / 0.1);
+  --fill-pressed: rgb(255 255 255 / 0.14);
+  --hairline: rgb(255 255 255 / 0.08);
+  --hairline-strong: rgb(255 255 255 / 0.14);
+
+  /* Frosted glass for bars that float over content */
+  --glass: rgb(18 17 16 / 0.72);
+  --glass-blur: saturate(180%) blur(20px);
 
   /* Text */
   --text: #f2eee6;
@@ -36,23 +47,33 @@
   --accent-soft: var(--text-2);
   --accent-tint: var(--surface);
 
-  /* Pipeline column greys */
+  /* Chart and pipeline greys */
   --col-new: #4a453e;
-  --bar: #33302b;
-  --bar-recent: #4a453e;
+  --bar: #3a3632;
+  --bar-recent: #5a544c;
 
-  /* Fonts */
-  --font-display: 'Big Shoulders Display', 'Geist', system-ui, sans-serif;
-  --font-text: 'Geist', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Fonts: San Francisco on Apple devices, Geist everywhere else */
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Geist', system-ui, sans-serif;
+  --font-text: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Geist', system-ui, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, 'Geist Mono', Menlo, monospace;
 
   /* Radii */
   --r-sm: 8px;
   --r-md: 10px;
-  --r-lg: 12px;
-  --r-xl: 16px;
-  --r-2xl: 18px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-2xl: 22px;
   --r-pill: 999px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --fast: 160ms;
+
+  /* Shadows */
+  --shadow-pop: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px rgb(0 0 0 / 0.4);
+
+  /* Mobile tab bar height (without the iPhone home indicator area) */
+  --tabbar-h: 58px;
 }
 
 [data-project='rnds'] {

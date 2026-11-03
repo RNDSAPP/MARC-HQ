@@ -6,7 +6,7 @@ export const club421: Project = {
   name: 'Club 421',
   tag: 'Jeu iOS',
   mark: '4',
-  space: 'ESPACE CLUB 421',
+  space: 'Espace Club 421',
   searchPlaceholder: 'Rechercher un BDE, une soirée, un avis',
 
   agents: [

@@ -8,22 +8,28 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-text);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1,
 h2,
 h3,
+h4,
 p {
   margin: 0;
 }
@@ -39,18 +45,30 @@ button {
   cursor: pointer;
 }
 
+/* Apple-style press feedback on everything you can tap */
+a,
+button {
+  transition:
+    background-color var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    transform var(--fast) var(--ease),
+    filter var(--fast) var(--ease);
+}
+
+button:active,
+.pressable:active {
+  transform: scale(0.97);
+}
+
 input::placeholder {
   color: var(--text-muted);
 }
 
 /* Visible focus for keyboard users, everywhere */
 :focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--accent-soft);
   outline-offset: 2px;
-}
-
-.mono {
-  font-family: var(--font-mono);
 }
 
 .visually-hidden {
@@ -69,9 +87,9 @@ input::placeholder {
   position: absolute;
   left: 12px;
   top: -60px;
-  z-index: 10;
-  padding: 10px 14px;
-  border-radius: var(--r-md);
+  z-index: 50;
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
   background: var(--text);
   color: var(--bg);
   font-weight: 600;
@@ -82,7 +100,9 @@ input::placeholder {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
     animation: none !important;
   }

@@ -1,17 +1,17 @@
 .pipeline {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 12px;
 }
 
 .pipeline-col {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  gap: 8px;
+  padding: 10px;
   background: var(--surface-low);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--r-xl);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
   min-height: 260px;
 }
 
@@ -19,8 +19,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 2px 4px 4px;
-  font-size: 13px;
+  padding: 4px 6px 6px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -29,10 +29,15 @@
 }
 
 .pipeline-col-count {
-  font-family: var(--font-mono);
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
+  text-align: center;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .pipeline-dot {
@@ -63,12 +68,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .pipeline-empty {
-  padding: 14px 4px;
-  font-size: 12px;
+  padding: 14px 6px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 
@@ -79,22 +84,32 @@
   padding: 14px;
   border-radius: var(--r-lg);
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--hairline);
+  transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+
+.pipeline-card:hover {
+  border-color: var(--hairline-strong);
 }
 
 .pipeline-card--hot {
   border-color: var(--alert-border);
 }
 
+.pipeline-card--hot:hover {
+  border-color: var(--alert);
+}
+
 .pipeline-card-name {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .pipeline-card-meta {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 
@@ -114,25 +129,24 @@
   justify-content: center;
   font-size: 10px;
   font-weight: 600;
-  background: var(--border);
+  background: var(--fill-strong);
   color: var(--text-card);
 }
 
 .pipeline-card-when {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text-2);
 }
 
 .pipeline-card-action {
-  min-height: 34px;
+  min-height: 36px;
   border: 0;
-  border-radius: var(--r-sm);
-  font-size: 13px;
+  border-radius: var(--r-pill);
+  font-size: 14px;
   font-weight: 600;
   background: var(--alert);
   color: var(--alert-ink);
-  transition: filter 120ms ease;
 }
 
 .pipeline-card-action:hover {

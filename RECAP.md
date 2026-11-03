@@ -18,7 +18,9 @@ En plus du brief, pour que l'outil serve vraiment au quotidien :
 3. Les boutons pas encore branchés affichent un court message qui le dit, au lieu de ne rien faire.
 4. La date, l'heure, la salutation et les numéros de semaine sont calculés à partir du jour réel.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (24 points).
+Ensuite, à ta demande, une passe de design « style Apple » : police d'Apple, titres en minuscules serrés, boutons en pilule, verre dépoli, cases rondes, icônes façon SF Symbols. Sur mobile, l'app se comporte comme une app iPhone : sélecteur de projet en haut, barre d'onglets en bas, marges qui respectent l'encoche. Vérifié sur les 11 pages, de 320 à 1 440 px de large.
+
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (32 points).
 
 ## Lancer l'app
 
@@ -37,7 +39,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 ## Comment le code est rangé
 
 1. `src/pages` : les deux écrans, `Home` (accueil) et `Workspace` (espace de travail d'un projet).
-2. `src/components` : un composant par fichier, avec son CSS à côté : `Sidebar`, `Topbar`, `Hero`, `WeeklyBars`, `KpiStrip`, `Pipeline`, `DataTable`, `StatusBadge`, `AgentCard`, `TodoList`, `Building`, plus `ProjectCard` pour les cartes de l'accueil.
+2. `src/components` : un composant par fichier, avec son CSS à côté : `Sidebar`, `Topbar`, `Hero`, `WeeklyBars`, `KpiStrip`, `Pipeline`, `DataTable`, `StatusBadge`, `AgentCard`, `TodoList`, `Building`, plus `ProjectCard` (cartes de l'accueil), `TabBar` (barre d'onglets mobile) et `ModuleIcon` (icônes des rubriques).
 3. `src/data` : les données d'exemple, leurs types et la couche d'accès.
 4. `src/lib` : petits outils (dates, initiales, couleur des statuts, courbe de l'accueil).
 5. `src/styles/tokens.css` : toutes les couleurs, polices et arrondis à un seul endroit.
@@ -53,7 +55,8 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 ## Points à valider avec toi
 
 1. ~~**Couleurs de l'accueil.**~~ Réglé : l'accueil suit les tokens du brief, et le bâtiment a pris la couleur de chaque projet (orange RNDS, menthe Club 421).
-2. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
-3. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
-4. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
-5. **Les étiquettes d'étage** sont un peu plus larges que dans la maquette, pour que le texte tienne sur une ligne.
+2. **Titres façon Apple ou façon affiche ?** Pour le style Apple, les grands titres ne sont plus en Big Shoulders (capitales condensées de la maquette) mais dans la police d'Apple, en minuscules. Si tu veux retrouver le côté affiche sur les titres seulement, c'est une ligne à changer.
+3. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
+4. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
+5. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
+6. **Les étiquettes d'étage** sont un peu plus larges que dans la maquette, pour que le texte tienne sur une ligne.

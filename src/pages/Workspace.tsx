@@ -6,6 +6,7 @@ import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
 import Sidebar from '../components/Sidebar';
+import TabBar from '../components/TabBar';
 import TodoList from '../components/TodoList';
 import Topbar from '../components/Topbar';
 import { getProjects } from '../data/api';
@@ -105,7 +106,7 @@ export default function Workspace({ project: projectId }: Props) {
 
         <div className="workspace-body">
           <Hero
-            eyebrow={`${dayLabel()} · ${project.name.toUpperCase()} · ${module.label.toUpperCase()}`}
+            eyebrow={`${project.name} · ${dayLabel()}`}
             headline={module.headline}
             sub={module.sub}
             cta={module.cta}
@@ -160,6 +161,8 @@ export default function Workspace({ project: projectId }: Props) {
           </div>
         </div>
       </main>
+
+      <TabBar project={project} />
 
       <p className="workspace-notice" role="status">
         {notice}

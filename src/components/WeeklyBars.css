@@ -1,19 +1,19 @@
 .weekly {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .weekly-bars {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
+  gap: 5px;
   height: 96px;
 }
 
 .weekly-bar {
   flex: 1 1 0;
-  border-radius: 4px 4px 2px 2px;
+  border-radius: 5px;
   background: var(--bar);
 }
 
@@ -28,7 +28,7 @@
 .weekly-axis {
   display: flex;
   justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }

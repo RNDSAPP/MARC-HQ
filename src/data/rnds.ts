@@ -6,7 +6,7 @@ export const rnds: Project = {
   name: 'RNDS',
   tag: 'App boxe',
   mark: 'R',
-  space: 'ESPACE RNDS',
+  space: 'Espace RNDS',
   searchPlaceholder: 'Rechercher un club, un ambassadeur, un post',
 
   agents: [

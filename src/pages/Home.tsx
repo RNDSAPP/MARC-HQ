@@ -32,7 +32,7 @@ export default function Home() {
             </span>
             <div className="home-title-text">
               <span className="home-eyebrow">
-                MARC HQ · {dayLabel()} · {timeLabel()}
+                {dayLabel()} · {timeLabel()}
               </span>
               <h1 className="home-title">{greeting()} Marc. Deux étages, une seule boutique.</h1>
             </div>

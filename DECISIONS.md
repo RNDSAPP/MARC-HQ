@@ -39,4 +39,20 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 21. **Étages cliquables.** Comme dans la maquette, de grandes zones invisibles sur chaque étage ouvrent le projet à la souris. Au clavier, ce sont les deux étiquettes qui servent (ce sont de vrais liens). Sur téléphone, les étiquettes sortent du dessin et se rangent dessous, pour ne pas le cacher.
 22. **Chiffres de l'accueil calculés.** « 2 agents au travail » et « 1 attend ta réponse » sont comptés à partir des agents des deux projets, et l'état « Agent : … » de chaque étage vient de l'agent le plus urgent du projet. La salutation passe de « Bonjour » à « Bonsoir » à 16 h (la maquette disait « Bonsoir » à 16 h 45).
 23. **Composant `ProjectCard` en plus.** Les deux cartes projet de l'accueil ont leur propre composant (`src/components/ProjectCard.tsx`), qui n'était pas dans la liste du brief. La petite courbe reprend exactement le calcul de la maquette.
-24. **Les étiquettes d'étage sont un peu plus larges** que dans la maquette (264 px au lieu de 236 px) : avec la police Geist, « Agent : attend ta réponse » passait sur deux lignes.
+24. **Les étiquettes d'étage sont un peu plus larges** que dans la maquette (284 px au lieu de 236 px), pour que chaque ligne tienne sur une seule ligne.
+
+## Passe de design « style Apple » (demandée par Marc)
+
+25. **Police d'Apple.** Le texte, les titres et les chiffres utilisent la police système d'Apple (San Francisco) sur Mac, iPhone et iPad, et Geist sur les autres appareils. Big Shoulders Display (titres en capitales façon affiche) n'est plus utilisée : les titres sont en minuscules, gras et serrés, comme sur apple.com. Pour revenir au style affiche, il suffit de changer `--font-display` dans `src/styles/tokens.css` et de remettre la police dans `index.html`.
+26. **Les couleurs ne changent pas.** Fond, surfaces, accents RNDS et Club 421, ambre d'alerte : ce sont toujours les tokens du brief. J'ai ajouté des remplissages et des séparateurs translucides (`--fill`, `--hairline`) et un effet verre dépoli (`--glass`) pour les barres qui flottent au-dessus du contenu.
+27. **Boutons en pilule**, arrondis plus généreux (14 à 28 px), petit effet d'enfoncement au clic, cases « À faire » rondes comme dans l'app Rappels, compteurs en pastille grise.
+28. **Icônes de rubrique** dessinées dans l'esprit des SF Symbols (`src/components/ModuleIcon.tsx`), dans la barre latérale et dans la barre d'onglets.
+29. **Mobile façon iPhone.** En dessous de 860 px de large :
+    1. en haut, une barre en verre dépoli avec la flèche de retour vers HQ et un sélecteur RNDS / Club 421 (contrôle segmenté) ;
+    2. en bas, une barre d'onglets fixe avec les 5 rubriques du projet (`src/components/TabBar.tsx`). « Vue d'ensemble » y devient « Aperçu », pour tenir dans l'onglet ;
+    3. les marges tiennent compte de l'encoche et de la barre d'accueil de l'iPhone (`viewport-fit=cover` et `safe-area-inset`) ;
+    4. le champ de recherche est en 16 px pour que Safari ne zoome pas dessus ;
+    5. l'app peut être ajoutée à l'écran d'accueil de l'iPhone (balises `apple-mobile-web-app` dans `index.html`).
+30. **Fil d'Ariane et en-têtes en minuscules.** « Projets », « Espace RNDS », « Données d'exemple », la date « Mardi 3 novembre » : en casse normale, comme chez Apple, au lieu des capitales espacées de la maquette. Seuls les en-têtes de colonnes des tableaux restent en petites capitales.
+31. **Pas d'animation sur le graphique.** J'avais ajouté une animation de pousse des barres, mais elle pouvait rester bloquée au départ (barres presque invisibles) quand la page tourne en arrière-plan. Pour la fiabilité, elle est retirée. Le message en bas de l'écran garde une petite animation d'apparition, sans risque : s'il ne s'anime pas, il s'affiche quand même.
+32. **Responsive vérifié** sur les 11 pages à 320, 375, 430, 768, 1 024 et 1 440 px de large : aucun défilement horizontal de la page (seuls les tableaux défilent, comme le demande le brief).

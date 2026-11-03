@@ -51,7 +51,7 @@ export default function Building({ projects }: Props) {
       </ul>
 
       <span className="building-hint" aria-hidden="true">
-        CLIQUE SUR UN ÉTAGE
+        Clique sur un étage
       </span>
     </div>
   );

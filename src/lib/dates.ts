@@ -16,11 +16,10 @@ export function weekSpan(count: number, today = new Date()): { first: string; la
   return { first: `S${isoWeek(start)}`, last: `S${isoWeek(today)}` };
 }
 
-/** "MARDI 3 NOVEMBRE" */
+/** "Mardi 3 novembre" */
 export function dayLabel(today = new Date()): string {
-  return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-    .format(today)
-    .toUpperCase();
+  const label = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(today);
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 /** "16:45" */
