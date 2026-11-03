@@ -1,56 +1,56 @@
-/* Design tokens of Marc HQ. Colours from BRIEF.md, Apple-style type, radii and materials. */
+/* Design tokens of Marc HQ. Light "white scale model" look, Apple-style type, radii and materials. */
 :root {
-  /* Surfaces */
-  --bg: #121110;
-  --sidebar: #0e0d0c;
-  --surface: #1a1917;
-  --surface-low: #161513;
-  --card: #1f1d1a;
-  --border: #2e2b27;
-  --border-soft: #24221f;
-  --border-strong: #3a3631;
+  /* Surfaces: light grey ground, white objects, like a white scale model */
+  --bg: #f4f4f4;
+  --sidebar: #fbfbfb;
+  --surface: #ffffff;
+  --surface-low: #ffffff;
+  --card: #f6f6f6;
+  --border: #e4e4e4;
+  --border-soft: #ececec;
+  --border-strong: #d4d4d4;
 
   /* Apple-style fills and hairlines, laid over any surface */
-  --fill: rgb(255 255 255 / 0.06);
-  --fill-strong: rgb(255 255 255 / 0.1);
-  --fill-pressed: rgb(255 255 255 / 0.14);
-  --hairline: rgb(255 255 255 / 0.08);
-  --hairline-strong: rgb(255 255 255 / 0.14);
+  --fill: rgb(0 0 0 / 0.04);
+  --fill-strong: rgb(0 0 0 / 0.07);
+  --fill-pressed: rgb(0 0 0 / 0.1);
+  --hairline: rgb(0 0 0 / 0.06);
+  --hairline-strong: rgb(0 0 0 / 0.12);
 
   /* Frosted glass for bars that float over content */
-  --glass: rgb(18 17 16 / 0.72);
+  --glass: rgb(244 244 244 / 0.8);
   --glass-blur: saturate(180%) blur(20px);
 
   /* Text */
-  --text: #f2eee6;
-  --text-2: #c8c2b8;
-  --text-muted: #9a948a;
-  --text-card: #e4ded4;
+  --text: #171a20;
+  --text-2: #393c41;
+  --text-muted: #5c5e62;
+  --text-card: #232529;
 
   /* Alert (waiting for Marc) */
   --alert: #f0b44c;
-  --alert-text: #f0c46a;
-  --alert-tint: #2b2213;
-  --alert-border: #5a4520;
+  --alert-text: #8a5a00;
+  --alert-tint: #fdf1da;
+  --alert-border: #f0d29a;
   --alert-ink: #1a1206;
 
-  /* Project accents */
-  --rnds: #ff5a36;
-  --rnds-soft: #ff8a6b;
-  --rnds-tint: #2a1712;
-  --club: #8fe0b0;
-  --club-soft: #a9eac4;
-  --club-tint: #14261c;
+  /* Project accents: the brand colour, a darker shade readable on white, a pale tint */
+  --rnds: #f04a2a;
+  --rnds-soft: #c2381c;
+  --rnds-tint: #ffebe5;
+  --club: #1f9a5a;
+  --club-soft: #17804a;
+  --club-tint: #e0f5e9;
 
   /* Current project accent (overridden by [data-project]) */
   --accent: var(--text);
   --accent-soft: var(--text-2);
-  --accent-tint: var(--surface);
+  --accent-tint: var(--fill-strong);
 
   /* Chart and pipeline greys */
-  --col-new: #4a453e;
-  --bar: #3a3632;
-  --bar-recent: #5a544c;
+  --col-new: #b8b8b8;
+  --bar: #e2e2e2;
+  --bar-recent: #c4c4c4;
 
   /* Fonts: San Francisco on Apple devices, Geist everywhere else */
   --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Geist', system-ui, sans-serif;
@@ -70,7 +70,9 @@
   --fast: 160ms;
 
   /* Shadows */
-  --shadow-pop: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px rgb(0 0 0 / 0.4);
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.06), 0 10px 30px rgb(0 0 0 / 0.1);
+  /* Soft shadow of white cards and pills, like objects resting on the ground */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05);
 
   /* Mobile tab bar height (without the iPhone home indicator area) */
   --tabbar-h: 58px;

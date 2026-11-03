@@ -20,7 +20,9 @@ En plus du brief, pour que l'outil serve vraiment au quotidien :
 
 Ensuite, à ta demande, une passe de design « style Apple » : police d'Apple, titres en minuscules serrés, boutons en pilule, verre dépoli, cases rondes, icônes façon SF Symbols. Sur mobile, l'app se comporte comme une app iPhone : sélecteur de projet en haut, barre d'onglets en bas, marges qui respectent l'encoche. Vérifié sur les 11 pages, de 320 à 1 440 px de large.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (32 points).
+Puis une passe « maquette blanche », d'après ton image de référence : thème clair (fond gris très clair, cartes blanches, ombres douces), bâtiment de l'accueil en maquette blanche avec la couleur des projets sur quelques détails seulement, étiquettes en pilule blanche. La mise en page n'a pas bougé.
+
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (39 points).
 
 ## Lancer l'app
 
@@ -54,7 +56,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 ## Points à valider avec toi
 
-1. ~~**Couleurs de l'accueil.**~~ Réglé : l'accueil suit les tokens du brief, et le bâtiment a pris la couleur de chaque projet (orange RNDS, menthe Club 421).
+1. **Couleurs.** L'app est passée en thème clair, à ta demande. Le vert de Club 421 est plus foncé que la menthe du brief, pour rester lisible sur du blanc. Dis-moi si tu préfères garder la menthe sur certains éléments.
 2. ~~**Titres façon Apple ou façon affiche ?**~~ Réglé : les grands titres restent dans la police d'Apple, en minuscules (validé par Marc le 3 novembre).
 3. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
 4. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.

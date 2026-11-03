@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 16px;
   letter-spacing: 0.02em;
 }
@@ -58,7 +58,7 @@
 .home-title {
   font-family: var(--font-display);
   font-size: clamp(26px, 3.2vw, 38px);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.1;
   text-wrap: balance;
@@ -79,11 +79,12 @@
   gap: 8px;
   min-height: 34px;
   padding: 0 14px;
-  background: var(--fill);
+  background: var(--surface);
   border-radius: var(--r-pill);
+  box-shadow: var(--shadow-card);
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-2);
+  color: var(--text);
 }
 
 .home-pill-dot {
@@ -94,12 +95,12 @@
 
 .home-pill-dot--work {
   background: var(--club);
-  box-shadow: 0 0 0 3px rgb(143 224 176 / 0.16);
+  box-shadow: 0 0 0 3px var(--club-tint);
 }
 
 .home-pill-dot--wait {
   background: var(--alert);
-  box-shadow: 0 0 0 3px rgb(240 180 76 / 0.16);
+  box-shadow: 0 0 0 3px var(--alert-tint);
 }
 
 .home-grid {
@@ -115,12 +116,13 @@
   background: var(--surface-low);
   border: 1px solid var(--hairline);
   border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-card);
 }
 
 .home-today-title {
   margin-bottom: 10px;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
@@ -146,7 +148,7 @@
   min-width: 44px;
   text-align: center;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 3px 8px;
   border-radius: var(--r-pill);
   background: var(--accent-tint);

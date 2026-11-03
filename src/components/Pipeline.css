@@ -13,6 +13,7 @@
   border: 1px solid var(--hairline);
   border-radius: var(--r-2xl);
   min-height: 260px;
+  box-shadow: var(--shadow-card);
 }
 
 .pipeline-col-head {

@@ -73,7 +73,7 @@ export const club421: Project = {
     {
       slug: 'vue-d-ensemble',
       label: 'Vue d’ensemble',
-      headline: 'La soirée du 14 est à confirmer.',
+      headline: 'La soirée du 14 est à confirmer',
       sub: 'Le BDE Commerce attend ta réponse pour ouvrir la billetterie. 150 étudiants, ta plus grosse soirée à date.',
       cta: 'Confirmer la soirée',
       heroLabel: 'Téléchargements cette semaine',
@@ -92,7 +92,7 @@ export const club421: Project = {
       slug: 'bde',
       label: 'BDE',
       count: '15',
-      headline: '2 BDE à un appel de signer.',
+      headline: '2 BDE à un appel de signer',
       sub: 'Le BDE Ingé n’a pas répondu depuis une semaine. Ton agent a préparé la relance.',
       cta: 'Ajouter un BDE',
       heroLabel: 'Étudiants touchés',
@@ -111,7 +111,7 @@ export const club421: Project = {
       slug: 'soirees',
       label: 'Soirées',
       count: '2',
-      headline: '2 soirées ce mois.',
+      headline: '2 soirées ce mois',
       sub: '120 joueurs en moyenne par soirée. De quoi viser une finale inter BDE en décembre.',
       cta: 'Créer une soirée',
       heroLabel: 'Joueurs par soirée',
@@ -127,7 +127,7 @@ export const club421: Project = {
       view: {
         kind: 'table',
         title: 'Agenda',
-        columns: ['SOIRÉE', 'BDE', 'DATE', 'STATUT'],
+        columns: ['Soirée', 'BDE', 'Date', 'Statut'],
         rows: [
           ['Tournoi 421', 'BDE Commerce Lyon', '14 nov.', 'À confirmer'],
           ['Soirée dés', 'BDE Médecine', '28 nov.', 'Confirmé'],
@@ -139,7 +139,7 @@ export const club421: Project = {
       slug: 'app-store',
       label: 'App Store',
       count: '4',
-      headline: '4 avis attendent une réponse.',
+      headline: '4 avis attendent une réponse',
       sub: 'La 1.3 est en review. Tu peux répondre au joueur qui réclamait le mode équipe : il arrive.',
       cta: 'Répondre aux avis',
       heroLabel: 'Note moyenne, 62 avis',
@@ -155,7 +155,7 @@ export const club421: Project = {
       view: {
         kind: 'table',
         title: 'Derniers avis',
-        columns: ['AVIS', 'NOTE', 'DATE', 'STATUT'],
+        columns: ['Avis', 'Note', 'Date', 'Statut'],
         rows: [
           ['Parfait en soirée', '5', 'Hier', 'À répondre'],
           ['Il manque un mode équipe', '4', 'Lun.', 'À répondre'],
@@ -167,7 +167,7 @@ export const club421: Project = {
     {
       slug: 'revenus',
       label: 'Revenus',
-      headline: '312 € ce mois, +18 %.',
+      headline: '312 € ce mois, +18 %',
       sub: 'Le pack de dés dorés fait la moitié du chiffre. Les soirées BDE font décoller les achats le lendemain.',
       cta: 'Exporter le mois',
       heroLabel: 'Chiffre d’affaires du mois',
@@ -183,7 +183,7 @@ export const club421: Project = {
       view: {
         kind: 'table',
         title: 'Par mois',
-        columns: ['MOIS', 'CA', 'ACHATS', 'TENDANCE'],
+        columns: ['Mois', 'CA', 'Achats', 'Tendance'],
         rows: [
           ['Novembre', '312 €', '96', 'Hausse'],
           ['Octobre', '264 €', '81', 'Hausse'],
@@ -194,8 +194,8 @@ export const club421: Project = {
   ],
 
   home: {
-    label: 'CLUB 421',
-    floor: 'REZ DE CHAUSSÉE',
+    label: 'Club 421',
+    floor: 'Rez-de-chaussée',
     summary: '+184 téléchargements · 312 € ce mois',
     big: '+184',
     bigLabel: 'téléchargements cette semaine',

@@ -32,9 +32,9 @@ export default function Home() {
             </span>
             <div className="home-title-text">
               <span className="home-eyebrow">
-                {dayLabel()} · {timeLabel()}
+                {greeting()} Marc · {dayLabel()} · {timeLabel()}
               </span>
-              <h1 className="home-title">{greeting()} Marc. Deux étages, une seule boutique.</h1>
+              <h1 className="home-title">Deux étages, une seule boutique</h1>
             </div>
           </div>
           <ul className="home-pills" aria-label="État des agents">

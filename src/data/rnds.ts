@@ -77,7 +77,7 @@ export const rnds: Project = {
     {
       slug: 'vue-d-ensemble',
       label: 'Vue d’ensemble',
-      headline: '2 clubs attendent ta signature.',
+      headline: '2 clubs attendent ta signature',
       sub: 'Villeurbanne Boxing et Punch Factory Bron ont dit oui. Il ne manque plus que toi pour passer à 14 clubs affiliés.',
       cta: 'Signer les contrats',
       heroLabel: 'Clubs affiliés',
@@ -96,7 +96,7 @@ export const rnds: Project = {
       slug: 'clubs',
       label: 'Clubs',
       count: '18',
-      headline: '4 clubs en discussion, 2 à signer.',
+      headline: '4 clubs en discussion, 2 à signer',
       sub: 'Ton prochain club se trouve probablement dans cette liste. Les relances sont triées par urgence.',
       cta: 'Ajouter un club',
       heroLabel: 'Membres couverts',
@@ -115,7 +115,7 @@ export const rnds: Project = {
       slug: 'ambassadeurs',
       label: 'Ambassadeurs',
       count: '9',
-      headline: 'Karim a ramené 41 inscriptions.',
+      headline: 'Karim a ramené 41 inscriptions',
       sub: 'Il est ton meilleur ambassadeur, de loin. Yanis n’a rien publié depuis 12 jours : une relance s’impose.',
       cta: 'Ajouter un ambassadeur',
       heroLabel: 'Inscriptions générées',
@@ -131,7 +131,7 @@ export const rnds: Project = {
       view: {
         kind: 'table',
         title: 'Classement',
-        columns: ['AMBASSADEUR', 'CLUB', 'INSCRIPTIONS', 'STATUT'],
+        columns: ['Ambassadeur', 'Club', 'Inscriptions', 'Statut'],
         rows: [
           ['Karim B.', 'Boxe Club Lyon 7', '41', 'Actif'],
           ['Inès D.', 'Ring Croix Rousse', '33', 'Actif'],
@@ -145,7 +145,7 @@ export const rnds: Project = {
       slug: 'publications',
       label: 'Publications',
       count: '4',
-      headline: 'Le reel de jeudi attend ton feu vert.',
+      headline: 'Le reel de jeudi attend ton feu vert',
       sub: 'Les 4 contenus de la semaine sont prêts. Ta semaine est couverte jusqu’à dimanche.',
       cta: 'Planifier un post',
       heroLabel: 'Vues moyennes par reel',
@@ -161,7 +161,7 @@ export const rnds: Project = {
       view: {
         kind: 'table',
         title: 'Cette semaine',
-        columns: ['CONTENU', 'FORMAT', 'DATE', 'STATUT'],
+        columns: ['Contenu', 'Format', 'Date', 'Statut'],
         rows: [
           ['Détection des coups en action', 'Reel', 'Jeu. 18 h', 'À valider'],
           ['Portrait de Karim', 'Carrousel', 'Ven. 12 h', 'Prêt'],
@@ -173,7 +173,7 @@ export const rnds: Project = {
     {
       slug: 'abonnes',
       label: 'Abonnés',
-      headline: '+192 abonnés en 30 jours.',
+      headline: '+192 abonnés en 30 jours',
       sub: 'TikTok grandit deux fois plus vite qu’Instagram. Les vidéos d’entraînement font la différence.',
       cta: 'Fixer un objectif',
       heroLabel: 'Abonnés au total',
@@ -189,7 +189,7 @@ export const rnds: Project = {
       view: {
         kind: 'table',
         title: 'Par plateforme',
-        columns: ['PLATEFORME', 'ABONNÉS', '30 JOURS', 'TENDANCE'],
+        columns: ['Plateforme', 'Abonnés', '30 jours', 'Tendance'],
         rows: [
           ['Instagram', '2 640', '+128', 'Hausse'],
           ['TikTok', '772', '+64', 'Hausse'],
@@ -201,7 +201,7 @@ export const rnds: Project = {
 
   home: {
     label: 'RNDS',
-    floor: 'ÉTAGE 1',
+    floor: 'Étage 1',
     summary: '2 clubs en attente · 3 412 abonnés',
     big: '3 412',
     bigLabel: 'abonnés, +6 % sur 30 jours',

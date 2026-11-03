@@ -21,15 +21,33 @@
   gap: 12px;
 }
 
+/* Same white pill tag as on the home page, with the project's dot */
 .hero-eyebrow {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent);
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 14px;
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-card);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .hero-title {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   font-size: clamp(34px, 4.4vw, 56px);
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -76,12 +94,13 @@
 }
 
 .hero-agent {
-  background: var(--fill-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
   color: var(--text);
 }
 
 .hero-agent:hover {
-  background: var(--fill-pressed);
+  box-shadow: var(--shadow-pop);
 }
 
 .hero-agent-dot {
@@ -101,6 +120,7 @@
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-card);
 }
 
 .hero-stat-head {
@@ -129,7 +149,7 @@
 
 .hero-stat-num {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 56px;
   line-height: 1;
   letter-spacing: -0.04em;

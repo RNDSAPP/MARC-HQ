@@ -74,7 +74,7 @@
 .workspace-h2 {
   font-family: var(--font-display);
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.025em;
 }
 
@@ -96,14 +96,13 @@
   max-width: min(520px, calc(100vw - 32px));
   padding: 12px 18px;
   border-radius: var(--r-xl);
-  background: rgb(42 40 37 / 0.96);
+  background: rgb(23 26 32 / 0.94);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--hairline-strong);
   box-shadow: var(--shadow-pop);
   font-size: 14px;
   font-weight: 500;
-  color: var(--text);
+  color: var(--bg);
   animation: notice-in 280ms var(--ease);
 }
 
