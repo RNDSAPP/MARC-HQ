@@ -38,9 +38,8 @@
 
 .project-card-main {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .project-card-big {
@@ -51,36 +50,16 @@
 
 .project-card-num {
   font-family: var(--font-display);
-  font-size: 34px;
-  font-weight: 600;
+  font-size: 44px;
+  font-weight: 300;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
 .project-card-big-label {
   font-size: 13px;
   color: var(--text-2);
-}
-
-.project-card-spark {
-  flex: none;
-  max-width: 45%;
-  height: auto;
-}
-
-.project-card-spark-area {
-  fill: var(--accent);
-  fill-opacity: 0.12;
-  stroke: none;
-}
-
-.project-card-spark-line {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
 }
 
 .project-card-minis {

@@ -88,8 +88,8 @@ export type HomeSummary = {
   big: string;
   bigLabel: string;
   mini: { label: string; value: string }[];
-  /** Shapes the small sparkline of the home card. */
-  sparkSeed: number;
+  /** Slug of the module whose 12-week series the home card draws. */
+  trendModule: string;
   todos: { text: string }[];
   /** Short tag used in the home to-do list ("RNDS", "421"). */
   shortTag: string;

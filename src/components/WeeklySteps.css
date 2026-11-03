@@ -9,6 +9,12 @@
   height: 128px;
 }
 
+/* Room above the drawing so the dot stays clear of the highest week */
+.steps--compact .steps-chart {
+  height: 84px;
+  padding-top: 14px;
+}
+
 .steps-chart svg {
   display: block;
   width: 100%;

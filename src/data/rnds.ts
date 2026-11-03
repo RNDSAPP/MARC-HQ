@@ -209,7 +209,7 @@ export const rnds: Project = {
       { label: 'Clubs affiliés', value: '12' },
       { label: 'Ambassadeurs', value: '9' },
     ],
-    sparkSeed: 1,
+    trendModule: 'abonnes',
     shortTag: 'RNDS',
     todos: [
       { text: 'Valider l’écran de détection des coups' },

@@ -5,6 +5,8 @@ import './WeeklySteps.css';
 type Props = {
   series: number[];
   label: string;
+  /** Smaller chart without the week axis, for the home cards. */
+  compact?: boolean;
 };
 
 // Drawing units. The SVG stretches to the card, so lines keep their width with non-scaling strokes.
@@ -18,7 +20,7 @@ const FLAT = 0.6;
  * that fades out downwards. Past weeks are grey, the current week is in the project colour,
  * marked by a dot and a dashed leader.
  */
-export default function WeeklySteps({ series, label }: Props) {
+export default function WeeklySteps({ series, label, compact = false }: Props) {
   const id = useId();
   const span = weekSpan(series.length);
   const max = Math.max(...series);
@@ -45,7 +47,7 @@ export default function WeeklySteps({ series, label }: Props) {
   const current = `M${previousBend.toFixed(1)},${y(series[lastIndex - 1]).toFixed(1)} L${lastX.toFixed(1)},${lastY.toFixed(1)} L${W},${lastY.toFixed(1)}`;
 
   return (
-    <div className="steps">
+    <div className={compact ? 'steps steps--compact' : 'steps'}>
       <div className="steps-chart" role="img" aria-label={`${label} sur les ${series.length} dernières semaines`}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
           <defs>
@@ -80,11 +82,13 @@ export default function WeeklySteps({ series, label }: Props) {
         </svg>
         <span className="steps-dot" style={{ left: `${(lastX / W) * 100}%` }} aria-hidden="true" />
       </div>
-      <div className="steps-axis">
-        <span>{span.first}</span>
-        <span>{series.length} dernières semaines</span>
-        <span>{span.last}</span>
-      </div>
+      {!compact && (
+        <div className="steps-axis">
+          <span>{span.first}</span>
+          <span>{series.length} dernières semaines</span>
+          <span>{span.last}</span>
+        </div>
+      )}
     </div>
   );
 }

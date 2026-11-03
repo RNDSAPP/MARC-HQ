@@ -203,7 +203,7 @@ export const club421: Project = {
       { label: 'CA du mois', value: '312 €' },
       { label: 'BDE partenaires', value: '7' },
     ],
-    sparkSeed: 2,
+    trendModule: 'vue-d-ensemble',
     shortTag: '421',
     todos: [{ text: 'Confirmer la soirée du 14' }, { text: 'Répondre aux 4 avis App Store' }],
   },
