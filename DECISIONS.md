@@ -16,7 +16,7 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 
 ## Données
 
-7. **Couche d'accès asynchrone dès maintenant.** Les fonctions de `src/data/api.ts` (`getProject`, `getProjects`) renvoient des promesses, comme le fera Supabase. Les écrans passent par le petit hook `useData`, qui garde en mémoire ce qui est déjà chargé. Pour brancher Supabase, il suffira de réécrire `api.ts` : les écrans ne bougent pas.
+7. **Couche d'accès asynchrone dès maintenant.** La fonction `getProjects` de `src/data/api.ts` renvoie des promesses, comme le fera Supabase. Les écrans passent par le petit hook `useData`, qui garde en mémoire ce qui est déjà chargé. Pour brancher Supabase, il suffira de réécrire `api.ts` : les écrans ne bougent pas.
 8. **Un seul objet par projet.** `src/data/rnds.ts` et `src/data/club421.ts` ont exactement la même forme (définie dans `src/data/types.ts`) : agents, tâches, pipeline, rubriques et résumé pour l'accueil. Les textes et chiffres sont ceux de la maquette, à la lettre.
 9. **Adresses des rubriques.** Les rubriques ont une adresse sans accent ni espace : `/rnds/vue-d-ensemble`, `/rnds/clubs`, `/rnds/ambassadeurs`, `/rnds/publications`, `/rnds/abonnes`, `/club421/vue-d-ensemble`, `/club421/bde`, `/club421/soirees`, `/club421/app-store`, `/club421/revenus`. `/rnds` seul mène à la vue d'ensemble ; une adresse inconnue ramène à l'accueil.
 10. **Couleur des badges de statut.** Comme dans la maquette, elle se déduit du texte : « Actif », « Prêt », « Confirmé », « Répondu », « Hausse »… en couleur du projet ; « À relancer », « À valider », « À répondre », « À confirmer » en ambre ; le reste en gris.
@@ -30,3 +30,4 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 15. **Petits ajouts utiles.** Compteur « 1 / 3 » à côté de « À faire », tâche cochée barrée, titre de l'onglet du navigateur qui suit la rubrique (« Ambassadeurs · RNDS · Marc HQ »), lien « Aller au contenu » pour la navigation au clavier.
 16. **Dates calculées.** La date en haut (« MARDI 3 NOVEMBRE ») et les numéros de semaine sous le graphique (S34 à S45) sont calculés à partir du jour réel, pas écrits en dur.
 17. **Tableau.** C'est un vrai tableau HTML (meilleur pour les lecteurs d'écran), qui défile horizontalement sur petit écran et peut être parcouru au clavier.
+18. **Club 421 = même écran, autres données.** Aucun composant n'est propre à un projet : `Workspace` reçoit le projet et tout le reste (rubriques, pipeline BDE, bouton « Relancer », couleur menthe) vient de `src/data/club421.ts`. Ajouter un troisième projet plus tard = un nouveau fichier de données et deux routes.
