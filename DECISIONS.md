@@ -31,3 +31,12 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 16. **Dates calculées.** La date en haut (« MARDI 3 NOVEMBRE ») et les numéros de semaine sous le graphique (S34 à S45) sont calculés à partir du jour réel, pas écrits en dur.
 17. **Tableau.** C'est un vrai tableau HTML (meilleur pour les lecteurs d'écran), qui défile horizontalement sur petit écran et peut être parcouru au clavier.
 18. **Club 421 = même écran, autres données.** Aucun composant n'est propre à un projet : `Workspace` reçoit le projet et tout le reste (rubriques, pipeline BDE, bouton « Relancer », couleur menthe) vient de `src/data/club421.ts`. Ajouter un troisième projet plus tard = un nouveau fichier de données et deux routes.
+
+## Accueil
+
+19. **Le bâtiment est repris tel quel.** Le dessin SVG est copié trait pour trait depuis la maquette ; seuls les noms d'attributs ont été adaptés à React (`stroke-width` devient `strokeWidth`, etc.). Il garde donc ses propres couleurs (orange `#FF7A45`, vert `#4ADE80`).
+20. **Le reste de l'accueil suit les tokens du brief.** Dans la maquette, l'accueil utilisait une autre palette (fond `#09090A`, polices Inter et JetBrains Mono, vert `#4ADE80`). J'ai suivi le brief : mêmes couleurs, mêmes polices (Geist, Geist Mono) et mêmes accents que l'espace de travail, pour que tout l'outil forme un seul ensemble. C'est un point à valider avec toi.
+21. **Étages cliquables.** Comme dans la maquette, de grandes zones invisibles sur chaque étage ouvrent le projet à la souris. Au clavier, ce sont les deux étiquettes qui servent (ce sont de vrais liens). Sur téléphone, les étiquettes sortent du dessin et se rangent dessous, pour ne pas le cacher.
+22. **Chiffres de l'accueil calculés.** « 2 agents au travail » et « 1 attend ta réponse » sont comptés à partir des agents des deux projets, et l'état « Agent : … » de chaque étage vient de l'agent le plus urgent du projet. La salutation passe de « Bonjour » à « Bonsoir » à 16 h (la maquette disait « Bonsoir » à 16 h 45).
+23. **Composant `ProjectCard` en plus.** Les deux cartes projet de l'accueil ont leur propre composant (`src/components/ProjectCard.tsx`), qui n'était pas dans la liste du brief. La petite courbe reprend exactement le calcul de la maquette.
+24. **Les étiquettes d'étage sont un peu plus larges** que dans la maquette (264 px au lieu de 236 px) : avec la police Geist, « Agent : attend ta réponse » passait sur deux lignes.

@@ -1,0 +1,175 @@
+.building {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
+  background: #0d0d0f;
+  overflow: hidden;
+}
+
+.building-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Invisible click zones over the floors (positions from the mockup). */
+.building-zone {
+  position: absolute;
+  cursor: pointer;
+}
+
+.building-zone--rnds {
+  left: 40%;
+  top: 14%;
+  width: 48%;
+  height: 56%;
+}
+
+.building-zone--club421 {
+  left: 12%;
+  top: 40%;
+  width: 37%;
+  height: 54%;
+}
+
+.building-labels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.building-label-item {
+  position: absolute;
+  width: 264px;
+}
+
+.building-label-item--rnds {
+  right: 3%;
+  top: 5%;
+}
+
+.building-label-item--club421 {
+  left: 3%;
+  top: 14%;
+}
+
+.building-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--surface-low);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-xl);
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.building-label:hover {
+  background: var(--surface);
+  transform: translateY(-1px);
+}
+
+.building-label-head,
+.building-label-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.building-label-name {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.building-label-floor {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--accent-soft);
+}
+
+.building-label-summary {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.building-label-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.building-label-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.building-label-status--wait {
+  color: var(--alert-text);
+}
+
+.building-label-status--wait .building-label-dot {
+  background: var(--alert);
+}
+
+.building-label-status--work {
+  color: var(--accent-soft);
+}
+
+.building-label-status--work .building-label-dot {
+  background: var(--accent);
+}
+
+.building-label-status--done {
+  color: var(--text-muted);
+}
+
+.building-label-status--done .building-label-dot {
+  background: var(--text-muted);
+}
+
+.building-label-status,
+.building-label-enter {
+  white-space: nowrap;
+}
+
+.building-label-enter {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-soft);
+}
+
+.building-hint {
+  position: absolute;
+  left: 3%;
+  bottom: 4%;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #7c7c85;
+}
+
+/* Small screens: the labels leave the drawing and stack under it. */
+@media (max-width: 860px) {
+  .building-labels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    padding: 0 12px 12px;
+  }
+
+  .building-label-item {
+    position: static;
+    width: auto;
+  }
+
+  .building-hint {
+    display: none;
+  }
+}
