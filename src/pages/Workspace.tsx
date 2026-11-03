@@ -10,7 +10,8 @@ import type { Entity } from '../components/EntitySheet';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
-import { AmbassadorsPlaza, PipelineCity } from '../components/Scenes';
+import { AmbassadorsPlaza, AppStoreScene, PipelineCity, ReviewCards } from '../components/Scenes';
+import logo421 from '../assets/logo-421-blanc.svg';
 import StatPanel from '../components/StatPanel';
 import TabBar from '../components/TabBar';
 import WorkspaceHeader from '../components/WorkspaceHeader';
@@ -182,6 +183,8 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             <PipelineCity project={project} module={module} onSelect={setOpen} />
           ) : module.slug === 'ambassadeurs' ? (
             <AmbassadorsPlaza project={project} module={module} onSelect={setOpen} />
+          ) : module.slug === 'app-store' ? (
+            <AppStoreScene project={project} module={module} rating={module.heroNum} icon={logo421} onSelect={setOpen} />
           ) : (
             <ProjectScene project={project} current={module.slug} />
           )}
@@ -215,7 +218,9 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             {listMeta}
           </span>
         </div>
-        {module.view.kind === 'table' ? (
+        {module.slug === 'app-store' ? (
+          <ReviewCards rows={rows} onOpen={setOpen} onAction={onAction} />
+        ) : module.view.kind === 'table' ? (
           <DataTable caption={listTitle} columns={module.view.columns} rows={rows} onOpen={setOpen} />
         ) : (
           <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={onAction} onOpen={setOpen} />

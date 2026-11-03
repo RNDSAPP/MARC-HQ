@@ -44,11 +44,13 @@ export type SceneItem = {
  * Wrapper shared by the module scenes: day/night, a map you can walk around, a numbered marker
  * on each item, and the names in a list under the map (legible, unlike labels on the drawing).
  */
-function SceneFrame({ project, box, art, lights, items, title, onSelect }: {
+function SceneFrame({ project, box, art, lights, lit, items, title, onSelect }: {
   project: Project;
   box: [number, number, number, number];
   art: ReactNode;
   lights?: ReactNode;
+  /** Areas that stay lit at night (outlines in drawing units). */
+  lit?: string[];
   items: SceneItem[];
   title: string;
   onSelect: (id: string) => void;
@@ -86,7 +88,7 @@ function SceneFrame({ project, box, art, lights, items, title, onSelect }: {
             <SceneDefs />
             <rect x={x} y={y} width={w} height={h} fill="url(#bld-ground)" />
             {art}
-            <SkyTint box={box} />
+            <SkyTint box={box} lit={lit} />
             <g className="night-lights">{lights}</g>
             <rect x={x} y={y} width={w} height={h} filter="url(#bld-grain)" />
           </svg>
@@ -249,6 +251,10 @@ export function PipelineCity({ project, module, onSelect }: { project: Project; 
       title={`${project.pipeline.title} en ville`}
       items={items}
       onSelect={onSelect}
+      lit={counts.map(({ column }) => {
+        const [ds, dt] = at[column.tone];
+        return points([o[0], o[1] - 8], [[ds, dt], [ds + district, dt], [ds + district, dt + district], [ds, dt + district]]);
+      })}
       art={
         <>
           <polygon points={points(o, [[district, -400], [district + STREET, -400], [district + STREET, span + 400], [district, span + 400]])} fill="url(#bld-asphalt)" />
@@ -380,6 +386,7 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
       title="Les ambassadeurs sur la place"
       items={items}
       onSelect={onSelect}
+      lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
       art={
         <>
           <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={30} h={8} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
@@ -401,5 +408,147 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
         </>
       }
     />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// App Store: the game on a big phone standing on its plate, the reviews around it.
+
+const stars = (n: number) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+
+/**
+ * The App Store module as a scene: a big phone shows the game's icon and its rating, the latest
+ * reviews float around it as bubbles with their stars; those still waiting for an answer are amber.
+ */
+export function AppStoreScene({ project, module, rating, icon, onSelect }: {
+  project: Project;
+  module: Module;
+  rating: string;
+  icon: string;
+  onSelect: (name: string) => void;
+}) {
+  if (module.view.kind !== 'table') return null;
+  const reviews = module.view.rows.map(([text, note, date, status]) => ({ text, note: parseInt(note, 10) || 0, date, status }));
+  const size = 360;
+  const o: Point = [0.866 * size + 60, 120];
+  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 170];
+  // The phone stands in the middle of the plate, its screen turned to us
+  const p = { s0: 150, s1: 214, t: 196, h: 150 };
+  const screen = (s: number, h: number): [number, number] => {
+    const [x, y] = iso(o, s, p.t);
+    return [x, y - h];
+  };
+  const [sx, sy] = screen(p.s0 + 8, p.h - 10);
+  // Bubbles around the phone, alternately left and right, rising
+  const spots: Point[] = [
+    [60, 250],
+    [300, 120],
+    [70, 140],
+    [310, 250],
+    [190, 330],
+    [30, 320],
+  ];
+  const items: SceneItem[] = reviews.map((review, i) => {
+    const [s, t] = spots[i % spots.length];
+    const [x, y] = iso(o, s, t);
+    const waiting = normalize(review.status).includes('repondre');
+    return {
+      id: review.text,
+      x,
+      y: y - 70,
+      label: `« ${review.text} »`,
+      sub: `${stars(review.note)} · ${review.date} · ${review.status}`,
+      tone: waiting ? 'alert' : 'accent',
+    };
+  });
+
+  return (
+    <SceneFrame
+      project={project}
+      box={box}
+      title="Les avis App Store"
+      items={items}
+      onSelect={onSelect}
+      lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
+      art={
+        <>
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <FloorText origin={[o[0], o[1] - 8]} s={34} t={size - 16} size={20}>
+            {`NOTE ${rating} · ${reviews.length} AVIS RÉCENTS`}
+          </FloorText>
+          {/* Phone: shadow, side, back edge, then the screen face */}
+          <polygon points={points(o, [[p.s0, p.t - 14], [p.s1 + 30, p.t - 14], [p.s1 + 30, p.t + 20], [p.s0, p.t + 6]])} fill="#000" fillOpacity="0.18" filter="url(#bld-blur-m)" />
+          <polygon points={solid(o, [[p.s1, p.t - 12, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s1, p.t - 12, 8 + p.h]])} fill="#2A2A2C" />
+          <polygon points={solid(o, [[p.s0, p.t - 12, 8 + p.h], [p.s1, p.t - 12, 8 + p.h], [p.s1, p.t, 8 + p.h], [p.s0, p.t, 8 + p.h]])} fill="#3A3A3D" />
+          <polygon points={solid(o, [[p.s0, p.t, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s0, p.t, 8 + p.h]])} fill="#1C1C1E" />
+          <polygon points={solid(o, [[p.s0 + 4, p.t, 14], [p.s1 - 4, p.t, 14], [p.s1 - 4, p.t, 4 + p.h], [p.s0 + 4, p.t, 4 + p.h]])} fill="#F4F2FA" />
+          {/* On the screen: the game's icon, its name and rating */}
+          <g transform={`matrix(0.866 0.5 0 1 ${sx} ${sy})`}>
+            <rect x="8" y="8" width="40" height="40" rx="10" className="lot-cap" />
+            <image href={icon} x="12" y="12" width="32" height="32" />
+            <text x="28" y="66" textAnchor="middle" fontSize="9" fontWeight="700" fill="#1C1C1E">
+              {project.name}
+            </text>
+            <text x="28" y="86" textAnchor="middle" fontSize="16" fontWeight="300" fill="#1C1C1E">
+              {rating}
+            </text>
+            <text x="28" y="98" textAnchor="middle" fontSize="8" fill="#F0B44C">
+              ★★★★★
+            </text>
+            <rect x="12" y="108" width="32" height="10" rx="5" className="lot-cap" />
+          </g>
+          {/* Review bubbles, standing on thin stems */}
+          {reviews.map((review, i) => {
+            const [s, t] = spots[i % spots.length];
+            const [x, y] = iso(o, s, t);
+            const waiting = normalize(review.status).includes('repondre');
+            return (
+              <g key={review.text}>
+                <ellipse cx={x} cy={y - 8} rx="10" ry="4" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+                <line x1={x} y1={y - 8} x2={x} y2={y - 46} stroke="#CFCFCF" strokeWidth="1.5" />
+                <rect x={x - 36} y={y - 74} width="72" height="28" rx="12" fill="#FFFFFF" stroke={waiting ? '#F0B44C' : '#E2E2E2'} strokeWidth="1.2" />
+                <text x={x} y={y - 56} textAnchor="middle" fontSize="11" fill="#F0B44C" letterSpacing="1">
+                  {stars(review.note)}
+                </text>
+              </g>
+            );
+          })}
+        </>
+      }
+    />
+  );
+}
+
+/** Reviews as cards: stars, the quote, the date, its status, and an answer button for those waiting. */
+export function ReviewCards({ rows, onOpen, onAction }: { rows: string[][]; onOpen: (name: string) => void; onAction: (label: string) => void }) {
+  return (
+    <ul className="reviews">
+      {rows.map(([text, note, date, status]) => {
+        const n = parseInt(note, 10) || 0;
+        const waiting = normalize(status).includes('repondre');
+        return (
+          <li key={text} className={`review${waiting ? ' review--waiting' : ''}`}>
+            <div className="review-top">
+              <span className="review-stars" aria-label={`${n} étoiles sur 5`}>
+                {stars(n)}
+              </span>
+              <span className="review-date">{date}</span>
+            </div>
+            <button type="button" className="review-text" onClick={() => onOpen(text)}>
+              « {text} »
+            </button>
+            <div className="review-foot">
+              <span className={`review-status${waiting ? ' review-status--waiting' : ''}`}>{status}</span>
+              {waiting && (
+                <button type="button" className="review-answer" onClick={() => onAction(`Répondre : ${text}`)}>
+                  Répondre
+                </button>
+              )}
+            </div>
+          </li>
+        );
+      })}
+      {rows.length === 0 && <li className="tool-empty">Aucun avis ne correspond.</li>}
+    </ul>
   );
 }
