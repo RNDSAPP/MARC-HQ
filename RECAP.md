@@ -24,9 +24,13 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (151 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (152 points).
 
-## Lancer l'app
+## Ouvrir l'app
+
+En ligne : **https://marc-hq-two.vercel.app**, sur ordinateur comme sur téléphone.
+
+## Lancer l'app sur le Mac
 
 Dans le dossier `marc-hq` :
 
@@ -54,7 +58,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 2. **Brancher les boutons d'action** : « Signer les contrats », « Confier à l'agent », « Valider », « Signer », « Relancer », « Ajouter un club »… Ils affichent pour l'instant un message « pas encore branché ».
 3. **Synchroniser tâches, notes et idées entre appareils** : aujourd'hui elles sont enregistrées dans le navigateur seulement. Avec Supabase, elles seront les mêmes partout.
 5. **Afficher les outils à l'intérieur de Marc HQ** (sans quitter la page) : possible seulement avec une version « app de bureau » (Tauri ou Electron), les sites refusant d'être intégrés dans une page web.
-6. **Mettre l'app en ligne** : tout est prêt pour Vercel (`vercel.json`). Il reste à importer le dépôt dans Vercel et à y coller l'adresse et la clé publique Supabase.
+6. ~~**Mettre l'app en ligne**~~ Fait : https://marc-hq-two.vercel.app (Vercel, compte RNDSAPP), mise à jour toute seule à chaque envoi sur GitHub.
 
 ## Points à valider avec toi
 
