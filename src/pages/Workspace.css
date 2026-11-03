@@ -285,12 +285,26 @@
     font-size: 20px;
   }
 
+  /* On phones the panel is no longer a white page of its own: the chart and the tasks become two
+     cards in the flow of the page, and its title (already in the header) goes */
   .workspace-panel {
-    padding: 28px 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
+    display: flex;
+    gap: 16px;
+    padding: 0 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 40px);
+    background: transparent;
+    border-top: 0;
   }
 
   .workspace-panel-title {
-    font-size: 26px;
+    display: none;
+  }
+
+  .workspace-panel > * {
+    padding: 20px 18px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-2xl);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
   }
 
   .workspace-notice {

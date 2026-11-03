@@ -173,10 +173,9 @@
     gap: 12px;
   }
 
+  /* On phones the project switcher on the right already shows the logo */
   .wh-mark {
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
+    display: none;
   }
 
   .wh-title {
