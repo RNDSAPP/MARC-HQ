@@ -31,6 +31,22 @@
   gap: 16px;
 }
 
+.home-account {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .home-title-block {
+    width: 100%;
+  }
+
+  .home-account {
+    display: block;
+    align-self: flex-start;
+    margin-left: auto;
+  }
+}
+
 /* The HQ logo is in the side rail; the header shows it on phones only */
 .home-logo {
   display: none !important;

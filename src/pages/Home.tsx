@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import AccountButton from '../components/AccountButton';
 import AppRail from '../components/AppRail';
 import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
@@ -39,6 +40,10 @@ export default function Home() {
                 <span className="home-title-light">Marc HQ</span> <span className="home-title-bold">RNDS et Club 421</span>
               </h1>
             </div>
+            {/* On phones the side rail is hidden: Marc's round sits here */}
+            <span className="home-account">
+              <AccountButton placement="down" />
+            </span>
           </div>
           <ul className="home-pills" aria-label="État des agents">
             <li className="home-pill">

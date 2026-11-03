@@ -4,7 +4,7 @@ import type { Project } from '../data/types';
 import { TOOLS, shortLabel } from '../data/sections';
 import { agentStatusLabel, projectStatus } from '../lib/format';
 import { useStored } from '../hooks/useStored';
-import { supabase } from '../lib/supabase';
+import AccountButton from './AccountButton';
 import ModuleIcon from './ModuleIcon';
 import { openNewProject } from './NewProjectDialog';
 import ProjectMark from './ProjectMark';
@@ -106,17 +106,7 @@ export default function AppRail({ projects, current }: Props) {
           </svg>
           <span className="rail-toggle-label">Réduire</span>
         </button>
-        <button
-          type="button"
-          className="rail-user"
-          title="Se déconnecter de Marc HQ"
-          aria-label="Se déconnecter de Marc HQ"
-          onClick={() => {
-            if (window.confirm('Se déconnecter de Marc HQ sur cet appareil ?')) supabase?.auth.signOut();
-          }}
-        >
-          MB
-        </button>
+        <AccountButton />
       </div>
     </nav>
   );
