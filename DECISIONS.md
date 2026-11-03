@@ -223,3 +223,4 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 
     La synchronisation part toute seule, un instant après chaque changement. Une tâche faite ou supprimée disparaît de l'agenda. L'autorisation demandée ne permet de gérer que les agendas que Marc HQ a créés lui-même : aucun autre agenda ni événement de Marc n'est lu ni modifié. Chaque événement porte sa clé Marc HQ, donc rien n'est jamais créé en double. Les soirées et le pipeline sont encore des données d'exemple, donc leurs événements aussi, jusqu'au branchement des vraies données.
 150. **Une seule adresse de retour Google** (`google-callback`) sert pour l'agenda comme pour les mails : il n'y a qu'un URI à déclarer chez Google.
+151. **Boutons « Ouvrir l'espace » de l'accueil** : le texte est blanc, sur un fond plein dans la couleur du projet, qui fonce un peu au survol.

@@ -137,13 +137,12 @@
   gap: 8px;
   min-height: 44px;
   border-radius: var(--r-pill);
-  background: var(--accent-tint);
-  color: var(--accent-soft);
+  background: var(--accent);
+  color: #ffffff;
   font-size: 15px;
   font-weight: 600;
 }
 
 .pcard-open:hover {
-  background: var(--accent);
-  color: var(--on-accent);
+  filter: brightness(0.92);
 }
