@@ -79,11 +79,13 @@
 
 .pmap-figure {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px;
+  column-gap: 6px;
 }
 
 .pmap-num {
+  white-space: nowrap;
   font-size: 24px;
   font-weight: 300;
   letter-spacing: -0.02em;
@@ -147,4 +149,30 @@
   font-weight: 600;
   text-align: center;
   color: var(--text-2);
+}
+
+/* Phones: modules two by two, compact; tools one per row */
+@media (max-width: 600px) {
+  .pmap-grid:not(.pmap-grid--tools) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .pmap-tile--module {
+    gap: 6px;
+    padding: 14px;
+  }
+
+  .pmap-tile--module .pmap-line,
+  .pmap-tile--module .pmap-label {
+    display: none;
+  }
+
+  .pmap-num {
+    font-size: 22px;
+  }
+
+  .pmap-grid--tools {
+    gap: 8px;
+  }
 }

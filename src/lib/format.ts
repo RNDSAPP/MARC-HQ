@@ -37,3 +37,18 @@ export function projectStatus(project: Project): AgentStatus {
   if (statuses.includes('work')) return 'work';
   return 'done';
 }
+
+/**
+ * Big numbers written short, as on social networks: 900 stays 900, 1 000 becomes 1k, 3 412
+ * becomes 3,4k, 12 400 becomes 12k, 1 250 000 becomes 1,3M. Works inside a short figure such as
+ * "+1 200", "3 412 €" or "2 930" (sign and unit kept); anything else is left as it is.
+ */
+export function compact(text: string) {
+  return text.replace(/\d{1,3}(?:[\s  ]\d{3})+(?:,\d+)?|\d{4,}(?:,\d+)?/g, (match) => {
+    const value = parseFloat(match.replace(/[\s  ]/g, '').replace(',', '.'));
+    if (!Number.isFinite(value) || value < 1000) return match;
+    const [base, unit] = value >= 1_000_000 ? [value / 1_000_000, 'M'] : [value / 1000, 'k'];
+    const short = base >= 10 ? Math.round(base).toString() : (Math.round(base * 10) / 10).toString().replace('.', ',');
+    return `${short}${unit}`;
+  });
+}

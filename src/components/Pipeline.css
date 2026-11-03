@@ -210,3 +210,14 @@
   position: relative;
   z-index: 1;
 }
+
+/* Nothing at all yet: one calm line instead of empty columns */
+.pipeline-none {
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--r-2xl);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

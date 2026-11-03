@@ -1,4 +1,5 @@
-// Sample data for Club 421, taken from reference/maquette.dc.html.
+// Club 421 in Marc HQ: real figures only. What is not plugged in yet is at 0; the App Store
+// comes live from App Store Connect, the agents from Claude Code, the tasks from Supabase.
 import type { Project } from './types';
 
 export const club421: Project = {
@@ -9,28 +10,10 @@ export const club421: Project = {
   space: 'Espace Club 421',
   searchPlaceholder: 'Rechercher un BDE, une soirée, un avis',
 
-  agents: [
-    {
-      name: 'Agent iOS',
-      task: 'Soumet la version 1.3 avec le mode équipe. Review Apple en cours.',
-      status: 'work',
-      when: 'en direct',
-      action: 'Suivre',
-    },
-    {
-      name: 'Agent partenariats',
-      task: '3 mails de relance BDE sont prêts, ils attendent ton envoi.',
-      status: 'done',
-      when: 'il y a 40 min',
-      action: 'Relire',
-    },
-  ],
+  // Real agents come from Claude Code (marc-hq skill, lib/agents.ts); none written here
+  agents: [],
 
-  todos: [
-    { id: 'club421-1', text: 'Confirmer la soirée du 14 avec le BDE Commerce', due: 'Auj.' },
-    { id: 'club421-2', text: 'Relancer le BDE Ingé', due: 'Auj.' },
-    { id: 'club421-3', text: 'Répondre aux 4 avis App Store', due: 'Jeu.' },
-  ],
+  todos: [],
 
   pipeline: {
     title: 'Pipeline BDE',
@@ -50,15 +33,15 @@ export const club421: Project = {
       headline: 'Premier BDE à trouver',
       sub: 'Pas encore de BDE partenaire ni de revenu. Ajoute un premier BDE pour lancer les soirées.',
       cta: 'Ajouter un BDE',
-      heroLabel: 'Téléchargements cette semaine',
-      heroNum: '+184',
-      heroDelta: '+32 %',
-      series: [60, 72, 68, 90, 85, 104, 98, 120, 131, 126, 140, 184],
+      heroLabel: 'BDE partenaires',
+      heroNum: '0',
+      heroDelta: 'pas encore',
+      series: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       kpis: [
-        { label: 'Téléchargements', value: '2 930', delta: '+184' },
+        { label: 'Téléchargements', value: '–', delta: 'à brancher' },
         { label: 'CA du mois', value: '0 €', delta: '' },
         { label: 'BDE partenaires', value: '0', delta: '' },
-        { label: 'Note App Store', value: '4,7', delta: '+0,1' },
+        { label: 'Note App Store', value: '–', delta: '' },
       ],
       view: { kind: 'pipeline' },
     },
@@ -84,58 +67,49 @@ export const club421: Project = {
     {
       slug: 'soirees',
       label: 'Soirées',
-      count: '2',
-      headline: '2 soirées ce mois',
-      sub: '120 joueurs en moyenne par soirée. De quoi viser une finale inter BDE en décembre.',
+      count: '0',
+      headline: 'Pas encore de soirée',
+      sub: 'Les soirées viendront avec les premiers BDE : chacune apparaîtra ici avec sa date, et dans ton Google Agenda.',
       cta: 'Créer une soirée',
       heroLabel: 'Joueurs par soirée',
-      heroNum: '120',
-      heroDelta: '+20',
-      series: [40, 55, 60, 70, 80, 85, 90, 95, 100, 105, 110, 120],
+      heroNum: '0',
+      heroDelta: 'pas encore',
+      series: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       kpis: [
-        { label: 'Prévues', value: '2', delta: 'ce mois' },
-        { label: 'Réalisées', value: '5', delta: 'au total' },
-        { label: 'Joueurs', value: '600', delta: 'cumul' },
-        { label: 'Téléchargements le soir', value: '+38', delta: 'moyenne' },
+        { label: 'Prévues', value: '0', delta: '' },
+        { label: 'Réalisées', value: '0', delta: '' },
+        { label: 'Joueurs', value: '0', delta: '' },
+        { label: 'Téléchargements le soir', value: '–', delta: '' },
       ],
       view: {
         kind: 'table',
         title: 'Agenda',
         columns: ['Soirée', 'BDE', 'Date', 'Statut'],
-        rows: [
-          ['Tournoi 421', 'BDE Commerce Lyon', '14 nov.', 'À confirmer'],
-          ['Soirée dés', 'BDE Médecine', '28 nov.', 'Confirmé'],
-          ['Finale inter BDE', 'Tous', 'Décembre', 'Idée'],
-        ],
+        rows: [],
       },
     },
+    // App Store: filled live from App Store Connect once signed in (lib/appstore.ts, withStore)
     {
       slug: 'app-store',
       label: 'App Store',
-      count: '4',
-      headline: '4 avis attendent une réponse',
-      sub: 'La 1.3 est en review. Tu peux répondre au joueur qui réclamait le mode équipe : il arrive.',
+      headline: 'Avis App Store',
+      sub: 'Les avis et les versions arrivent en direct d’App Store Connect.',
       cta: 'Répondre aux avis',
-      heroLabel: 'Note moyenne, 62 avis',
-      heroNum: '4,7',
-      heroDelta: '+0,1',
-      series: [4.3, 4.4, 4.4, 4.5, 4.5, 4.5, 4.6, 4.6, 4.6, 4.7, 4.7, 4.7],
+      heroLabel: 'Note moyenne',
+      heroNum: '–',
+      heroDelta: '',
+      series: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       kpis: [
-        { label: 'Téléchargements', value: '2 930', delta: '+184' },
-        { label: 'Note', value: '4,7', delta: '+0,1' },
-        { label: 'Version', value: '1.2', delta: '1.3 en review' },
-        { label: 'Crashs', value: '0,2 %', delta: '-0,1' },
+        { label: 'En ligne', value: '–', delta: '' },
+        { label: 'Dernière version', value: '–', delta: '' },
+        { label: 'Avis écrits', value: '0', delta: '' },
+        { label: 'À répondre', value: '0', delta: '' },
       ],
       view: {
         kind: 'table',
         title: 'Derniers avis',
         columns: ['Avis', 'Note', 'Date', 'Statut'],
-        rows: [
-          ['Parfait en soirée', '5', 'Hier', 'À répondre'],
-          ['Il manque un mode équipe', '4', 'Lun.', 'À répondre'],
-          ['Les dés dorés valent le coup', '5', 'Dim.', 'À répondre'],
-          ['Trop addictif', '5', 'Sam.', 'Répondu'],
-        ],
+        rows: [],
       },
     },
     {
@@ -166,15 +140,15 @@ export const club421: Project = {
   home: {
     label: 'Club 421',
     floor: 'Rez-de-chaussée',
-    summary: '+184 téléchargements · 0 € ce mois',
-    big: '+184',
-    bigLabel: 'téléchargements cette semaine',
+    summary: '0 BDE · 0 € ce mois',
+    big: '0 €',
+    bigLabel: 'chiffre d’affaires ce mois',
     mini: [
       { label: 'CA du mois', value: '0 €' },
       { label: 'BDE partenaires', value: '0' },
     ],
-    trendModule: 'vue-d-ensemble',
+    trendModule: 'revenus',
     shortTag: '421',
-    todos: [{ text: 'Confirmer la soirée du 14' }, { text: 'Répondre aux 4 avis App Store' }],
+    todos: [],
   },
 };

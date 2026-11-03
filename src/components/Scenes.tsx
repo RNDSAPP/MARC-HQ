@@ -24,6 +24,7 @@ import MapViewport from './MapViewport';
 import { VERSION_STATE } from '../lib/appstore';
 import type { StoreData, StoreReview } from '../lib/appstore';
 import './Scenes.css';
+import { compact } from '../lib/format';
 
 const normalize = (text: string) =>
   text
@@ -128,7 +129,7 @@ function SceneFrame({ project, box: plateBox, art, lights, lit, items, title, on
                 <span className="scene-legend-name">{item.label}</span>
                 <span className="scene-legend-sub">{item.sub}</span>
               </span>
-              {item.value && <span className="scene-legend-value">{item.value}</span>}
+              {item.value && <span className="scene-legend-value">{compact(item.value)}</span>}
             </button>
           </li>
         ))}
@@ -593,7 +594,7 @@ export function AppStorePanel({ project, module, rating, icon, live }: { project
         {facts.map((kpi) => (
           <div key={kpi.label} className="store-fact">
             <dt>{kpi.label}</dt>
-            <dd>{kpi.value}</dd>
+            <dd>{compact(kpi.value)}</dd>
             <dd className="store-fact-delta">{kpi.delta}</dd>
           </div>
         ))}
@@ -996,7 +997,7 @@ export function RevenueCards({ rows, onOpen }: { rows: string[][]; onOpen: (name
         <li key={month} className={`revenue${i === 0 ? ' revenue--now' : ''}`}>
           <button type="button" className="revenue-open" onClick={() => onOpen(month)}>
             <span className="revenue-month">{month}</span>
-            <span className="revenue-ca">{ca}</span>
+            <span className="revenue-ca">{compact(ca)}</span>
             <span className="revenue-bar" aria-hidden="true">
               <span style={{ width: `${(euros(ca) / max) * 100}%` }} />
             </span>
@@ -1336,7 +1337,7 @@ export function FollowersScene({ project, module, onSelect }: { project: Project
                     {st.name}
                   </text>
                   <text y="10" textAnchor="middle" fontSize="9" fontWeight="300" fill="#FFFFFF" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif">
-                    {st.count}
+                    {compact(st.count)}
                   </text>
                 </g>
                 {/* Outer wall, a band in the platform's colour, the stands */}
@@ -1397,7 +1398,7 @@ export function FollowerCards({ rows, onOpen }: { rows: string[][]; onOpen: (nam
         <li key={name} className="revenue">
           <button type="button" className="revenue-open" onClick={() => onOpen(name)}>
             <span className="revenue-month">{name}</span>
-            <span className="revenue-ca">{count}</span>
+            <span className="revenue-ca">{compact(count)}</span>
             <span className="revenue-bar" aria-hidden="true">
               <span style={{ width: `${(euros(count) / total) * 100}%`, background: 'var(--accent)' }} />
             </span>

@@ -2,7 +2,7 @@ import { useEffect, useId, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { Project, ProjectId } from '../data/types';
-import { agentStatusLabel, projectStatus } from '../lib/format';
+import { agentStatusLabel, compact, projectStatus } from '../lib/format';
 import MapViewport from './MapViewport';
 import ModuleIcon from './ModuleIcon';
 import { useStored } from '../hooks/useStored';
@@ -52,11 +52,11 @@ export default function Building({ projects }: Props) {
                   <span className="building-label-name">{project.home.label}</span>
                   <span className="building-label-floor">{project.home.floor}</span>
                 </span>
-                <span className="building-label-summary">{project.home.summary}</span>
+                <span className="building-label-summary">{compact(project.home.summary)}</span>
                 <span className="building-label-foot">
                   <span className={`building-label-status building-label-status--${status}`}>
                     <span className="building-label-dot" aria-hidden="true" />
-                    Agent : {agentStatusLabel[status]}
+                    Agent : {project.agents.length ? agentStatusLabel[status] : 'aucun pour l’instant'}
                   </span>
                   <span className="building-label-enter" aria-hidden="true">
                     Entrer →

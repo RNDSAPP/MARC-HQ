@@ -244,14 +244,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.72);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.35), var(--shadow-pop);
+  background: var(--surface);
+  box-shadow: 0 6px 16px -6px rgb(20 20 40 / 0.35), 0 0 0 1px var(--hairline);
   color: var(--accent);
+}
+
+/* On phones the modules are in the pills under the header: the drawing stays clear */
+@media (max-width: 860px) {
+  .scene-spot-item {
+    display: none;
+  }
 }
 
 .scene-spot:hover {

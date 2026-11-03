@@ -310,7 +310,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             )}
             {project.agents.length === 0 && (
               <p className="workspace-empty">
-                Pas encore d'agent pour ce projet. Ouvre Claude depuis <Link to={`/${project.id}/connexions`}>Connexions</Link>.
+                Pas encore d'agent actif. Dans Claude Code, tes agents se signalent ici tout seuls quand ils travaillent sur {project.name}.
               </p>
             )}
           </section>

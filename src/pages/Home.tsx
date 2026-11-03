@@ -49,11 +49,11 @@ export default function Home() {
           <ul className="home-pills" aria-label="État des agents">
             <li className="home-pill">
               <span className="home-pill-dot home-pill-dot--work" aria-hidden="true" />
-              {active} {active > 1 ? 'agents au travail' : 'agent au travail'}
+              {active === 0 ? 'Aucun agent au travail' : `${active} ${active > 1 ? 'agents au travail' : 'agent au travail'}`}
             </li>
             <li className="home-pill">
               <span className="home-pill-dot home-pill-dot--wait" aria-hidden="true" />
-              {waiting} {waiting > 1 ? 'attendent ta réponse' : 'attend ta réponse'}
+              {waiting === 0 ? 'Personne n’attend ta réponse' : `${waiting} ${waiting > 1 ? 'attendent ta réponse' : 'attend ta réponse'}`}
             </li>
           </ul>
         </header>

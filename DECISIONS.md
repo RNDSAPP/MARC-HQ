@@ -245,3 +245,16 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - **Club 421, revenus** : 0 € (un seul mois, novembre, à 0), et 0 € sur l'accueil.
 
     Les titres disent où on en est (« Pas encore d'ambassadeur », « Pas encore de BDE », « 0 € pour l'instant ») et invitent à ajouter le premier. Les soirées, les clubs, les abonnés et les téléchargements gardent pour l'instant leurs chiffres d'exemple.
+163. **Que du vrai** : plus aucun chiffre d'exemple dans les deux projets.
+    - Clubs, ambassadeurs, publications, abonnés, BDE, soirées et revenus sont à 0. Leurs titres disent « Pas encore de… », ou « à brancher » pour les abonnés.
+    - Les faux agents et les fausses tâches de départ sont retirés.
+    - L'App Store vient d'App Store Connect, partout : page App Store, tuile de l'aperçu, note dans les chiffres et étiquette de l'étage sur l'accueil (« 1.7 en attente de review · 0 € ce mois »).
+    - Les agents viennent de Claude Code. Sans agent, on lit « Agent : aucun pour l'instant » et « Aucun agent au travail ».
+
+    Un bug est corrigé : en passant de la page App Store à une autre page, le titre « Avis sur l'App Store » restait affiché.
+164. **Grands nombres écrits court**, comme sur les réseaux : 900 reste 900, 1 000 devient 1k, 3 412 devient 3,4k, 12 400 devient 12k, 1 250 000 devient 1,3M. Ça vaut pour les chiffres, les tuiles, les grands chiffres des panneaux, les étiquettes de l'accueil et les stades.
+165. **Zéro bug d'affichage**, contrôlé sur les 20 pages en largeur téléphone et ordinateur (aucun débordement).
+    - Le menu du profil n'est plus coupé par la barre latérale.
+    - Les libellés longs (« Ambassadeurs ») restent dans leurs tuiles, et les grands nombres ne se coupent plus en deux lignes (« 4 / 900 »).
+    - Sur téléphone, les ronds posés sur les dessins disparaissent (les pastilles des rubriques font ce travail), et les tuiles du plan du projet vont deux par deux, en plus compact.
+    - Un pipeline entièrement vide affiche une seule phrase au lieu de quatre colonnes vides.

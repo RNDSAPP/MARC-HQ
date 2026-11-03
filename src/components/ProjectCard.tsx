@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Project } from '../data/types';
-import { agentStatusLabel, projectStatus } from '../lib/format';
+import { agentStatusLabel, compact, projectStatus } from '../lib/format';
 import ProjectMark from './ProjectMark';
 import WeeklySteps from './WeeklySteps';
 import './ProjectCard.css';
@@ -27,12 +27,12 @@ export default function ProjectCard({ project }: Props) {
         </span>
         <span className={`pcard-status pcard-status--${status}`}>
           <span className="pcard-status-dot" aria-hidden="true" />
-          {agentStatusLabel[status]}
+          {project.agents.length ? agentStatusLabel[status] : 'aucun agent'}
         </span>
       </header>
 
       <div className="pcard-figure">
-        <span className="pcard-num">{home.big}</span>
+        <span className="pcard-num">{compact(home.big)}</span>
         <span className="pcard-label">{home.bigLabel}</span>
       </div>
       <WeeklySteps series={trend.series} label={trend.heroLabel} compact />
@@ -41,7 +41,7 @@ export default function ProjectCard({ project }: Props) {
         {home.mini.map((item) => (
           <div key={item.label} className="pcard-mini">
             <dt>{item.label}</dt>
-            <dd>{item.value}</dd>
+            <dd>{compact(item.value)}</dd>
           </div>
         ))}
       </dl>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Project } from '../data/types';
 import { TOOLS } from '../data/sections';
+import { compact } from '../lib/format';
 import ModuleIcon from './ModuleIcon';
 import './ProjectMap.css';
 
@@ -45,7 +46,7 @@ export default function ProjectMap({ project, counts }: { project: Project; coun
               </span>
               <span className="pmap-name">{module.label}</span>
               <span className="pmap-figure">
-                <span className="pmap-num">{module.heroNum}</span>
+                <span className="pmap-num">{compact(module.heroNum)}</span>
                 <span className="pmap-label">{module.heroLabel}</span>
               </span>
               <span className="pmap-line">{module.headline}</span>

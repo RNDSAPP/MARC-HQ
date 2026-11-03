@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import type { CSSProperties, ChangeEvent } from 'react';
 import { useSession } from '../lib/session';
 import { supabase } from '../lib/supabase';
 import './AccountButton.css';
@@ -22,6 +22,8 @@ async function square(file: File) {
 export default function AccountButton({ initials = 'MB', placement = 'up' }: { initials?: string; placement?: 'up' | 'down' }) {
   const session = useSession();
   const [open, setOpen] = useState(false);
+  // The menu is placed on the screen itself, so the side rail (which scrolls) cannot cut it
+  const [spot, setSpot] = useState<CSSProperties>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [newPassword, setNewPassword] = useState<string | null>(null);
@@ -64,11 +66,25 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
 
   return (
     <div className="account" ref={box}>
-      <button type="button" className="account-round" onClick={() => setOpen((was) => !was)} aria-expanded={open} aria-label="Mon compte">
+      <button
+        type="button"
+        className="account-round"
+        onClick={(event) => {
+          const box = event.currentTarget.getBoundingClientRect();
+          setSpot(
+            placement === 'up'
+              ? { left: box.left, bottom: window.innerHeight - box.top + 8 }
+              : { right: window.innerWidth - box.right, top: box.bottom + 8 },
+          );
+          setOpen((was) => !was);
+        }}
+        aria-expanded={open}
+        aria-label="Mon compte"
+      >
         {photo ? <img src={photo} alt="" /> : <span>{initials}</span>}
       </button>
       {open && (
-        <div className={`account-menu account-menu--${placement}`} role="menu">
+        <div className="account-menu" role="menu" style={spot}>
           {session?.user.email && <p className="account-email">{session.user.email}</p>}
           <button type="button" role="menuitem" className="account-item" onClick={() => picker.current?.click()} disabled={busy || !session}>
             {busy ? 'Enregistrement…' : photo ? 'Changer la photo' : 'Ajouter une photo'}

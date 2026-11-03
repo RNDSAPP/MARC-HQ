@@ -12,6 +12,13 @@ type Props = {
 
 /** Pipeline in columns (clubs for RNDS, BDE for Club 421). */
 export default function Pipeline({ columns, hotAction, onAction, onOpen }: Props) {
+  if (columns.every((column) => column.cards.length === 0)) {
+    return (
+      <p className="pipeline-none">
+        Rien dans le pipeline pour l'instant. Chaque nouveau contact apparaîtra ici, dans son étape : {columns.map((column) => column.name.toLowerCase()).join(', ')}.
+      </p>
+    );
+  }
   return (
     <div className="pipeline">
       {columns.map((column) => (

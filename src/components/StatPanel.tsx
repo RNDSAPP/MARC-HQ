@@ -1,5 +1,6 @@
 import WeeklySteps from './WeeklySteps';
 import './StatPanel.css';
+import { compact } from '../lib/format';
 
 type Props = {
   label: string;
@@ -16,7 +17,7 @@ export default function StatPanel({ label, value, delta, series }: Props) {
         {label}
       </h2>
       <div className="stat-figure">
-        <span className="stat-value">{value}</span>
+        <span className="stat-value">{compact(value)}</span>
         <span className="stat-delta">{delta}</span>
       </div>
       <WeeklySteps series={series} label={label} />
