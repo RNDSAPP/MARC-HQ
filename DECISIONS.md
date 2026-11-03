@@ -21,3 +21,12 @@ Chaque fois que le brief ne tranchait pas, j'ai pris l'option la plus simple. To
 9. **Adresses des rubriques.** Les rubriques ont une adresse sans accent ni espace : `/rnds/vue-d-ensemble`, `/rnds/clubs`, `/rnds/ambassadeurs`, `/rnds/publications`, `/rnds/abonnes`, `/club421/vue-d-ensemble`, `/club421/bde`, `/club421/soirees`, `/club421/app-store`, `/club421/revenus`. `/rnds` seul mène à la vue d'ensemble ; une adresse inconnue ramène à l'accueil.
 10. **Couleur des badges de statut.** Comme dans la maquette, elle se déduit du texte : « Actif », « Prêt », « Confirmé », « Répondu », « Hausse »… en couleur du projet ; « À relancer », « À valider », « À répondre », « À confirmer » en ambre ; le reste en gris.
 11. **Cases « À faire ».** Elles sont gardées dans le stockage de session du navigateur : elles restent cochées quand tu changes de rubrique, de projet ou que tu recharges la page, et repartent à zéro quand tu fermes l'onglet.
+
+## Espace de travail
+
+12. **La recherche filtre vraiment.** Elle cherche dans les cartes du pipeline (nom et détail) ou dans les lignes du tableau de la rubrique ouverte, sans tenir compte des accents ni des majuscules. Le compteur affiche alors « 2 sur 5 ». `⌘K` (ou `Ctrl+K`) place le curseur dans la recherche, `Échap` la vide. Elle se remet à zéro quand tu changes de rubrique.
+13. **Boutons pas encore branchés.** « Signer les contrats », « Confier à l'agent », « Valider », « Signer »… sont de vrais boutons, mais il n'y a pas encore de vraies données derrière. Au lieu de ne rien faire en silence, ils affichent un court message en bas de l'écran qui le dit clairement.
+14. **Projets bien séparés.** Chaque projet a ses propres données, sa propre couleur et ses propres cases cochées (`marc-hq:todos:rnds` et `marc-hq:todos:club421`). Passer d'un projet à l'autre recharge complètement l'espace : rien ne déborde de l'un à l'autre.
+15. **Petits ajouts utiles.** Compteur « 1 / 3 » à côté de « À faire », tâche cochée barrée, titre de l'onglet du navigateur qui suit la rubrique (« Ambassadeurs · RNDS · Marc HQ »), lien « Aller au contenu » pour la navigation au clavier.
+16. **Dates calculées.** La date en haut (« MARDI 3 NOVEMBRE ») et les numéros de semaine sous le graphique (S34 à S45) sont calculés à partir du jour réel, pas écrits en dur.
+17. **Tableau.** C'est un vrai tableau HTML (meilleur pour les lecteurs d'écran), qui défile horizontalement sur petit écran et peut être parcouru au clavier.

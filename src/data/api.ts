@@ -10,10 +10,6 @@ const projects: Record<ProjectId, Project> = { rnds, club421 };
 /** Order of the projects in the switcher and on the home page. */
 export const projectIds: ProjectId[] = ['rnds', 'club421'];
 
-export async function getProject(id: ProjectId): Promise<Project> {
-  return projects[id];
-}
-
 export async function getProjects(): Promise<Project[]> {
   return projectIds.map((id) => projects[id]);
 }

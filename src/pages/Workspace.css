@@ -1,0 +1,111 @@
+.workspace,
+.workspace-loading {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.workspace-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-main:focus {
+  outline: none;
+}
+
+.workspace-body {
+  width: 100%;
+  max-width: 1440px;
+  padding: 36px 36px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.workspace-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.workspace-list {
+  flex: 999 1 560px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.workspace-aside {
+  flex: 1 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.workspace-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.workspace-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.workspace-todo-head {
+  margin-bottom: 8px;
+}
+
+.workspace-h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.workspace-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Short message after clicking an action that is not plugged in yet. */
+.workspace-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.workspace-notice:empty {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .workspace,
+  .workspace-loading {
+    flex-direction: column;
+  }
+
+  .workspace-body {
+    padding: 24px 16px 48px;
+    gap: 22px;
+  }
+}
