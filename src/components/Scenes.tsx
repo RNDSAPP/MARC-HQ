@@ -201,8 +201,7 @@ const cityKind = (module: Module): CityKind => (module.slug === 'clubs' ? 'gym' 
 function cityPlan(project: Project, module: Module) {
   const kind = cityKind(module);
   const counts = project.pipeline.columns.map((column) => ({ column, count: stageCount(column, module) }));
-  // A campus keeps a 2 × 2 corner of each district for its lecture theatre
-  const n = Math.max(5, Math.ceil(Math.sqrt(Math.max(...counts.map((c) => c.count)) + (kind === 'campus' ? 4 : 0))));
+  const n = Math.max(5, Math.ceil(Math.sqrt(Math.max(...counts.map((c) => c.count)))));
   const district = n * SLOT;
   const span = district * 2 + STREET;
   const width = 0.866 * span * 2 + 120;
@@ -210,8 +209,7 @@ function cityPlan(project: Project, module: Module) {
   const box: [number, number, number, number] = [0, 0, width, span + 140];
   // Where each stage sits: affiliated at the back, the ones to sign at the front, nearest to Marc.
   const at: Record<PipelineTone, Point> = { accent: [0, 0], muted: [district + STREET, 0], new: [0, district + STREET], alert: [district + STREET, district + STREET] };
-  const amphi = kind === 'campus' ? [n - 2, n - 1, 2 * n - 2, 2 * n - 1] : [];
-  const order = spreadOrder(n).filter((slot) => !amphi.includes(slot));
+  const order = spreadOrder(n);
   const lots: Lot[] = [];
   for (const { column, count } of counts) {
     const [ds, dt] = at[column.tone];
@@ -227,61 +225,7 @@ function cityPlan(project: Project, module: Module) {
       lots.push({ s: ds + (slot % n) * SLOT + 5, t: dt + Math.floor(slot / n) * SLOT + 5, h, tone: column.tone, name: card?.name, meta: card?.meta, stage: column.name });
     }
   }
-  return { origin, box, district, at, counts, kind, n, lots: lots.sort((a, b) => a.s + a.t - (b.s + b.t)) };
-}
-
-/**
- * An open-air lecture theatre on a campus, in a 2 × 2 corner of a district (s0, t0): stepped
- * half-circles of seats, the highest at the back, each step with its front wall, students seated
- * along the steps, a small stage in the project's colour at the bottom.
- */
-function Amphitheatre({ o, s0, t0 }: { o: Point; s0: number; t0: number }) {
-  const cs = s0 + SLOT + 2;
-  const ct = t0 + SLOT - 2;
-  const base = 8;
-  // The back half of a circle (facing us), from 135° to 315° in floor axes
-  const half = (r: number, h: number) =>
-    Array.from({ length: 17 }, (_, i) => {
-      const a = ((135 + (180 * i) / 16) * Math.PI) / 180;
-      return [cs + r * Math.cos(a), ct + r * Math.sin(a), h] as [number, number, number];
-    });
-  const end = (r: number, sign: number): [number, number] => [cs + sign * r * Math.cos((135 * Math.PI) / 180), ct + sign * r * Math.sin((135 * Math.PI) / 180)];
-  const steps = [0, 1, 2, 3, 4].map((i) => ({ r: 40 - i * 7, h: base + (5 - i) * 4 }));
-  return (
-    <g>
-      <polygon points={points(o, [[cs - 44, ct - 44], [cs + 44, ct - 44], [cs + 44, ct + 20], [cs - 44, ct + 20]])} fill="#2E3470" fillOpacity="0.1" filter="url(#bld-blur-m)" transform={`translate(0 ${-base})`} />
-      {steps.map(({ r, h }, i) => {
-        const [as, at] = end(r, 1);
-        const [bs, bt] = end(r, -1);
-        return (
-          <g key={i}>
-            {/* Front wall of the step along the diameter, then its top */}
-            <polygon points={solid(o, [[as, at, base], [bs, bt, base], [bs, bt, h], [as, at, h]])} fill={i % 2 ? '#D9DCEA' : '#E2E5F0'} />
-            <polygon points={solid(o, half(r, h))} fill={i % 2 ? '#F7F8FC' : '#EEF0F7'} stroke="#DADDEB" strokeWidth="0.5" />
-            {/* Students seated along the step */}
-            {i < 4 &&
-              [0.16, 0.34, 0.52, 0.7, 0.86].map((f, k) => {
-                if ((i * 2 + k) % 3 === 2) return null;
-                const a = ((135 + 180 * f) * Math.PI) / 180;
-                const rr = r - 3.5;
-                const [x, y] = iso(o, cs + rr * Math.cos(a), ct + rr * Math.sin(a));
-                const look = LOOKS[(i * 5 + k * 2) % LOOKS.length];
-                return (
-                  <g key={k}>
-                    <rect x={x - 2.2} y={y - h - 5} width="4.4" height="4.6" rx="1.8" fill={look.top} />
-                    <circle cx={x} cy={y - h - 7.2} r="2.3" fill={look.skin} />
-                    <path d={`M${x - 2.3},${y - h - 7.6} a2.3 2.3 0 0 1 4.6,0 Z`} fill={look.headColor} />
-                  </g>
-                );
-              })}
-          </g>
-        );
-      })}
-      {/* The stage and its lectern */}
-      <polygon points={solid(o, half(9, base + 1))} className="lot-cap" />
-      <polygon points={solid(o, [[cs - 3, ct - 3, base + 1], [cs + 1, ct - 3, base + 1], [cs + 1, ct - 3, base + 9], [cs - 3, ct - 3, base + 9]])} fill="#FFFFFF" stroke="#D6D9E8" strokeWidth="0.5" />
-    </g>
-  );
+  return { origin, box, district, at, counts, kind, lots: lots.sort((a, b) => a.s + a.t - (b.s + b.t)) };
 }
 
 /**
@@ -403,7 +347,7 @@ function CityWindows({ lots, o }: { lots: Lot[]; o: Point }) {
  * the map; a tap opens the club's card. The city grows with the pipeline.
  */
 export function PipelineCity({ project, module, onSelect }: { project: Project; module: Module; onSelect: (name: string) => void }) {
-  const { origin: o, box, district, at, counts, lots, kind, n } = cityPlan(project, module);
+  const { origin: o, box, district, at, counts, lots, kind } = cityPlan(project, module);
   const span = district * 2 + STREET;
   const items: SceneItem[] = lots
     .filter((lot) => lot.name)
@@ -445,12 +389,6 @@ export function PipelineCity({ project, module, onSelect }: { project: Project; 
           })}
           <Tree origin={o} s={span - 18} t={14} size={0.8} base={8} />
           <Tree origin={o} s={14} t={span - 16} size={0.8} base={8} />
-          {/* On a campus, each district has its lecture theatre in its right-hand corner */}
-          {kind === 'campus' &&
-            counts.map(({ column }) => {
-              const [ds, dt] = at[column.tone];
-              return <Amphitheatre key={`amphi-${column.name}`} o={o} s0={ds + (n - 2) * SLOT} t0={dt} />;
-            })}
           {lots.map((lot) => (
             <CityBuilding key={`${lot.s}-${lot.t}`} lot={lot} o={o} kind={kind} />
           ))}
