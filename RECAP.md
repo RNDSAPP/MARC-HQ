@@ -2,7 +2,7 @@
 
 ## Ce qui est fait
 
-Les six étapes du brief sont faites, dans l'ordre, avec un commit local pour chacune (rien n'a été poussé, aucun dépôt distant).
+Les six étapes du brief sont faites, dans l'ordre, avec un commit pour chacune. Le code est sur GitHub, dans le dépôt `ttpcreators/marc.hq`, choisi par Marc le 3 novembre.
 
 1. **Projet** : Vite, React, TypeScript, React Router, tokens de couleur et polices (Big Shoulders Display, Geist, Geist Mono).
 2. **Données** : `src/data/rnds.ts` et `src/data/club421.ts` (tous les textes et chiffres de la maquette), derrière `src/data/api.ts`.
@@ -50,10 +50,9 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 ## Ce qui reste à faire
 
-1. **Brancher les vraies données** (Supabase, puis tes dépôts GitHub et autres sources) : il suffit de réécrire `src/data/api.ts`, les écrans ne bougent pas.
+1. **Brancher les vraies données** (Supabase, puis tes dépôts GitHub et autres sources) : il suffit de réécrire `src/data/api.ts`, les écrans ne bougent pas. La clé publique Supabase est rangée dans `.env.local` (jamais envoyé sur GitHub) ; il manque l'adresse du projet Supabase. Le modèle est dans `.env.example`.
 2. **Brancher les boutons d'action** : « Signer les contrats », « Confier à l'agent », « Valider », « Signer », « Relancer », « Ajouter un club »… Ils affichent pour l'instant un message « pas encore branché ».
 3. **Synchroniser tâches, notes et idées entre appareils** : aujourd'hui elles sont enregistrées dans le navigateur seulement. Avec Supabase, elles seront les mêmes partout.
-4. **Choisir le compte GitHub** puis créer le dépôt distant et pousser.
 5. **Afficher les outils à l'intérieur de Marc HQ** (sans quitter la page) : possible seulement avec une version « app de bureau » (Tauri ou Electron), les sites refusant d'être intégrés dans une page web.
 6. **Mettre l'app en ligne**, si tu veux y accéder depuis ton téléphone.
 
@@ -61,7 +60,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 1. **Couleurs.** L'app est passée en thème clair, à ta demande. RNDS suit sa charte (rouge `#FF0A3C`). Club 421 est en violet (`#7C4DFF`) à ta demande ; envoie-moi sa charte quand elle est prête pour caler la teinte exacte.
 2. ~~**Titres façon Apple ou façon affiche ?**~~ Réglé : les grands titres restent dans la police d'Apple, en minuscules (validé par Marc le 3 novembre).
-3. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
+3. **Identité des commits.** Marc HQ est sur le compte GitHub ttpcreators : les nouveaux commits sont signés « ttpcreators ». Les commits faits avant le 3 novembre restent signés « Marc Bouraoui » avec ton adresse Gmail. Je peux réécrire leur auteur si tu veux, mais il faudra forcer l'envoi sur GitHub.
 4. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.
 5. **Adresses des rubriques** sans accent (`/rnds/abonnes`, `/club421/soirees`…). Ça te va ?
 6. **Les étiquettes d'étage** sont un peu plus larges que dans la maquette, pour que le texte tienne sur une ligne.
