@@ -89,7 +89,7 @@
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05);
 
   /* Mobile tab bar height (without the iPhone home indicator area) */
-  --tabbar-h: 58px;
+  --tabbar-h: 54px;
 }
 
 /* Recomputed on each project element, so it picks up that project's accent */

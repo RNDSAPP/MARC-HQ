@@ -4,28 +4,43 @@
 }
 
 @media (max-width: 860px) {
+  /* A floating pill of frosted glass, off the edges, like iOS's Liquid Glass tab bar; the open
+     tab sits in a lighter bubble inside it */
   .tabbar {
     display: block;
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 14px;
+    right: 14px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
     z-index: 20;
-    padding: 6px 8px env(safe-area-inset-bottom);
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 5px;
+    border: 1px solid rgb(255 255 255 / 0.55);
+    border-radius: 999px;
     background: var(--glass);
     -webkit-backdrop-filter: var(--glass-blur);
     backdrop-filter: var(--glass-blur);
-    border-top: 1px solid var(--hairline);
+    box-shadow:
+      0 10px 30px -12px rgb(20 20 40 / 0.28),
+      0 1px 0 rgb(255 255 255 / 0.6) inset;
+  }
+
+  :root[data-theme='night'] .tabbar {
+    border-color: rgb(255 255 255 / 0.1);
+    box-shadow:
+      0 10px 30px -12px rgb(0 0 0 / 0.6),
+      0 1px 0 rgb(255 255 255 / 0.08) inset;
   }
 
   .tabbar-list {
     list-style: none;
-    margin: 0 auto;
+    margin: 0;
     padding: 0;
-    max-width: 560px;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
+    gap: 2px;
   }
 
   .tabbar-item {
@@ -43,8 +58,20 @@
     color: var(--text-muted);
   }
 
+  .tabbar-item {
+    border-radius: 999px;
+    transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
+  }
+
   .tabbar-item.active {
     color: var(--accent);
+    background: rgb(255 255 255 / 0.75);
+    box-shadow: 0 1px 4px rgb(20 20 40 / 0.08);
+  }
+
+  :root[data-theme='night'] .tabbar-item.active {
+    background: rgb(255 255 255 / 0.12);
+    box-shadow: none;
   }
 
   /* Home tab bar: monochrome glyphs like an iPhone app, the open tab in the text colour */

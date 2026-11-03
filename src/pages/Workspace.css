@@ -294,6 +294,6 @@
   }
 
   .workspace-notice {
-    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 20px);
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 36px);
   }
 }
