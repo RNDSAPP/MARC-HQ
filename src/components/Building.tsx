@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { Project, ProjectId } from '../data/types';
@@ -397,16 +397,6 @@ export function FloorText({ origin, s, t, alongT = false, size = 20, children }:
   );
 }
 
-/** A route on the floor: a solid line and a dashed one beside it, in the project's colour. */
-function Route({ origin, solid, dashed, color }: { origin: Point; solid: Point[]; dashed: Point[]; color: string }) {
-  return (
-    <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
-      <polyline points={points(origin, solid)} strokeWidth="2.4" />
-      <polyline points={points(origin, dashed)} strokeWidth="2.4" strokeDasharray="7 6" />
-    </g>
-  );
-}
-
 // Designer-toy figures: big round head with ears, small eyes under thick brows, round hands,
 // clothes and sneakers in colour. Drawn facing us, feet at (0, 0), about 45 units tall.
 type Headwear = 'cap' | 'bucket' | 'hair' | 'buzz' | 'long';
@@ -425,6 +415,10 @@ export type Look = {
   holds?: 'phone' | 'cup';
   /** Boxing gloves up in guard, in this colour. */
   gloves?: string;
+  /** Short-sleeved tee: bare forearms. */
+  tee?: boolean;
+  /** High boxing boots in the shoes' colour, laced up the shin. */
+  boots?: boolean;
 };
 /**
  * A figure at floor point (s, t). `walk`: it strolls there and back by (ds, dt).
@@ -443,9 +437,13 @@ export type Figure = {
   cheer?: boolean;
   /**
    * selfie: phone held up to film; nap: asleep on a stool; chat: talking, with a speech bubble;
-   * sit: seated on a stool, awake; camera: a photographer, camera up to the eye; pushup: doing push-ups.
+   * sit: seated on a stool, awake; camera: a photographer, camera up to the eye;
+   * curl: working the arms with dumbbells; shake: a bartender shaking a cocktail; shot: knocking back a shot;
+   * tray: a tray of drinks carried up on one hand.
    */
-  pose?: 'selfie' | 'nap' | 'chat' | 'sit' | 'camera' | 'pushup';
+  pose?: 'selfie' | 'nap' | 'chat' | 'sit' | 'camera' | 'curl' | 'shake' | 'shot' | 'tray';
+  /** Laughing: eyes closed in two arcs, mouth open. Everyone else smiles. */
+  laugh?: boolean;
 };
 
 export const SKIN = { light: '#F3C9AE', rose: '#EDB89A', tan: '#C98B62', deep: '#8A5636' };
@@ -517,7 +515,7 @@ function limb(x1: number, y1: number, x2: number, y2: number, width: number) {
 }
 
 /** A designer-toy figure standing at floor point (s, t). */
-export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run }: Figure & { origin: Point }) {
+export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run, laugh }: Figure & { origin: Point }) {
   const [x, y] = iso(origin, s, t);
   // Small idle motions (Building.css): boxers hop and jab, walkers stroll, the others breathe.
   // Each figure starts at a different point of its loop so they never move in step.
@@ -527,22 +525,37 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
     '--dy': walk ? `${(0.5 * (walk[0] + walk[1])).toFixed(1)}px` : '0px',
   } as CSSProperties;
   const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : cheer ? ' fig--cheer' : run ? ' fig--run' : walk ? ' fig--walk' : '';
+  const action = pose === 'curl' || pose === 'shake' || pose === 'shot' ? ` fig--${pose}` : '';
   const sleeve = shade(look.top, 0.08);
   const legBottom = look.shorts ? -6.6 : -2.4;
   const crease = shade(look.top, 0.28);
   const selfie = pose === 'selfie';
   const camera = pose === 'camera';
+  const shake = pose === 'shake';
+  const shot = pose === 'shot';
+  const curl = pose === 'curl';
+  const tray = pose === 'tray';
   const arms = look.gloves
     ? [limb(-6, -21, -6.6, -24.6, 4), limb(6, -21, 6.8, -25.2, 4)]
     : camera
       ? [limb(-6.2, -22.4, -5, -27, 4), limb(6.2, -22.4, 5, -27, 4)]
-      : [limb(-6.2, -22.4, -8, -14, 4), selfie ? limb(6.2, -22.4, 9.6, -30, 4) : limb(6.2, -22.4, 8, -14, 4)];
-  const leftHand: Point = camera ? [-5.4, -28] : [-8.2, -12.6];
-  const rightHand: Point = selfie ? [9.8, -31.4] : camera ? [5.4, -28] : [8.2, -12.6];
+      : shake
+        ? [limb(-6.2, -22.4, -1.6, -27.6, 4), limb(6.2, -22.4, 2.8, -29, 4)]
+        : [tray ? limb(-6.2, -22.4, -10.4, -30, 4) : limb(-6.2, -22.4, -8, -14, 4), selfie ? limb(6.2, -22.4, 9.6, -30, 4) : shot ? limb(6.2, -22.4, 8.8, -29.6, 4) : limb(6.2, -22.4, 8, -14, 4)];
+  const leftHand: Point = camera ? [-5.4, -28] : shake ? [-1.4, -28.6] : tray ? [-10.6, -31] : [-8.2, -12.6];
+  const rightHand: Point = selfie ? [9.8, -31.4] : camera ? [5.4, -28] : shake ? [2.8, -30] : shot ? [9, -31] : [8.2, -12.6];
+  // A dumbbell held in the fist: a short bar and a weight at each end
+  const dumbbell = ([hx, hy]: Point) => (
+    <g>
+      <rect x={hx - 4.4} y={hy - 0.6} width="8.8" height="1.2" rx="0.6" fill="#8C919A" />
+      {vinyl((f) => <rect x={hx - 5.6} y={hy - 2.4} width="2" height="4.8" rx="0.8" fill={f} />, '#2B2B2B')}
+      {vinyl((f) => <rect x={hx + 3.6} y={hy - 2.4} width="2" height="4.8" rx="0.8" fill={f} />, '#2B2B2B')}
+    </g>
+  );
   // Seated on a stool: asleep (nap) or awake (sit)
   const nap = pose === 'nap' || pose === 'sit';
   return (
-    <g className={`fig${kind}${nap ? ' fig--nap' : ''}`} style={motion}>
+    <g className={`fig${kind}${action}${nap ? ' fig--nap' : ''}`} style={motion}>
     {nap && (
       <g>
         <ellipse cx={x + 2} cy={y + 1} rx="11" ry="3.4" fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-s)" />
@@ -553,8 +566,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
     <g className="fig-body">
     <g transform={`translate(${x.toFixed(1)} ${(y - (nap ? 6 : 0)).toFixed(1)}) scale(0.92${nap ? ' 0.86' : ''}) rotate(${nap ? -6 : 0})`}>
       <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#2E3470" fillOpacity="0.2" filter="url(#bld-blur-s)" />
-      {/* For push-ups the whole body tips over from the feet, and rises and falls (Building.css) */}
-      <g className={pose === 'pushup' ? 'fig-pushup' : undefined}>
+      <g>
 
       {look.head === 'long' && vinyl((f) => <rect x="-9.6" y="-40" width="19.2" height="25" rx="8" fill={f} />, look.headColor)}
 
@@ -569,6 +581,13 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
           <line x1={leg.x + 2.6} y1="-10" x2={leg.x + 2.6} y2={legBottom - 0.6} stroke={shade(look.bottom, 0.22)} strokeWidth="0.5" strokeLinecap="round" />
           <ellipse cx={leg.shoe} cy={-0.7 + leg.drop} rx="3.8" ry="1.2" fill="#F9FAFD" />
           {vinyl((f) => <ellipse cx={leg.shoe} cy={-1.8 + leg.drop} rx="3.6" ry="2.1" fill={f} />, look.shoes)}
+          {look.boots && (
+            <>
+              {vinyl((f) => <rect x={leg.x + 0.2} y={-6.6 + leg.drop} width="4.7" height="5.4" rx="1.6" fill={f} />, look.shoes)}
+              <line x1={leg.x + 1.2} y1={-5.4 + leg.drop} x2={leg.x + 3.9} y2={-5.4 + leg.drop} stroke="#FFFFFF" strokeOpacity="0.7" strokeWidth="0.5" />
+              <line x1={leg.x + 1.2} y1={-3.8 + leg.drop} x2={leg.x + 3.9} y2={-3.8 + leg.drop} stroke="#FFFFFF" strokeOpacity="0.7" strokeWidth="0.5" />
+            </>
+          )}
         </g>
       ))}
 
@@ -582,15 +601,44 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
       {look.gloves ? (
         arms.map((arm, index) => <g key={index}>{vinyl(arm, sleeve)}</g>)
       ) : (
-        <>
+        <g className={shake ? 'fig-shake' : undefined}>
           <g className="fig-arm fig-arm--l">
-            {vinyl(arms[0], sleeve)}
+            {/* Curls: the forearm folds up (Building.css), the fist and its dumbbell rise with it */}
+            <g className={curl ? 'fig-curl-arm' : undefined}>{vinyl(arms[0], look.tee ? look.skin : sleeve)}</g>
+            {look.tee && vinyl((f) => <rect x="-8.2" y="-24" width="4.4" height="5" rx="2" fill={f} />, look.top)}
             {look.holds === 'cup' && vinyl((f) => <path d="M-11.2,-17.8 L-5.4,-17.8 L-6.3,-10.8 L-10.3,-10.8 Z" fill={f} />, '#5B8DEF')}
-            {vinyl((f) => <circle cx={leftHand[0]} cy={leftHand[1]} r="2.8" fill={f} />, look.skin)}
+            <g className={curl ? 'fig-curl-hand' : undefined}>
+              {vinyl((f) => <circle cx={leftHand[0]} cy={leftHand[1]} r="2.8" fill={f} />, look.skin)}
+              {curl && dumbbell(leftHand)}
+            </g>
+            {/* A round tray with two cocktails on it */}
+            {tray && (
+              <g>
+                {vinyl((f) => <ellipse cx="-11" cy="-33.6" rx="7.4" ry="2.2" fill={f} />, '#C9CDD2')}
+                {([[-14, '#F27BA0'], [-8.4, '#F2B33D']] as [number, string][]).map(([gx, drink]) => (
+                  <g key={gx}>
+                    <line x1={gx} y1="-34" x2={gx} y2="-37.4" stroke="#CDD1E5" strokeWidth="0.6" />
+                    <path d={`M${gx - 2.6},${-40.8} L${gx + 2.6},${-40.8} L${gx},${-37.2} Z`} fill="#FFFFFF" fillOpacity="0.9" stroke="#CDD1E5" strokeWidth="0.35" />
+                    <path d={`M${gx - 2},${-40} L${gx + 2},${-40} L${gx},${-37.7} Z`} fill={drink} />
+                  </g>
+                ))}
+              </g>
+            )}
           </g>
           <g className="fig-arm fig-arm--r">
-            {vinyl(arms[1], sleeve)}
-            {vinyl((f) => <circle cx={rightHand[0]} cy={rightHand[1]} r="2.8" fill={f} />, look.skin)}
+            <g className={curl ? 'fig-curl-arm' : undefined}>{vinyl(arms[1], look.tee ? look.skin : sleeve)}</g>
+            {look.tee && vinyl((f) => <rect x="3.8" y="-24" width="4.4" height="5" rx="2" fill={f} />, look.top)}
+            {/* A shot glass, golden, held up */}
+            {shot && (
+              <g>
+                <path d="M6.9,-37.4 L11.1,-37.4 L10.6,-32 L7.4,-32 Z" fill="#FFFFFF" fillOpacity="0.9" stroke="#CDD1E5" strokeWidth="0.4" />
+                <path d="M7.2,-35.6 L10.8,-35.6 L10.6,-32 L7.4,-32 Z" fill="#E8A93A" />
+              </g>
+            )}
+            <g className={curl ? 'fig-curl-hand' : undefined}>
+              {vinyl((f) => <circle cx={rightHand[0]} cy={rightHand[1]} r="2.8" fill={f} />, look.skin)}
+              {curl && dumbbell(rightHand)}
+            </g>
             {look.holds === 'phone' && !selfie && <rect x="7.4" y="-19.6" width="3.4" height="6.2" rx="0.9" fill="#2F6B4C" />}
             {selfie && (
               <g>
@@ -599,7 +647,16 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
               </g>
             )}
           </g>
-        </>
+          {/* The bartender's shaker, held in both hands, shaken (Building.css) */}
+          {shake && (
+            <g>
+              {vinyl((f) => <rect x="-1.6" y="-38.6" width="4.6" height="9.6" rx="1.6" fill={f} />, '#C9CDD2')}
+              {vinyl((f) => <rect x="-0.8" y="-40.4" width="3" height="2.4" rx="1" fill={f} />, '#AEB3BB')}
+              {vinyl((f) => <circle cx={leftHand[0]} cy={leftHand[1]} r="2.8" fill={f} />, look.skin)}
+              {vinyl((f) => <circle cx={rightHand[0]} cy={rightHand[1]} r="2.8" fill={f} />, look.skin)}
+            </g>
+          )}
+        </g>
       )}
 
       {/* Shadow of the head on the shoulders */}
@@ -616,6 +673,17 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
         <g fill="none" stroke={INK} strokeWidth="0.9" strokeLinecap="round">
           <path d="M-4.4,-32 q1.6,1.2 3.2,0" />
           <path d="M1.2,-32 q1.6,1.2 3.2,0" />
+        </g>
+      ) : laugh && look.eyes !== 'sunglasses' ? (
+        <g fill="none" stroke={INK} strokeWidth="1" strokeLinecap="round">
+          <path d="M-4.4,-31.6 q1.6,-2 3.2,0" />
+          <path d="M1.2,-31.6 q1.6,-2 3.2,0" />
+          {look.eyes === 'glasses' && (
+            <g strokeWidth="0.75">
+              <circle cx="-2.8" cy="-32.2" r="2.5" />
+              <circle cx="2.8" cy="-32.2" r="2.5" />
+            </g>
+          )}
         </g>
       ) : look.eyes === 'sunglasses' ? (
         <g>
@@ -644,13 +712,22 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
       )}
       {look.head !== 'cap' && look.head !== 'bucket' && (
         <g stroke={INK} strokeWidth="1" strokeLinecap="round">
-          <line x1="-4.6" y1="-35.8" x2="-1.4" y2="-35" />
-          <line x1="1.4" y1="-35" x2="4.6" y2="-35.8" />
+          <path d="M-4.6,-35.4 Q-3,-36.6 -1.4,-35.8" fill="none" />
+          <path d="M1.4,-35.8 Q3,-36.6 4.6,-35.4" fill="none" />
         </g>
       )}
       <ellipse cx="-5.4" cy="-29.4" rx="1.5" ry="0.8" fill="#E8907A" fillOpacity="0.35" />
       <ellipse cx="5.4" cy="-29.4" rx="1.5" ry="0.8" fill="#E8907A" fillOpacity="0.35" />
-      <line x1="-0.9" y1="-27.8" x2="0.9" y2="-27.8" stroke={shade(look.skin, 0.4)} strokeWidth="0.8" strokeLinecap="round" />
+      {/* Everyone is having a good time: a smile, or laughing mouth open */}
+      {laugh || shot ? (
+        <g>
+          <path d="M-2.6,-28.9 Q0,-28.4 2.6,-28.9 Q2,-25 0,-25 Q-2,-25 -2.6,-28.9 Z" fill="#7A2B2B" />
+          <path d="M-2.1,-28.7 Q0,-28.3 2.1,-28.7 L1.8,-27.9 Q0,-27.6 -1.8,-27.9 Z" fill="#FFFFFF" />
+          <ellipse cx="0" cy="-25.9" rx="1.2" ry="0.6" fill="#E46A6A" />
+        </g>
+      ) : (
+        <path d="M-2.4,-28.7 Q0,-26.2 2.4,-28.7" fill="none" stroke={shade(look.skin, 0.5)} strokeWidth="0.9" strokeLinecap="round" />
+      )}
 
       {look.headphones && (
         <>
@@ -873,30 +950,122 @@ const RNDS_PEOPLE: Figure[] = [
   { s: 262, t: 46, fight: 'bag', look: { skin: SKIN.deep, top: RNDS, bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F', shorts: true, gloves: '#1F1F1F' } },
   // Skipping rope beside the ring
   { s: 60, t: 212, rope: true, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#EFEBE3', shoes: '#F4F4F4', head: 'hair', headColor: '#4A3A30', eyes: 'glasses' } },
-  // Doing push-ups by the ring
-  { s: 300, t: 200, pose: 'pushup', look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#D8DBEB', shorts: true } },
+  // Working the arms with dumbbells by the ring
+  { s: 300, t: 200, pose: 'curl', laugh: true, look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#D8DBEB', shorts: true } },
 ];
 
 const CLUB_PEOPLE: Figure[] = [
-  // At the bar
-  { s: 58, t: 96, look: { skin: SKIN.light, top: '#EFE7D2', bottom: '#2B2B2B', shoes: '#E9DFC8', head: 'hair', headColor: '#1F1F1F', eyes: 'glasses' } },
-  { s: 58, t: 168, look: { skin: SKIN.rose, top: '#F0E9DE', bottom: '#2B2B2B', shoes: '#1F1F1F', head: 'long', headColor: '#8A5A3C', eyes: 'sunglasses' } },
-  // Around the first dice table
-  { s: 160, t: 150, look: { skin: SKIN.tan, top: CLUB, bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F' } },
-  { s: 203, t: 111, look: { skin: SKIN.light, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'hair', headColor: '#3A2A20', headphones: true, holds: 'phone' } },
-  { s: 206, t: 156, look: { skin: SKIN.deep, top: '#F4F4F4', bottom: '#6FA8DC', shoes: '#F2C14E', head: 'cap', headColor: '#3E8E5E', shorts: true } },
+  // At the bar, knocking back shots
+  { s: 58, t: 96, pose: 'shot', look: { skin: SKIN.light, top: '#EFE7D2', bottom: '#2B2B2B', shoes: '#E9DFC8', head: 'hair', headColor: '#1F1F1F', eyes: 'glasses' } },
+  { s: 58, t: 168, pose: 'shot', look: { skin: SKIN.rose, top: '#F0E9DE', bottom: '#2B2B2B', shoes: '#1F1F1F', head: 'long', headColor: '#8A5A3C', eyes: 'sunglasses' } },
+  // Four players round the big dice table
+  { s: 108, t: 150, laugh: true, look: { skin: SKIN.tan, top: CLUB, bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F' } },
+  { s: 158, t: 172, laugh: true, look: { skin: SKIN.deep, top: '#F4F4F4', bottom: '#6FA8DC', shoes: '#F2C14E', head: 'cap', headColor: '#3E8E5E', shorts: true } },
+  { s: 214, t: 140, look: { skin: SKIN.light, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'hair', headColor: '#3A2A20', headphones: true, holds: 'cup' } },
+  { s: 208, t: 68, laugh: true, look: { skin: SKIN.rose, top: '#E9D3B8', bottom: '#2B2B2B', shoes: '#1F1F1F', head: 'long', headColor: '#1F1F1F' } },
   // Second table
   { s: 262, t: 150, look: { skin: SKIN.rose, top: '#B8AE7E', bottom: '#EFEBE3', shoes: '#1F1F1F', head: 'buzz', headColor: '#8C8C8C' } },
-  { s: 312, t: 96, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'bucket', headColor: '#EFEBE3' } },
-  // Walking in
-  { s: 120, t: 214, look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
+  { s: 312, t: 96, laugh: true, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'bucket', headColor: '#EFEBE3' } },
+  // Just in
+  { s: 296, t: 214, look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
 ];
 
-const CARS: { s: number; t: number; alongT: boolean; color: string; stripes?: string }[] = [
-  { s: 408, t: 206, alongT: true, color: RNDS },
-  { s: 383, t: 420, alongT: true, color: '#1E1E1E', stripes: '#F4F4F4' },
-  { s: 140, t: 624, alongT: false, color: '#F4F4F4', stripes: CLUB },
+// The bartender's round: from his station at the end of the bar he shakes a cocktail, then takes
+// a tray to a player picked at random, by a path that goes round the tables, and comes back.
+const BAR_STATION: Point = [30, 224];
+const ROUNDS: Point[][] = [
+  [[104, 180]],
+  [[150, 200]],
+  [[120, 228], [250, 162], [228, 166]],
+  [[120, 228], [250, 162], [240, 88]],
+  [[120, 228], [250, 162], [270, 178]],
+  [[120, 228], [250, 162], [322, 122]],
 ];
+const WALK_SPEED = 34; // floor units per second
+
+function Bartender({ origin }: { origin: Point }) {
+  const [at, setAt] = useState<Point>(BAR_STATION);
+  const [leg, setLeg] = useState(0);
+  const [mode, setMode] = useState<'shake' | 'walk' | 'serve'>('shake');
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let cancelled = false;
+    let last = -1;
+    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    const walk = async (path: Point[]) => {
+      let from = path[0];
+      for (const to of path.slice(1)) {
+        const seconds = Math.hypot(to[0] - from[0], to[1] - from[1]) / WALK_SPEED;
+        setLeg(seconds);
+        setAt(to);
+        await wait(seconds * 1000);
+        if (cancelled) return;
+        from = to;
+      }
+    };
+    (async () => {
+      while (!cancelled) {
+        setMode('shake');
+        await wait(3500 + Math.random() * 2500);
+        if (cancelled) return;
+        let pick = Math.floor(Math.random() * ROUNDS.length);
+        if (pick === last) pick = (pick + 1) % ROUNDS.length;
+        last = pick;
+        const there = [BAR_STATION, ...ROUNDS[pick]];
+        setMode('walk');
+        await walk(there);
+        if (cancelled) return;
+        setMode('serve');
+        await wait(1400);
+        if (cancelled) return;
+        setMode('walk');
+        await walk([...there].reverse());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const [x, y] = iso([0, 0], at[0], at[1]);
+  const look: Look = { skin: SKIN.tan, top: '#F4F4F4', bottom: '#1F1F1F', shoes: '#1F1F1F', head: 'hair', headColor: '#1F1F1F' };
+  return (
+    <g
+      className={`bartender${mode === 'walk' ? ' is-walking' : ''}`}
+      style={{ transform: `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`, transition: `transform ${leg.toFixed(2)}s linear` }}
+    >
+      <Person origin={origin} s={0} t={0} pose={mode === 'shake' ? 'shake' : 'tray'} laugh={mode === 'serve'} look={look} />
+    </g>
+  );
+}
+
+// Traffic on the two back roads only, driving from the top of the map down past the building:
+// each car is drawn at the middle of its trip (s, t), where it stays when motion is reduced, and
+// drives from `run` / 2 units before it to `run` / 2 after (Building.css, .car-drive).
+const CARS: { s: number; t: number; alongT: boolean; color: string; stripes?: string; run: number; time: number; delay: number }[] = [
+  { s: -27, t: 250, alongT: true, color: RNDS, run: 1140, time: 15, delay: 0 },
+  { s: -48, t: 150, alongT: true, color: '#F4F4F4', stripes: CLUB, run: 1140, time: 19, delay: -9 },
+  { s: 140, t: -27, alongT: false, color: '#1E1E1E', stripes: '#F4F4F4', run: 920, time: 13, delay: -4 },
+  { s: 60, t: -48, alongT: false, color: '#F2C14E', run: 920, time: 17, delay: -12 },
+];
+
+/** The drive of a car along its road, shared by the car and its lights at night. */
+function driveStyle({ alongT, run, time, delay }: (typeof CARS)[number]) {
+  return {
+    '--car-dx': `${((alongT ? -0.866 : 0.866) * run) / 2}px`,
+    '--car-dy': `${(0.5 * run) / 2}px`,
+    animationDuration: `${time}s`,
+    animationDelay: `${delay}s`,
+  } as CSSProperties;
+}
+
+function DrivingCar(car: (typeof CARS)[number]) {
+  const { run: _run, time: _time, delay: _delay, ...drawn } = car;
+  return (
+    <g className="car-drive" style={driveStyle(car)}>
+      <Car {...drawn} />
+    </g>
+  );
+}
 
 const LAMP_POSTS: Point[] = [
   [448, 110],
@@ -914,11 +1083,11 @@ export function SkyTint({ box: [x, y, w, h], lit = [] }: { box: [number, number,
     <>
       {lit.length > 0 && (
         <defs>
-          {/* The lit spaces are cut out of the night, with a soft edge */}
+          {/* The lit spaces are cut out of the night, with a clean edge */}
           <mask id={`${id}-lit`} maskUnits="userSpaceOnUse" x={x} y={y} width={w} height={h}>
             <rect x={x} y={y} width={w} height={h} fill="#FFFFFF" />
             {lit.map((area) => (
-              <polygon key={area} points={area} fill="#000000" filter="url(#bld-blur-s)" />
+              <polygon key={area} points={area} fill="#000000" />
             ))}
           </mask>
         </defs>
@@ -986,8 +1155,8 @@ function NightLights({ only }: { only?: ProjectId }) {
       {only !== 'rnds' && (
         <>
           <Neon origin={C} color={CLUB} />
-          <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp-night)" />
-          <ellipse cx="392" cy="400" rx="52" ry="28" fill="#FFCF5C" fillOpacity="0.25" filter="url(#bld-blur-m)" />
+          <polygon points="378,362 406,362 456,400 392,438 328,400" fill="url(#bld-lamp-night)" />
+          <ellipse cx="392" cy="400" rx="70" ry="38" fill="#FFCF5C" fillOpacity="0.25" filter="url(#bld-blur-m)" />
           <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
           {/* The bottles on the bar shelf catch the light */}
           <polygon points={solid(C, [[10, 48, 50], [14, 48, 50], [14, 160, 50], [10, 160, 50]])} fill="#FFE7A0" fillOpacity="0.5" filter="url(#bld-blur-s)" />
@@ -1016,7 +1185,7 @@ function NightLights({ only }: { only?: ProjectId }) {
             const [rx, ry] = iso(SITE_GROUND, ...at(1, 19));
             const beam = [at(46, 3), at(46, 16), at(100, 30), at(100, -11)];
             return (
-              <g key={`${car.s}-${car.t}`}>
+              <g key={`${car.s}-${car.t}`} className="car-drive" style={driveStyle(car)}>
                 <defs>
                   <radialGradient id={`bld-beam-${i}`} gradientUnits="userSpaceOnUse" cx={nx} cy={ny} r="64">
                     <stop offset="0" stopColor="#FFF4CC" stopOpacity="0.75" />
@@ -1034,25 +1203,34 @@ function NightLights({ only }: { only?: ProjectId }) {
   );
 }
 
-// The runners: the one in white with the blue cap left the gym to run with three friends,
-// along the front roads and back (Building.css, .runner).
+// The runners: the one with the blue cap left the gym to run with three friends. They run as a
+// pack, side by side, all round the map on the outer ring of roads (Building.css, .runner-pack).
+// Black tees, shorts and high boxing boots.
 const RUNNERS: Look[] = [
-  { skin: SKIN.rose, top: '#F2F2F2', bottom: '#F2F2F2', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' },
-  { skin: SKIN.deep, top: '#FF0A3C', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'buzz', headColor: '#1F1F1F' },
-  { skin: SKIN.light, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'long', headColor: '#8A5A3C' },
-  { skin: SKIN.tan, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F' },
+  { skin: SKIN.rose, top: '#1F1F1F', bottom: '#2C4FB8', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8', shorts: true, tee: true, boots: true },
+  { skin: SKIN.deep, top: '#1F1F1F', bottom: RNDS, shoes: '#1F1F1F', head: 'buzz', headColor: '#1F1F1F', shorts: true, tee: true, boots: true },
+  { skin: SKIN.light, top: '#1F1F1F', bottom: '#F4F4F4', shoes: RNDS, head: 'long', headColor: '#8A5A3C', shorts: true, tee: true, boots: true },
+  { skin: SKIN.tan, top: '#1F1F1F', bottom: '#3A3A3A', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', shorts: true, tee: true, boots: true },
+];
+// Places in the pack, in drawing units around its centre (back row first), and each one's step
+const PACK: { at: Point; stride: string }[] = [
+  { at: [-9, -6], stride: '-0.05s' },
+  { at: [9, -7], stride: '-0.21s' },
+  { at: [-3, 4], stride: '-0.29s' },
+  { at: [14, 3], stride: '-0.12s' },
 ];
 
 function Runners() {
-  // An L along the right road then the front road, run there and back, on the sidewalk side
-  const route = [iso(SITE_GROUND, 392, -60), iso(SITE_GROUND, 392, 612), iso(SITE_GROUND, -80, 612)]
+  // The outer ring: right road, front road, outer left road, outer back road, and round again
+  const ring = ([[405, -176], [405, 622], [-176, 622], [-176, -176]] as Point[])
+    .map(([s, t]) => iso(SITE_GROUND, s, t))
     .map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`)
     .join(' L ');
   return (
-    <g>
+    <g className="runner-pack" style={{ offsetPath: `path('M ${ring} Z')` } as CSSProperties}>
       {RUNNERS.map((look, i) => (
-        <g key={i} className="runner" style={{ offsetPath: `path('M ${route}')`, animationDelay: `${-i * 0.9}s` } as CSSProperties}>
-          <Person origin={[i % 2 === 0 ? -4 : 6, 0]} s={0} t={0} look={look} run />
+        <g key={i} style={{ '--stride': PACK[i].stride } as CSSProperties}>
+          <Person origin={PACK[i].at} s={0} t={0} look={look} run laugh={i % 2 === 1} />
         </g>
       ))}
     </g>
@@ -1230,8 +1408,6 @@ function RndsFloorArt() {
       <ellipse cx="626" cy="98" rx="10" ry="2.6" fill="#FFF3B0" />
       <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp)" />
 
-      <FloorText origin={R} s={262} t={204} alongT>RING</FloorText>
-      <Route origin={R} color={RNDS} solid={[[282, 70], [282, 120], [236, 120]]} dashed={[[294, 70], [294, 132], [236, 132]]} />
 
       {/* Punching bags */}
       <ellipse cx="812" cy="276" rx="9" ry="3.5" fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-s)" />
@@ -1291,10 +1467,6 @@ function ClubFloorArt() {
         return <Bottle key={t} x={x} y={y - 50} color={colors[index]} tall={index % 3 === 1 ? 1.2 : 1} />;
       })}
 
-      <FloorText origin={C} s={74} t={146} alongT size={18}>BAR</FloorText>
-      <FloorText origin={C} s={150} t={236} size={18}>TABLES</FloorText>
-      <Route origin={C} color={CLUB} solid={[[52, 184], [290, 184], [290, 142]]} dashed={[[52, 196], [302, 196], [302, 142]]} />
-
       {/* Bar counter */}
       <polygon points={points(C, [[16, 44], [46, 44], [46, 208], [16, 208]])} fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-m)" />
       <g stroke="#DADDED" strokeWidth="0.8" strokeLinejoin="round">
@@ -1307,9 +1479,27 @@ function ClubFloorArt() {
         const [x, y] = iso(C, bs, bt);
         return <Bottle key={`${bs}-${bt}`} x={x} y={y - 24} color={color} />;
       })}
-      {[100, 112, 136].map((gt) => {
+      {/* Cocktails he has just served, and a row of golden shots */}
+      {([[100, '#F27BA0'], [136, '#F2B33D']] as [number, string][]).map(([gt, drink]) => {
         const [x, y] = iso(C, 30, gt);
-        return <rect key={gt} x={x - 1.5} y={y - 28.5} width="3" height="4.5" rx="0.8" fill="#FFFFFF" fillOpacity="0.85" stroke="#CDD1E5" strokeWidth="0.5" />;
+        return (
+          <g key={gt}>
+            <line x1={x} y1={y - 24} x2={x} y2={y - 29} stroke="#CDD1E5" strokeWidth="0.8" />
+            <ellipse cx={x} cy={y - 24.2} rx="2" ry="0.7" fill="#E4E6F1" />
+            <path d={`M${x - 3.6},${y - 33.4} L${x + 3.6},${y - 33.4} L${x},${y - 28.8} Z`} fill="#FFFFFF" fillOpacity="0.9" stroke="#CDD1E5" strokeWidth="0.4" />
+            <path d={`M${x - 2.8},${y - 32.4} L${x + 2.8},${y - 32.4} L${x},${y - 29.4} Z`} fill={drink} />
+            <circle cx={x + 2.6} cy={y - 33.6} r="1.2" fill="#F4E04D" stroke="#E0C62E" strokeWidth="0.3" />
+          </g>
+        );
+      })}
+      {[112, 117, 122].map((gt) => {
+        const [x, y] = iso(C, 32, gt);
+        return (
+          <g key={gt}>
+            <path d={`M${x - 1.6},${y - 28.4} L${x + 1.6},${y - 28.4} L${x + 1.3},${y - 24.2} L${x - 1.3},${y - 24.2} Z`} fill="#FFFFFF" fillOpacity="0.9" stroke="#CDD1E5" strokeWidth="0.35" />
+            <path d={`M${x - 1.45},${y - 27} L${x + 1.45},${y - 27} L${x + 1.3},${y - 24.2} L${x - 1.3},${y - 24.2} Z`} fill="#E8A93A" />
+          </g>
+        );
       })}
       {(() => {
         const [x, y] = iso(C, 30, 150);
@@ -1318,12 +1508,13 @@ function ClubFloorArt() {
       <line x1="392" y1="318" x2="392" y2="356" stroke="#CDD1E5" />
       <ellipse cx="392" cy="360" rx="13" ry="5" fill="#D2D5E7" />
       <ellipse cx="392" cy="362" rx="8" ry="2.2" fill="#FFF3B0" />
-      <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp)" />
+      <polygon points="378,362 406,362 456,400 392,438 328,400" fill="url(#bld-lamp)" />
 
       {/* Dice tables */}
-      <DiceTable cx={392} cy={398} rx={40} ry={22} rolling />
+      <DiceTable cx={392} cy={398} rx={56} ry={31} rolling />
       <DiceTable cx={500} cy={468} rx={34} ry={19} />
       <People origin={C} figures={CLUB_PEOPLE} prefix="c" />
+      <Bartender origin={C} />
     </>
   );
 }
@@ -1352,6 +1543,10 @@ function BuildingArt() {
       <Tree s={90} t={-100} size={0.9} />
       <Tree s={220} t={-96} />
       <Tree s={340} t={-102} size={0.85} />
+      {/* The traffic on the back roads, behind the building */}
+      {CARS.map((car) => (
+        <DrivingCar key={`${car.s}-${car.t}`} {...car} />
+      ))}
 
       {/* Base plate */}
       <Slab s0={0} t0={0} s1={366} t1={586} r={26} h={14} top="#F6F7FB" side="#CDD1E5" shadow={0.16} />
@@ -1359,10 +1554,7 @@ function BuildingArt() {
       <RndsFloorArt />
       <ClubFloorArt />
 
-      {/* In front: the road traffic, then the plots across the road */}
-      {CARS.map((car) => (
-        <Car key={`${car.s}-${car.t}`} {...car} />
-      ))}
+      {/* In front: the plots across the road */}
       <Slab s0={440} t0={70} s1={540} t1={480} r={22} h={6} top="#EEF0F7" side="#CED2E6" />
       <Slab s0={40} t0={656} s1={400} t1={750} r={22} h={6} top="#EEF0F7" side="#CED2E6" />
       {HOME_BLOCKS.filter((b) => b.s1 >= 0 && b.t1 >= 0).map((b) => (
@@ -1381,11 +1573,18 @@ function BuildingArt() {
       <Tree s={360} t={708} size={0.9} />
 
       <SkyTint box={[-80, -40, 1170, 730]} lit={[LIT_SPACES.rnds, LIT_SPACES.club421]} />
-      {/* At night the cars are drawn again over the dark, dimmed but readable, at their exact shape */}
-      <g className="night-cars">
+      {/* At night the cars are drawn again over the dark, dimmed but readable, at their exact shape,
+          except where the building stands in front of them */}
+      <mask id="bld-night-cars">
+        <rect x="-80" y="-40" width="1170" height="730" fill="#FFFFFF" />
+        <polygon points={LIT_SPACES.rnds} fill="#000000" />
+        <polygon points={LIT_SPACES.club421} fill="#000000" />
+      </mask>
+      <g className="night-cars" mask="url(#bld-night-cars)">
         {CARS.map((car) => (
-          <Car key={`${car.s}-${car.t}`} {...car} />
+          <DrivingCar key={`${car.s}-${car.t}`} {...car} />
         ))}
+        <Runners />
       </g>
       <NightLights />
       <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
@@ -1414,21 +1613,21 @@ function BlockArt({ g, b }: { g: Point; b: Block }) {
 function BlockWindows({ g, b, seed }: { g: Point; b: Block; seed: number }) {
   return (
     <>
-      {[0.35, 0.62].flatMap((level, li) =>
-        Array.from({ length: Math.max(0, Math.floor((b.s1 - b.s0 - 16) / 18)) }, (_, i) => i)
-          .filter((i) => (i + seed + li) % 3 !== 0)
-          .map((i) => {
-            const s0 = b.s0 + 10 + i * 18;
-            return (
-              <polygon
-                key={`${level}-${i}`}
-                points={solid(g, [[s0, b.t1, b.h * level], [s0 + 9, b.t1, b.h * level], [s0 + 9, b.t1, b.h * level + 5], [s0, b.t1, b.h * level + 5]])}
-                fill="#FFE1A6"
-                fillOpacity="0.7"
-              />
-            );
-          }),
-      )}
+      {/* One lit window in three, on one floor, square and soft: a building where people live */}
+      {Array.from({ length: Math.max(0, Math.floor((b.s1 - b.s0 - 16) / 22)) }, (_, i) => i)
+        .filter((i) => (i + seed) % 3 === 0)
+        .map((i) => {
+          const s0 = b.s0 + 12 + i * 22;
+          const h = b.h * 0.5;
+          return (
+            <polygon
+              key={i}
+              points={solid(g, [[s0, b.t1, h], [s0 + 10, b.t1, h], [s0 + 10, b.t1, h + 10], [s0, b.t1, h + 10]])}
+              fill="#FFD98A"
+              fillOpacity="0.4"
+            />
+          );
+        })}
     </>
   );
 }

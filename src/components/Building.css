@@ -630,8 +630,10 @@
   opacity: 0.38;
 }
 
+/* Night: a deep graphite, not black and not blue, so the ground and roads still read */
 [data-phase='night'] .sky-tint {
-  opacity: 0.8;
+  fill: #1a1c21;
+  opacity: 0.86;
 }
 
 [data-phase='dawn'] .night-lights {
@@ -735,30 +737,107 @@
 
 [data-phase='night'] .night-cars {
   display: inline;
-  filter: brightness(0.55) saturate(0.9);
+  filter: brightness(0.62) saturate(0.9);
 }
 
-/* Push-ups: lying from the feet, the body rises and falls */
-.fig-pushup {
-  transform: rotate(-80deg);
-  animation: pushup 1.4s ease-in-out infinite;
+/* Dumbbell curls: each forearm folds up in turn (seen from the front it shortens) and the fist
+   with its dumbbell rises to the shoulder */
+.fig--curl .fig-curl-arm {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: curl-arm 1.6s ease-in-out infinite;
 }
 
-@keyframes pushup {
+.fig--curl .fig-curl-hand {
+  animation: curl-hand 1.6s ease-in-out infinite;
+}
+
+.fig--curl .fig-arm--r > g {
+  animation-delay: -0.8s;
+}
+
+@keyframes curl-arm {
   0%,
   100% {
-    transform: rotate(-82deg);
+    transform: scaleY(1);
   }
 
-  50% {
-    transform: rotate(-70deg);
+  45%,
+  55% {
+    transform: scaleY(0.42);
   }
 }
 
-/* Runners on the home map: they follow their route there and back, upright, at a steady pace */
-.runner {
+@keyframes curl-hand {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  45%,
+  55% {
+    transform: translateY(-9px);
+  }
+}
+
+/* The bartender shakes his cocktail, quick and short */
+.fig--shake .fig-shake {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: shake 0.26s ease-in-out infinite alternate;
+}
+
+@keyframes shake {
+  from {
+    transform: translateY(0.6px) rotate(-3deg);
+  }
+
+  to {
+    transform: translateY(-2.4px) rotate(4deg);
+  }
+}
+
+/* A shot: the glass goes up, to the mouth, down in one go, then back up for the next round */
+.fig--shot .fig-arm--r {
+  transform-box: fill-box;
+  transform-origin: 20% 100%;
+  animation: shot 3.2s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes shot {
+  0%,
+  30%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  42%,
+  58% {
+    transform: rotate(-34deg) translateY(1px);
+  }
+}
+
+/* Traffic on the back roads, driving down past the building */
+.car-drive {
+  animation: car-drive 15s linear infinite;
+}
+
+@keyframes car-drive {
+  from {
+    transform: translate(calc(-1 * var(--car-dx)), calc(-1 * var(--car-dy)));
+  }
+
+  to {
+    transform: translate(var(--car-dx), var(--car-dy));
+  }
+}
+
+/* Runners on the home map: a pack of four with a real running stride (knees up, arms pumping, a
+   bounce on each step), all round the outer ring of roads. Each runner keeps its own step. */
+.runner-pack {
   offset-rotate: 0deg;
-  animation: run-route 26s linear infinite alternate;
+  animation: run-route 32s linear infinite;
 }
 
 @keyframes run-route {
@@ -772,23 +851,79 @@
 }
 
 .fig--run .fig-body {
-  animation: fig-step 0.18s ease-in-out infinite alternate;
+  animation: run-bounce 0.17s ease-in-out infinite alternate;
+  animation-delay: var(--stride, 0s);
 }
 
 .fig--run .fig-leg {
-  animation: fig-leg 0.36s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: run-leg 0.34s linear infinite;
+  animation-delay: var(--stride, 0s);
 }
 
 .fig--run .fig-leg--r {
-  animation-delay: -0.18s;
+  animation-delay: calc(var(--stride, 0s) - 0.17s);
 }
 
 .fig--run .fig-arm {
   transform-box: fill-box;
   transform-origin: 50% 0;
-  animation: fig-arm 0.36s ease-in-out infinite;
+  animation: run-arm 0.34s ease-in-out infinite;
+  animation-delay: var(--stride, 0s);
 }
 
 .fig--run .fig-arm--l {
-  animation-delay: -0.18s;
+  animation-delay: calc(var(--stride, 0s) - 0.17s);
+}
+
+@keyframes run-bounce {
+  from {
+    transform: translateY(0.5px);
+  }
+
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+/* Seen from the front, a stride is a knee coming up (the leg looks shorter and higher) and an arm
+   swinging forward (shorter, hand higher), then back */
+@keyframes run-leg {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  25% {
+    transform: translateY(-5.5px) scaleY(0.72);
+  }
+
+  50% {
+    transform: translateY(-1px) scaleY(0.95);
+  }
+}
+
+@keyframes run-arm {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  50% {
+    transform: translateY(-1.5px) scaleY(0.6);
+  }
+}
+
+/* The bartender walks his round with a tray (Building.tsx, Bartender) */
+.bartender.is-walking .fig-body {
+  animation: fig-step 0.3s ease-in-out infinite alternate;
+}
+
+.bartender.is-walking .fig-leg {
+  animation: fig-leg 0.6s ease-in-out infinite;
+}
+
+.bartender.is-walking .fig-leg--r {
+  animation-delay: -0.3s;
 }
