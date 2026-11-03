@@ -21,6 +21,7 @@ import { useCustomProjects, useProjects } from '../data/customProjects';
 import { TOOLS, isTool } from '../data/sections';
 import ProjectMap from '../components/ProjectMap';
 import { useCalendarSync } from '../lib/calendar';
+import AccountGate from '../components/AccountGate';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { dayLabel, isoDate } from '../lib/dates';
@@ -129,6 +130,12 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
 
         <main className="workspace-body" id="contenu" tabIndex={-1}>
           {tool?.slug === 'todo' && <TodoPage tasks={tasks.tasks} query={matches} onAdd={tasks.add} onToggle={tasks.toggle} onRemove={tasks.remove} />}
+          {tool?.slug === 'todo' && calendar.session === null && (
+            <AccountGate
+              title="Retrouve tes tâches partout"
+              text="Pour l'instant, tes tâches restent sur cet appareil. Connecte-toi à Marc HQ : elles seront les mêmes sur ton Mac, ton téléphone et le site, et iront dans ton Google Agenda."
+            />
+          )}
           {tool?.slug === 'notes' && <NotesPage notes={notes.notes} query={matches} onAdd={notes.add} onUpdate={notes.update} onRemove={notes.remove} />}
           {tool?.slug === 'idees' && <IdeasPage ideas={ideas.ideas} query={matches} onAdd={ideas.add} onUpdate={ideas.update} onRemove={ideas.remove} />}
           {tool?.slug === 'versions' && <VersionsPage api={versions} query={matches} />}
