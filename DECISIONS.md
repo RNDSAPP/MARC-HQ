@@ -200,3 +200,4 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 130. **Tableaux sur téléphone** : chaque ligne devient une petite carte (nom et statut en haut, les deux détails dessous avec le nom de leur colonne), sans défilement sur le côté.
 131. **Barre de navigation à l'accueil sur téléphone** : comme la barre latérale n'y est pas, une barre en bas remplace la navigation. Elle contient Accueil (le carré HQ), un onglet par projet avec son logo, et « Nouveau » pour ajouter un projet. Dans un projet, la barre du bas, les pastilles des rubriques et la flèche de retour vers l'accueil prennent le relais.
 132. **Plus d'amphithéâtres** sur le campus des BDE, à la demande de Marc : il reste les facultés et les bâtiments de cours.
+133. **Icônes des tuiles de l'aperçu en blanc**, sur un carré plein dans la couleur du projet.

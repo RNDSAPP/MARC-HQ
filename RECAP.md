@@ -24,7 +24,7 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (132 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (133 points).
 
 ## Lancer l'app
 
