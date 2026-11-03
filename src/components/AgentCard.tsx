@@ -1,5 +1,6 @@
 import type { Agent } from '../data/types';
 import { agentStatusLabel } from '../lib/format';
+import BrandIcon from './BrandIcon';
 import './AgentCard.css';
 
 type Props = {
@@ -11,7 +12,13 @@ export default function AgentCard({ agent, onAction }: Props) {
   return (
     <article className={`agent agent--${agent.status}`}>
       <div className="agent-head">
-        <h3 className="agent-name">{agent.name}</h3>
+        <h3 className="agent-name">
+          {/* The agents run on Claude */}
+          <span className="agent-logo">
+            <BrandIcon brand="claude" size={16} />
+          </span>
+          {agent.name}
+        </h3>
         <span className="agent-status">{agentStatusLabel[agent.status]}</span>
       </div>
       <p className="agent-task">{agent.task}</p>

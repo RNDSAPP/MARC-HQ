@@ -6,6 +6,7 @@ import type { Module, PipelineColumn, PipelineTone, Project } from '../data/type
 import { phaseLabel, usePhase } from '../lib/sun';
 import {
   FloorText,
+  Neighbourhood,
   Person,
   PhaseButton,
   SKIN,
@@ -44,9 +45,11 @@ export type SceneItem = {
  * Wrapper shared by the module scenes: day/night, a map you can walk around, a numbered marker
  * on each item, and the names in a list under the map (legible, unlike labels on the drawing).
  */
-function SceneFrame({ project, box, art, lights, lit, items, title, onSelect }: {
+function SceneFrame({ project, box: plateBox, art, lights, lit, items, title, onSelect, hood }: {
   project: Project;
   box: [number, number, number, number];
+  /** Roads, blocks and trees around the plate: its ground origin and extent. */
+  hood?: { ground: Point; size: Point };
   art: ReactNode;
   lights?: ReactNode;
   /** Areas that stay lit at night (outlines in drawing units). */
@@ -58,6 +61,10 @@ function SceneFrame({ project, box, art, lights, lit, items, title, onSelect }: 
   const [choice, setChoice] = usePhaseChoice();
   const phase = usePhase(choice);
   const [hover, setHover] = useState<string | null>(null);
+  // With a neighbourhood, the frame opens a little wider so it shows around the plate
+  const box: [number, number, number, number] = hood
+    ? [plateBox[0] - 90, plateBox[1] - 70, plateBox[2] + 180, plateBox[3] + 130]
+    : plateBox;
   const [x, y, w, h] = box;
   return (
     <div className="scene-block" data-project={project.id}>
@@ -87,9 +94,14 @@ function SceneFrame({ project, box, art, lights, lit, items, title, onSelect }: 
           <svg viewBox={box.join(' ')} className="scene-art" aria-hidden="true">
             <SceneDefs />
             <rect x={x} y={y} width={w} height={h} fill="url(#bld-ground)" />
+            {hood && <Neighbourhood ground={hood.ground} size={hood.size} part="back" />}
             {art}
+            {hood && <Neighbourhood ground={hood.ground} size={hood.size} part="front" />}
             <SkyTint box={box} lit={lit} />
-            <g className="night-lights">{lights}</g>
+            <g className="night-lights">
+              {lights}
+              {hood && <Neighbourhood ground={hood.ground} size={hood.size} part="lights" />}
+            </g>
             <rect x={x} y={y} width={w} height={h} filter="url(#bld-grain)" />
           </svg>
         </MapViewport>
@@ -386,6 +398,7 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
       title="Les ambassadeurs sur la place"
       items={items}
       onSelect={onSelect}
+      hood={{ ground: o, size: [size, size] }}
       lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
       art={
         <>
@@ -469,6 +482,7 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
       title="Les avis App Store"
       items={items}
       onSelect={onSelect}
+      hood={{ ground: o, size: [size, size] }}
       lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
       art={
         <>
@@ -506,7 +520,7 @@ export function AppStoreScene({ project, module, rating, icon, onSelect }: {
               <g key={review.text}>
                 <ellipse cx={x} cy={y - 8} rx="10" ry="4" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-s)" />
                 <line x1={x} y1={y - 8} x2={x} y2={y - 46} stroke="#CFCFCF" strokeWidth="1.5" />
-                <rect x={x - 36} y={y - 74} width="72" height="28" rx="12" fill="#FFFFFF" stroke={waiting ? '#F0B44C' : '#E2E2E2'} strokeWidth="1.2" />
+                <rect x={x - 36} y={y - 74} width="72" height="28" rx="12" fill="#FFFFFF" stroke={waiting ? '#D97757' : '#E2E2E2'} strokeWidth="1.2" />
                 <text x={x} y={y - 56} textAnchor="middle" fontSize="11" fill="#F0B44C" letterSpacing="1">
                   {stars(review.note)}
                 </text>
@@ -595,6 +609,7 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
       title="Les revenus, mois par mois"
       items={items}
       onSelect={onSelect}
+      hood={{ ground: o, size: [size, size] }}
       lit={[
         points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]]),
         // Each tower's silhouette, so it stays white above the plate at night
@@ -709,6 +724,7 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
       title="Le studio et les contenus de la semaine"
       items={items}
       onSelect={onSelect}
+      hood={{ ground: o, size: [size, size] }}
       lit={[
         points([o[0], o[1] - b], [[0, 0], [size, 0], [size, size], [0, size]]),
         solid(o, [[18, 40, b], [18, 300, b], [18, 300, b + 120], [18, 40, b + 120]]),
@@ -749,7 +765,7 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
               <g key={post.title}>
                 <ellipse cx={x} cy={y - b} rx="10" ry="4" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-s)" />
                 <line x1={x} y1={y - b} x2={x} y2={y - b - 26} stroke="#CFCFCF" strokeWidth="1.5" />
-                <rect x={x - w / 2} y={y - b - 26 - h} width={w} height={h} rx="6" fill="#1C1C1E" stroke={waiting ? '#F0B44C' : '#E2E2E2'} strokeWidth="1.6" />
+                <rect x={x - w / 2} y={y - b - 26 - h} width={w} height={h} rx="6" fill="#1C1C1E" stroke={waiting ? '#D97757' : '#E2E2E2'} strokeWidth="1.6" />
                 <rect x={x - w / 2 + 3} y={y - b - 23 - h} width={w - 6} height={h - 14} rx="4" className="lot-cap" opacity="0.85" />
                 <path d={`M${x - 3},${y - b - 26 - h / 2 - 9} l7,4 l-7,4 z`} fill="#FFFFFF" />
                 <text x={x} y={y - b - 30} textAnchor="middle" fontSize="7" fontWeight="700" fill="#FFFFFF">
@@ -846,6 +862,7 @@ export function FollowersScene({ project, module, onSelect }: { project: Project
       title="Les abonnés, plateforme par plateforme"
       items={items}
       onSelect={onSelect}
+      hood={{ ground: o, size: [size, size] }}
       lit={[
         points([o[0], o[1] - b], [[0, 0], [size, 0], [size, size], [0, size]]),
         ...stands.map(({ s, t }) => solid(o, [[s, t + 66, b], [s + width, t + 66, b], [s + width, t, b], [s + width, t, b + 30], [s, t, b + 30], [s, t + 66, b + 30]])),

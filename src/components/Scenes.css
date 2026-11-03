@@ -51,7 +51,7 @@
 }
 
 .scene-pin--alert {
-  background: #e3a33a;
+  background: var(--alert);
 }
 
 .scene-pin--new {
@@ -164,7 +164,7 @@
 }
 
 .lot--alert .lot-cap {
-  fill: #f0b44c;
+  fill: var(--alert);
 }
 
 .lot-ghost {

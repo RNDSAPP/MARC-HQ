@@ -237,6 +237,10 @@ const ROADS: { across: [number, number]; alongT: boolean }[] = [
   { across: [596, 648], alongT: false },
   { across: [-50, -8], alongT: true },
   { across: [-50, -8], alongT: false },
+  // Outer roads, between the back plots and the blocks in the corners
+  { across: [-196, -156], alongT: true },
+  { across: [-196, -156], alongT: false },
+  { across: [556, 590], alongT: true },
 ];
 
 /** Asphalt bands with edge lines, a dashed centre line and zebra crossings by the front corner. */
@@ -350,8 +354,8 @@ export function Tree({ s, t, size = 1, base = 6, origin = SITE_GROUND }: { s: nu
 }
 
 /** A street lamp on the pavement. */
-function Lamp({ s, t }: { s: number; t: number }) {
-  const [x, y0] = iso(SITE_GROUND, s, t);
+export function Lamp({ s, t, origin = SITE_GROUND }: { s: number; t: number; origin?: Point }) {
+  const [x, y0] = iso(origin, s, t);
   const y = y0 - 6;
   return (
     <g>
@@ -881,7 +885,7 @@ const LAMP_POSTS: Point[] = [
  * Colour of the sky over the model: nothing by day, warm at dawn and dusk, deep blue at night
  * (Building.css, from the scene's data-phase). Laid over everything with a multiply blend.
  */
-export function SkyTint({ box: [x, y, w, h], lit = [] }: { box: [number, number, number, number]; lit?: string[] }) {
+export function SkyTint({ box: [x, y, w, h], lit = [], dim = [] }: { box: [number, number, number, number]; lit?: string[]; dim?: string[] }) {
   const id = useId().replace(/:/g, '');
   return (
     <>
@@ -892,6 +896,10 @@ export function SkyTint({ box: [x, y, w, h], lit = [] }: { box: [number, number,
             <rect x={x} y={y} width={w} height={h} fill="#FFFFFF" />
             {lit.map((area) => (
               <polygon key={area} points={area} fill="#000000" filter="url(#bld-blur-s)" />
+            ))}
+            {/* Half lit: still readable, still night */}
+            {dim.map((area) => (
+              <polygon key={area} points={area} fill="#8A8A8A" />
             ))}
           </mask>
         </defs>
@@ -928,12 +936,11 @@ const LIT_SCENES: Record<string, string> = Object.fromEntries(
   }),
 );
 
-/** Neon line along the two front edges of a floor, with its glow. */
+/** Neon line along the two front edges of a floor: one crisp line, no blur. */
 function Neon({ origin, color }: { origin: Point; color: string }) {
   const edge = points(origin, [[320, 0], [320, 250], [0, 250]]);
   return (
     <g fill="none" strokeLinejoin="round">
-      <polyline points={edge} stroke={color} strokeWidth="7" strokeOpacity="0.55" filter="url(#bld-blur-s)" />
       <polyline points={edge} stroke={color} strokeWidth="2" />
     </g>
   );
@@ -975,20 +982,38 @@ function NightLights({ only }: { only?: ProjectId }) {
               return <polyline key={`${a0}-${alongT}`} points={points(SITE_GROUND, alongT ? [[mid, -900], [mid, 1500]] : [[-900, mid], [1500, mid]])} />;
             })}
           </g>
+          {HOME_BLOCKS.map((b, i) => (
+            <BlockWindows key={`${b.s0}-${b.t0}`} g={SITE_GROUND} b={b} seed={i} />
+          ))}
           {LAMP_POSTS.map(([ls, lt]) => {
             const [x, y] = iso(SITE_GROUND, ls, lt);
+            // A soft round pool on the ground right under the lamp's head, and the bulb
             return (
               <g key={`${ls}-${lt}`}>
-                <ellipse cx={x - 10} cy={y + 2} rx="30" ry="15" fill="#FFC970" fillOpacity="0.8" filter="url(#bld-blur-m)" />
-                <circle cx={x - 12} cy={y - 46} r="4" fill="#FFF6CC" filter="url(#bld-blur-s)" />
+                <ellipse cx={x - 12} cy={y - 4} rx="26" ry="13" fill="url(#bld-pool)" />
+                <circle cx={x - 12} cy={y - 46} r="2.6" fill="#FFF6CC" />
+                <circle cx={x - 12} cy={y - 46} r="6" fill="#FFF6CC" fillOpacity="0.35" filter="url(#bld-blur-s)" />
               </g>
             );
           })}
-          {CARS.map((car) => {
-            // Two beams on the road ahead of the nose (u = 46 to 96 in the car's frame)
+          {CARS.map((car, i) => {
+            // A beam on the road ahead of the nose, fading out, and the rear lights
             const at = (u: number, v: number): Point => (car.alongT ? [car.s + v, car.t + u] : [car.s + u, car.t + v]);
-            const beam = [at(46, 2), at(46, 17), at(96, 26), at(96, -7)];
-            return <polygon key={`${car.s}-${car.t}`} points={points(SITE_GROUND, beam)} fill="#FFF0BC" fillOpacity="0.7" filter="url(#bld-blur-s)" />;
+            const [nx, ny] = iso(SITE_GROUND, ...at(46, 9.5));
+            const [rx, ry] = iso(SITE_GROUND, ...at(1, 19));
+            const beam = [at(46, 3), at(46, 16), at(100, 30), at(100, -11)];
+            return (
+              <g key={`${car.s}-${car.t}`}>
+                <defs>
+                  <radialGradient id={`bld-beam-${i}`} gradientUnits="userSpaceOnUse" cx={nx} cy={ny} r="64">
+                    <stop offset="0" stopColor="#FFF4CC" stopOpacity="0.75" />
+                    <stop offset="1" stopColor="#FFF4CC" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <polygon points={points(SITE_GROUND, beam)} fill={`url(#bld-beam-${i})`} />
+                <circle cx={rx} cy={ry - 7} r="4" fill="#FF3B3B" fillOpacity="0.55" filter="url(#bld-blur-s)" />
+              </g>
+            );
           })}
         </>
       )}
@@ -1047,6 +1072,31 @@ export function SceneDefs() {
           <stop offset="0" stopColor="#FFE07A" stopOpacity="0.45" />
           <stop offset="1" stopColor="#FFD060" stopOpacity="0.04" />
         </linearGradient>
+        {/* Floor materials, drawn in floor units and laid flat on each floor */}
+        <pattern id="bld-floor-rnds" patternUnits="userSpaceOnUse" width="80" height="80" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${R[0]} ${R[1]})`}>
+          <rect width="80" height="80" fill="#F7F7F7" />
+          <rect x="40" width="40" height="40" fill="#F1F1F1" />
+          <rect y="40" width="40" height="40" fill="#F1F1F1" />
+          <path d="M0 0H80M0 40H80M0 0V80M40 0V80" stroke="#E2E2E2" strokeWidth="1" fill="none" />
+        </pattern>
+        <pattern id="bld-floor-club" patternUnits="userSpaceOnUse" width="160" height="40" patternTransform={`matrix(0.866 0.5 -0.866 0.5 ${C[0]} ${C[1]})`}>
+          <rect width="160" height="40" fill="#EFE6D7" />
+          <rect width="80" height="20" fill="#F2EADD" />
+          <rect x="80" width="80" height="20" fill="#ECE2D1" />
+          <rect x="-40" y="20" width="80" height="20" fill="#EDE3D3" />
+          <rect x="40" y="20" width="80" height="20" fill="#F3EBDF" />
+          <rect x="120" y="20" width="80" height="20" fill="#EDE3D3" />
+          <path d="M0 0H160M0 20H160M0 0V20M80 0V20M40 20V40M120 20V40" stroke="#DDD1BD" strokeWidth="0.8" fill="none" />
+          <path d="M8 7H60M92 13H150M50 27H104M130 33H158M4 33H30" stroke="#E6DBC8" strokeWidth="0.6" fill="none" />
+        </pattern>
+        <radialGradient id="bld-floor-light" cx="0.35" cy="0.3" r="0.9">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.45" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="bld-pool" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#FFD98A" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#FFD98A" stopOpacity="0" />
+        </radialGradient>
         <linearGradient id="bld-canvas" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#2E2E30" />
           <stop offset="1" stopColor="#111112" />
@@ -1099,8 +1149,9 @@ function RndsFloorArt() {
       {/* RNDS floor */}
       <polygon points="877,280 877,298 660.5,423 660.5,405" fill="url(#bld-side-right)" />
       <polygon points="660.5,405 660.5,423 383.5,263 383.5,245" fill="url(#bld-side-left)" />
-      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-top)" stroke="#E3E3E3" />
-      <g stroke="#F0F0F0" strokeWidth="1"><line x1="655" y1="152" x2="438" y2="277" /><line x1="710" y1="184" x2="493" y2="309" /><line x1="765" y1="216" x2="548" y2="341" /><line x1="820" y1="248" x2="603" y2="373" /></g>
+      {/* Gym floor: square rubber tiles */}
+      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-rnds)" stroke="#E3E3E3" />
+      <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-floor-light)" />
       <g clipPath="url(#bld-clip-rnds)" filter="url(#bld-blur-m)" fill="#000" fillOpacity="0.09">
         <polygon points={points(R, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
         <polygon points={points(R, [[8, 8], [320, 8], [320, 30], [8, 30]])} />
@@ -1152,8 +1203,9 @@ function ClubFloorArt() {
       {/* Club 421 floor */}
       <polygon points="626,425 626,443 409.5,568 409.5,550" fill="url(#bld-side-right)" />
       <polygon points="409.5,550 409.5,568 132.4,408 132.4,390" fill="url(#bld-side-left)" />
-      <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-top)" stroke="#E3E3E3" />
-      <g stroke="#F0F0F0" strokeWidth="1"><line x1="404" y1="297" x2="187" y2="422" /><line x1="459" y1="329" x2="242" y2="454" /><line x1="514" y1="361" x2="297" y2="486" /><line x1="569" y1="393" x2="352" y2="518" /></g>
+      {/* Bar floor: light oak planks, staggered */}
+      <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-club)" stroke="#E0D6C6" />
+      <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-floor-light)" />
       <g clipPath="url(#bld-clip-club)" filter="url(#bld-blur-m)" fill="#000" fillOpacity="0.09">
         <polygon points={points(C, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
         <polygon points={points(C, [[8, 8], [320, 8], [320, 22], [8, 22]])} />
@@ -1231,6 +1283,9 @@ function BuildingArt() {
       <Tree s={-100} t={110} />
       <Tree s={-92} t={270} size={0.9} />
       <Tree s={-102} t={430} />
+      {HOME_BLOCKS.filter((b) => b.s1 < 0 || b.t1 < 0).map((b) => (
+        <BlockArt key={`${b.s0}-${b.t0}`} g={SITE_GROUND} b={b} />
+      ))}
       <Tree s={90} t={-100} size={0.9} />
       <Tree s={220} t={-96} />
       <Tree s={340} t={-102} size={0.85} />
@@ -1247,6 +1302,9 @@ function BuildingArt() {
       ))}
       <Slab s0={440} t0={70} s1={540} t1={480} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
       <Slab s0={40} t0={656} s1={400} t1={750} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
+      {HOME_BLOCKS.filter((b) => b.s1 >= 0 && b.t1 >= 0).map((b) => (
+        <BlockArt key={`${b.s0}-${b.t0}`} g={SITE_GROUND} b={b} />
+      ))}
       {LAMP_POSTS.map(([ls, lt]) => (
         <Lamp key={`${ls}-${lt}`} s={ls} t={lt} />
       ))}
@@ -1258,10 +1316,152 @@ function BuildingArt() {
       <Tree s={250} t={700} size={1.1} />
       <Tree s={360} t={708} size={0.9} />
 
-      <SkyTint box={[-80, -40, 1170, 730]} lit={[LIT_SPACES.rnds, LIT_SPACES.club421]} />
+      <SkyTint
+        box={[-80, -40, 1170, 730]}
+        lit={[LIT_SPACES.rnds, LIT_SPACES.club421]}
+        dim={CARS.map((car) => {
+          const at = (u: number, v: number, h: number): [number, number, number] => (car.alongT ? [car.s + v, car.t + u, h] : [car.s + u, car.t + v, h]);
+          return litArea(SITE_GROUND, [at(0, 0, 0), at(46, 0, 0), at(46, 19, 0), at(0, 19, 0), at(0, 0, 18), at(46, 0, 18), at(46, 19, 18), at(0, 19, 18)]);
+        })}
+      />
       <NightLights />
       <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
     </svg>
+  );
+}
+
+type Block = { s0: number; s1: number; t0: number; t1: number; h: number };
+
+/** A neighbouring block in white clay, with two rows of windows on the face turned to us. */
+function BlockArt({ g, b }: { g: Point; b: Block }) {
+  return (
+    <g>
+      <polygon points={points(g, [[b.s0, b.t0], [b.s1 + 12, b.t0], [b.s1 + 12, b.t1 + 12], [b.s0, b.t1]])} fill="#000" fillOpacity="0.12" filter="url(#bld-blur-m)" />
+      <polygon points={solid(g, [[b.s1, b.t0, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s1, b.t0, b.h]])} fill="#D6D6D6" />
+      <polygon points={solid(g, [[b.s0, b.t1, 0], [b.s1, b.t1, 0], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#ECECEC" />
+      <polygon points={solid(g, [[b.s0, b.t0, b.h], [b.s1, b.t0, b.h], [b.s1, b.t1, b.h], [b.s0, b.t1, b.h]])} fill="#FAFAFA" />
+      {[0.35, 0.62].map((level) => (
+        <polygon key={level} points={solid(g, [[b.s0 + 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level], [b.s1 - 8, b.t1, b.h * level + 5], [b.s0 + 8, b.t1, b.h * level + 5]])} fill="#E2E2E2" />
+      ))}
+    </g>
+  );
+}
+
+/** Its lit windows at night: a few small warm panes, not every one. */
+function BlockWindows({ g, b, seed }: { g: Point; b: Block; seed: number }) {
+  return (
+    <>
+      {[0.35, 0.62].flatMap((level, li) =>
+        Array.from({ length: Math.max(0, Math.floor((b.s1 - b.s0 - 16) / 18)) }, (_, i) => i)
+          .filter((i) => (i + seed + li) % 3 !== 0)
+          .map((i) => {
+            const s0 = b.s0 + 10 + i * 18;
+            return (
+              <polygon
+                key={`${level}-${i}`}
+                points={solid(g, [[s0, b.t1, b.h * level], [s0 + 9, b.t1, b.h * level], [s0 + 9, b.t1, b.h * level + 5], [s0, b.t1, b.h * level + 5]])}
+                fill="#FFE1A6"
+                fillOpacity="0.7"
+              />
+            );
+          }),
+      )}
+    </>
+  );
+}
+
+// Blocks that fill the corners of the home map, past the back roads and on the right
+const HOME_BLOCKS: Block[] = [
+  { s0: -330, s1: -210, t0: 40, t1: 170, h: 84 },
+  { s0: -340, s1: -220, t0: 210, t1: 330, h: 56 },
+  { s0: -320, s1: -220, t0: 380, t1: 480, h: 40 },
+  { s0: 50, s1: 190, t0: -330, t1: -210, h: 96 },
+  { s0: 230, s1: 370, t0: -320, t1: -210, h: 62 },
+  { s0: 600, s1: 700, t0: -60, t1: 90, h: 70 },
+];
+
+// Around a plate (a project's floor, or a module's plate): two roads in front, a few
+// neighbouring blocks behind, trees and street lamps. By night the windows and lamps light up.
+// `size` is the plate's extent in floor units (s, t), measured from the ground origin.
+function hoodPlan([S, T]: Point) {
+  return {
+    blocks: [
+      { s0: -150, s1: -60, t0: T * 0.08, t1: T * 0.5, h: 70 },
+      { s0: -160, s1: -70, t0: T * 0.62, t1: T * 0.95, h: 46 },
+      { s0: S * 0.1, s1: S * 0.44, t0: -160, t1: -70, h: 86 },
+      { s0: S * 0.53, s1: S * 0.88, t0: -150, t1: -70, h: 54 },
+    ],
+    trees: [
+      [S + 94, T * 0.25],
+      [S + 98, T * 0.75],
+      [S * 0.3, T + 100],
+      [S * 0.72, T + 106],
+      [-40, -40],
+    ] as Point[],
+    lamps: [
+      [S + 20, T * 0.48],
+      [S * 0.45, T + 20],
+    ] as Point[],
+    roadS: S + 50,
+    roadT: T + 48,
+  };
+}
+
+export function Neighbourhood({ ground: g, part, size = [342, 272] }: { ground: Point; part: 'back' | 'front' | 'lights'; size?: Point }) {
+  const { blocks, trees, lamps, roadS, roadT } = hoodPlan(size);
+  const [S, T] = size;
+  const inFront = ([ts, tt]: Point) => ts > S || tt > T;
+  if (part === 'lights') {
+    return (
+      <>
+        {blocks.map((b, bi) => (
+          <BlockWindows key={`${b.s0}-${b.t0}`} g={g} b={b} seed={bi} />
+        ))}
+        {lamps.map(([ls, lt]) => {
+          const [x, y] = iso(g, ls, lt);
+          return (
+            <g key={`${ls}-${lt}`}>
+              <ellipse cx={x - 12} cy={y - 4} rx="26" ry="13" fill="url(#bld-pool)" />
+              <circle cx={x - 12} cy={y - 46} r="2.6" fill="#FFF6CC" />
+            </g>
+          );
+        })}
+        <g fill="none" stroke="#FFFFFF" strokeOpacity="0.3" strokeWidth="1.6" strokeDasharray="12 10">
+          <polyline points={points(g, [[roadS, -400], [roadS, 900]])} />
+          <polyline points={points(g, [[-400, roadT], [900, roadT]])} />
+        </g>
+      </>
+    );
+  }
+  if (part === 'front') {
+    return (
+      <>
+        {lamps.map(([ls, lt]) => (
+          <Lamp key={`${ls}-${lt}`} s={ls} t={lt} origin={[g[0], g[1] + 6]} />
+        ))}
+        {trees.filter(inFront).map(([ts, tt]) => (
+          <Tree key={`${ts}-${tt}`} origin={g} s={ts} t={tt} size={0.85} base={0} />
+        ))}
+      </>
+    );
+  }
+  return (
+    <>
+      {/* Roads in front of the plate */}
+      <polygon points={points(g, [[roadS - 20, -400], [roadS + 20, -400], [roadS + 20, 900], [roadS - 20, 900]])} fill="url(#bld-asphalt)" />
+      <polygon points={points(g, [[-400, roadT - 20], [900, roadT - 20], [900, roadT + 20], [-400, roadT + 20]])} fill="url(#bld-asphalt)" />
+      <g fill="none" stroke="#F4F4F4" strokeWidth="1.6" strokeDasharray="12 10">
+        <polyline points={points(g, [[roadS, -400], [roadS, 900]])} />
+        <polyline points={points(g, [[-400, roadT], [900, roadT]])} />
+      </g>
+      {/* Neighbouring blocks behind, white clay with rows of windows */}
+      {blocks.map((b) => (
+        <BlockArt key={`${b.s0}-${b.t0}`} g={g} b={b} />
+      ))}
+      {trees.filter((p) => !inFront(p)).map(([ts, tt]) => (
+        <Tree key={`${ts}-${tt}`} origin={g} s={ts} t={tt} size={0.85} base={0} />
+      ))}
+    </>
   );
 }
 
@@ -1358,10 +1558,15 @@ function FloorScene({ project, current }: { project: Project; current: string })
       <svg viewBox={scene.viewBox.join(' ')} className="scene-art" aria-hidden="true">
         <SceneDefs />
         <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-ground)" />
+        <Neighbourhood ground={[ox, oy + 30]} part="back" />
         <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
         {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
+        <Neighbourhood ground={[ox, oy + 30]} part="front" />
         <SkyTint box={scene.viewBox} lit={LIT_SCENES[project.id] ? [LIT_SCENES[project.id]] : []} />
         <NightLights only={project.id} />
+        <g className="night-lights">
+          <Neighbourhood ground={[ox, oy + 30]} part="lights" />
+        </g>
         <rect x={vx} y={vy} width={vw} height={vh} filter="url(#bld-grain)" />
       </svg>
       <PhaseButton choice={choice} phase={phase} onChange={setChoice} />

@@ -27,12 +27,12 @@
   --text-muted: #5c5e62;
   --text-card: #232529;
 
-  /* Alert (waiting for Marc) */
-  --alert: #f0b44c;
-  --alert-text: #8a5a00;
-  --alert-tint: #fdf1da;
-  --alert-border: #f0d29a;
-  --alert-ink: #1a1206;
+  /* Alert (an agent waiting for Marc): Claude's orange, since the agents run on Claude */
+  --alert: #d97757;
+  --alert-text: #a8512f;
+  --alert-tint: #fbece6;
+  --alert-border: #efc3b2;
+  --alert-ink: #ffffff;
 
   /* Project accents: the brand colour, a darker shade readable on white, a pale tint.
      RNDS: "Rouge Gong" from the RNDS brand kit (Documents/RNDS/RNDS_charte_graphique.pdf). */
@@ -128,9 +128,9 @@
   --text-muted: #8f8f94;
   --text-card: #e6e7ea;
 
-  --alert-text: #f3c870;
-  --alert-tint: #2e2412;
-  --alert-border: #5a4520;
+  --alert-text: #f0a080;
+  --alert-tint: #3a1f16;
+  --alert-border: #6b3424;
 
   --rnds-soft: #ff5c78;
   --rnds-tint: #3a0f19;

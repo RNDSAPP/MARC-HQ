@@ -932,11 +932,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--fill-strong);
-  font-weight: 700;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card), inset 0 0 0 1px var(--hairline);
+  color: var(--text);
+}
+
+.conn-url {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conn-edit {
+  display: flex;
+  gap: 6px;
+}
+
+.conn-edit .tool-input {
+  height: 36px;
+  font-size: 14px;
+}
+
+.conn-open {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .conn-name {

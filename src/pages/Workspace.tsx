@@ -244,7 +244,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             ))}
             {project.agents.length === 0 && (
               <p className="workspace-empty">
-                Pas encore d'agent. Ils arriveront avec Claude, dans <Link to={`/${project.id}/connexions`}>Connexions</Link>.
+                Pas encore d'agent pour ce projet. Ouvre Claude depuis <Link to={`/${project.id}/connexions`}>Connexions</Link>.
               </p>
             )}
           </section>
@@ -257,8 +257,8 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
               <KpiStrip kpis={module.kpis} />
             ) : (
               <p className="workspace-empty">
-                Pas encore de chiffres. Branche Instagram, App Store Connect ou Stripe dans <Link to={`/${project.id}/connexions`}>Connexions</Link>, ou fixe-toi un{' '}
-                <Link to={`/${project.id}/objectifs`}>objectif</Link>.
+                Pas encore de chiffres. Fixe-toi un <Link to={`/${project.id}/objectifs`}>objectif</Link>, et retrouve tes outils dans{' '}
+                <Link to={`/${project.id}/connexions`}>Connexions</Link>.
               </p>
             )}
           </section>

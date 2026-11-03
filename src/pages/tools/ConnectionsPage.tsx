@@ -1,40 +1,44 @@
 import { useState } from 'react';
+import BrandIcon from '../../components/BrandIcon';
+import type { Brand } from '../../components/BrandIcon';
 import type { Project } from '../../data/types';
 import { useStored } from '../../hooks/useStored';
 import './Tools.css';
 
-type Connector = {
-  id: string;
+type Service = {
+  brand: Brand;
   name: string;
   group: string;
-  /** What it would bring to this project. */
+  /** What Marc finds there for this project. */
   gives: string;
-  /** What it takes to plug it in for real. */
-  needs: string[];
+  /** Where "Ouvrir" goes when no address is set for the project. */
+  url: string;
 };
 
-// Each real connection needs a server side (Supabase) to keep the access safely, and an app
-// declared with the service. Until then, Marc marks the ones he wants first.
-const CONNECTORS: Connector[] = [
-  { id: 'claude', name: 'Claude', group: 'Agents', gives: 'Des agents qui rédigent les relances, résument les avis et préparent les posts, à partir des données du projet.', needs: ['Une clé API Claude, gardée côté serveur', 'Supabase pour faire tourner les agents'] },
-  { id: 'gmail', name: 'Gmail', group: 'Mails et agenda', gives: 'Les mails des clubs et partenaires rangés dans chaque fiche, et les réponses préparées.', needs: ['Une application déclarée chez Google (OAuth)', 'Supabase pour garder l’accès'] },
-  { id: 'agenda', name: 'Google Agenda', group: 'Mails et agenda', gives: 'Les rendez-vous et soirées dans la frise de la semaine.', needs: ['La même application Google que Gmail'] },
-  { id: 'instagram', name: 'Instagram', group: 'Réseaux', gives: 'Abonnés, portée et publications en vrai dans les chiffres et la rubrique Publications.', needs: ['Un compte professionnel Instagram', 'Une application déclarée chez Meta'] },
-  { id: 'tiktok', name: 'TikTok', group: 'Réseaux', gives: 'Vues et abonnés TikTok à côté d’Instagram.', needs: ['Une application déclarée chez TikTok for Developers'] },
-  { id: 'meta', name: 'Meta Business', group: 'Réseaux', gives: 'Publicités Facebook et Instagram : dépenses, résultats, coût par inscription.', needs: ['Un compte Meta Business', 'L’application Meta d’Instagram'] },
-  { id: 'youtube', name: 'YouTube', group: 'Réseaux', gives: 'Vues et abonnés de la chaîne.', needs: ['L’application Google de Gmail'] },
-  { id: 'appstore', name: 'App Store Connect', group: 'App et code', gives: 'Téléchargements, note, avis et versions en vrai, avec réponse aux avis.', needs: ['Une clé API App Store Connect', 'Supabase pour la garder'] },
-  { id: 'github', name: 'GitHub', group: 'App et code', gives: 'Les commits, tickets et versions du dépôt dans Versions et Retours.', needs: ['Le dépôt du projet sur le bon compte', 'Un jeton GitHub, gardé côté serveur'] },
-  { id: 'supabase', name: 'Supabase', group: 'App et code', gives: 'La base de données de Marc HQ : tout est synchronisé entre ton Mac et ton iPhone.', needs: ['Un projet Supabase (gratuit pour commencer)'] },
-  { id: 'stripe', name: 'Stripe', group: 'Paiements', gives: 'Le chiffre d’affaires et les achats en direct dans Revenus.', needs: ['Une clé Stripe en lecture seule'] },
+const SERVICES: Service[] = [
+  { brand: 'claude', name: 'Claude', group: 'Agents', gives: 'Tes agents et conversations pour ce projet.', url: 'https://claude.ai' },
+  { brand: 'gmail', name: 'Gmail', group: 'Mails et agenda', gives: 'Les mails des clubs, partenaires et utilisateurs.', url: 'https://mail.google.com' },
+  { brand: 'agenda', name: 'Google Agenda', group: 'Mails et agenda', gives: 'Rendez-vous, appels et soirées.', url: 'https://calendar.google.com' },
+  { brand: 'instagram', name: 'Instagram', group: 'Réseaux', gives: 'Le compte du projet, ses posts et ses messages.', url: 'https://www.instagram.com' },
+  { brand: 'tiktok', name: 'TikTok', group: 'Réseaux', gives: 'Le compte TikTok et ses vidéos.', url: 'https://www.tiktok.com' },
+  { brand: 'meta', name: 'Meta Business', group: 'Réseaux', gives: 'Publicités Facebook et Instagram, messagerie.', url: 'https://business.facebook.com' },
+  { brand: 'youtube', name: 'YouTube', group: 'Réseaux', gives: 'La chaîne et ses vidéos.', url: 'https://studio.youtube.com' },
+  { brand: 'appstore', name: 'App Store Connect', group: 'App et code', gives: 'Téléchargements, avis, versions et review Apple.', url: 'https://appstoreconnect.apple.com' },
+  { brand: 'github', name: 'GitHub', group: 'App et code', gives: 'Le dépôt du code, ses tickets et ses versions.', url: 'https://github.com' },
+  { brand: 'supabase', name: 'Supabase', group: 'App et code', gives: 'La base de données de l’app.', url: 'https://supabase.com/dashboard' },
+  { brand: 'figma', name: 'Figma', group: 'App et code', gives: 'Les maquettes et le design.', url: 'https://www.figma.com' },
+  { brand: 'stripe', name: 'Stripe', group: 'Paiements', gives: 'Paiements, abonnements et chiffre d’affaires.', url: 'https://dashboard.stripe.com' },
 ];
 
-type Wish = Record<string, boolean>;
+/** Addresses Marc set for this project, by service (his Instagram account, his repo…). */
+type Addresses = Partial<Record<Brand, string>>;
+
+const withScheme = (url: string) => (/^https?:\/\//.test(url) ? url : `https://${url}`);
 
 /**
- * Connections of a project: what each service would bring, what it takes to plug it in, and a
- * "À brancher" list Marc fills to say which ones come first. Nothing is connected for real yet:
- * the buttons say so plainly.
+ * The services a project lives in, with their logo. "Ouvrir" goes to the page in this same tab
+ * (back comes back to Marc HQ). Each one can point to the project's own page: its Instagram
+ * account, its GitHub repo, its App Store Connect app.
  */
 export default function ConnectionsPage({ project, query, onRemoveProject }: {
   project: Project;
@@ -42,23 +46,24 @@ export default function ConnectionsPage({ project, query, onRemoveProject }: {
   /** Only for projects added from the app. */
   onRemoveProject?: () => void;
 }) {
-  const [wish, setWish] = useStored<Wish>(`marc-hq:${project.id}:connections`, () => ({}));
-  const [open, setOpen] = useState<string | null>(null);
+  const [addresses, setAddresses] = useStored<Addresses>(`marc-hq:${project.id}:services`, () => ({}));
+  const [editing, setEditing] = useState<Brand | null>(null);
+  const [draft, setDraft] = useState('');
   const [confirm, setConfirm] = useState(false);
-  const visible = CONNECTORS.filter((c) => query(`${c.name} ${c.group} ${c.gives}`));
-  const groups = [...new Set(visible.map((c) => c.group))];
-  const wanted = CONNECTORS.filter((c) => wish[c.id]).length;
+  const visible = SERVICES.filter((s) => query(`${s.name} ${s.group} ${s.gives}`));
+  const groups = [...new Set(visible.map((s) => s.group))];
+  const own = Object.values(addresses).filter(Boolean).length;
 
   return (
     <section className="tool" aria-labelledby="tool-title">
       <div className="tool-head">
         <h1 id="tool-title" className="tool-title">
-          <span className="tool-title-light">Connexions</span> <span className="tool-title-bold">{wanted} à brancher</span>
+          <span className="tool-title-light">Connexions</span> <span className="tool-title-bold">{SERVICES.length} outils</span>
         </h1>
       </div>
       <p className="conn-intro">
-        Aucun outil n'est encore branché pour de vrai : il faut d'abord une partie serveur (Supabase) pour garder les accès en sécurité. Marque ceux que tu
-        veux en premier, on les branchera dans cet ordre.
+        Ouvre chaque outil en un clic, dans cet onglet. Donne l'adresse propre à {project.name} (son compte, son dépôt, son app) pour arriver directement au bon
+        endroit{own > 0 ? ` : ${own} déjà réglée${own > 1 ? 's' : ''}` : ''}.
       </p>
 
       {groups.map((group) => (
@@ -66,37 +71,56 @@ export default function ConnectionsPage({ project, query, onRemoveProject }: {
           <h2 className="tool-group-title">{group}</h2>
           <ul className="conns">
             {visible
-              .filter((c) => c.group === group)
-              .map((c) => (
-                <li key={c.id} className={`conn${wish[c.id] ? ' conn--wanted' : ''}`}>
-                  <div className="conn-head">
-                    <span className="conn-icon" aria-hidden="true">
-                      {c.name.charAt(0)}
-                    </span>
-                    <span className="conn-name">{c.name}</span>
-                    <span className={`conn-state${wish[c.id] ? ' conn-state--wanted' : ''}`}>{wish[c.id] ? 'À brancher' : 'Pas connecté'}</span>
-                  </div>
-                  <p className="conn-gives">{c.gives}</p>
-                  {open === c.id && (
-                    <div className="conn-needs">
-                      <p>Pour le brancher, il faudra :</p>
-                      <ul>
-                        {c.needs.map((n) => (
-                          <li key={n}>{n}</li>
-                        ))}
-                      </ul>
+              .filter((s) => s.group === group)
+              .map((s) => {
+                const url = addresses[s.brand] || s.url;
+                return (
+                  <li key={s.brand} className="conn">
+                    <div className="conn-head">
+                      <span className="conn-icon" aria-hidden="true">
+                        <BrandIcon brand={s.brand} size={22} />
+                      </span>
+                      <span className="conn-name">{s.name}</span>
                     </div>
-                  )}
-                  <div className="conn-actions">
-                    <button type="button" className="tool-ghost" aria-expanded={open === c.id} onClick={() => setOpen(open === c.id ? null : c.id)}>
-                      {open === c.id ? 'Masquer' : 'Ce qu’il faut'}
-                    </button>
-                    <button type="button" className={wish[c.id] ? 'tool-ghost' : 'tool-primary tool-primary--small'} onClick={() => setWish((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}>
-                      {wish[c.id] ? 'Retirer de la liste' : 'Mettre à brancher'}
-                    </button>
-                  </div>
-                </li>
-              ))}
+                    <p className="conn-gives">{s.gives}</p>
+                    {editing === s.brand ? (
+                      <form
+                        className="conn-edit"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          setAddresses((prev) => ({ ...prev, [s.brand]: draft.trim() ? withScheme(draft.trim()) : undefined }));
+                          setEditing(null);
+                        }}
+                      >
+                        <label className="visually-hidden" htmlFor={`conn-${s.brand}`}>
+                          Adresse {s.name} pour {project.name}
+                        </label>
+                        <input id={`conn-${s.brand}`} className="tool-input" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={s.url.replace('https://', '')} autoFocus inputMode="url" />
+                        <button type="submit" className="tool-primary tool-primary--small">
+                          OK
+                        </button>
+                      </form>
+                    ) : (
+                      <p className="conn-url">{url.replace(/^https?:\/\/(www\.)?/, '')}</p>
+                    )}
+                    <div className="conn-actions">
+                      <button
+                        type="button"
+                        className="tool-ghost"
+                        onClick={() => {
+                          setDraft(addresses[s.brand] ?? '');
+                          setEditing(editing === s.brand ? null : s.brand);
+                        }}
+                      >
+                        {addresses[s.brand] ? 'Changer l’adresse' : 'Adresse du projet'}
+                      </button>
+                      <a className="conn-open" href={url}>
+                        Ouvrir
+                      </a>
+                    </div>
+                  </li>
+                );
+              })}
           </ul>
         </div>
       ))}

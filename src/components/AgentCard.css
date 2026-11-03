@@ -82,3 +82,24 @@
   background: var(--alert);
   filter: brightness(1.08);
 }
+
+.agent-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-logo {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: #fbece6;
+}
+
+:root[data-theme='night'] .agent-logo {
+  background: #3a1f16;
+}
