@@ -584,3 +584,78 @@
     transform: translateY(-4px);
   }
 }
+
+/* Day and night (src/lib/sun.ts): the sky tint darkens the model, then the lights come on */
+.sky-tint {
+  fill: #33406b;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: opacity 1.2s var(--ease), fill 1.2s var(--ease);
+  pointer-events: none;
+}
+
+.night-lights {
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 1.2s var(--ease);
+  pointer-events: none;
+}
+
+[data-phase='dawn'] .sky-tint {
+  fill: #f3b999;
+  opacity: 0.28;
+}
+
+[data-phase='dusk'] .sky-tint {
+  fill: #c9785a;
+  opacity: 0.38;
+}
+
+[data-phase='night'] .sky-tint {
+  opacity: 0.66;
+}
+
+[data-phase='dawn'] .night-lights {
+  opacity: 0.25;
+}
+
+[data-phase='dusk'] .night-lights {
+  opacity: 0.7;
+}
+
+[data-phase='night'] .night-lights {
+  opacity: 1;
+}
+
+.building[data-phase='night'],
+.scene[data-phase='night'] {
+  background: #757b92;
+}
+
+.phase-button {
+  position: absolute;
+  right: 3%;
+  bottom: 4%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.phase-button-mode {
+  color: var(--text-muted);
+}
+
+.scene .phase-button {
+  right: 16px;
+  bottom: 16px;
+}

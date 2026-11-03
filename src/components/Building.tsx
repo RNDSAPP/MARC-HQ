@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import type { Project, ProjectId } from '../data/types';
 import { agentStatusLabel, projectStatus } from '../lib/format';
 import ModuleIcon from './ModuleIcon';
+import { useStored } from '../hooks/useStored';
+import { phaseLabel, usePhase } from '../lib/sun';
+import type { PhaseChoice } from '../lib/sun';
 import logo421 from '../assets/logo-421-violet.svg';
 import './Building.css';
 
@@ -12,8 +15,10 @@ type Props = {
 
 /** The isometric building of the home page: one floor per project, each floor opens its workspace. */
 export default function Building({ projects }: Props) {
+  const [choice, setChoice] = usePhaseChoice();
+  const phase = usePhase(choice);
   return (
-    <div className="building">
+    <div className="building" data-phase={phase}>
       <BuildingArt />
 
       {/* Large invisible click zones over each floor. Keyboard users get the labels below instead. */}
@@ -56,7 +61,41 @@ export default function Building({ projects }: Props) {
       <span className="building-hint" aria-hidden="true">
         Clique sur un étage
       </span>
+      <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
     </div>
+  );
+}
+
+/** Day or night on the model: by default it follows the clock; the choice is kept in this browser. */
+function usePhaseChoice() {
+  return useStored<PhaseChoice>('marc-hq:phase', () => 'auto');
+}
+
+const NEXT_CHOICE: Record<PhaseChoice, PhaseChoice> = { auto: 'day', day: 'night', night: 'auto' };
+
+/** Small pill on the model: shows the light of the moment and cycles Auto → Jour → Nuit. */
+function PhaseButton({ choice, phase, onChange }: { choice: PhaseChoice; phase: ReturnType<typeof usePhase>; onChange: (update: (prev: PhaseChoice) => PhaseChoice) => void }) {
+  const night = phase === 'night' || phase === 'dusk';
+  return (
+    <button
+      type="button"
+      className="phase-button"
+      onClick={() => onChange((prev) => NEXT_CHOICE[prev])}
+      aria-label={`Lumière : ${phaseLabel[phase]}${choice === 'auto' ? ', selon l’heure' : ', forcée'}. Changer`}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        {night ? (
+          <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+        ) : (
+          <>
+            <circle cx="12" cy="12" r="4.2" />
+            <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" />
+          </>
+        )}
+      </svg>
+      {phaseLabel[phase]}
+      <span className="phase-button-mode">{choice === 'auto' ? 'auto' : 'forcé'}</span>
+    </button>
   );
 }
 
@@ -228,46 +267,56 @@ function Roads() {
 }
 
 /**
- * A small clay car driving along t (or along s): rounded body, a cabin with a sloped windscreen
- * and tinted windows, wheels with hubs, headlights at the front and lights at the back.
+ * A low clay sports car driving along t (or along s): wedge body with a plunging bonnet, a small
+ * cabin set back under a steep windscreen, a rear wing, big wheels with silver rims, a slim light
+ * bar at the front and optional racing stripes.
  */
-function Car({ s, t, alongT, color }: { s: number; t: number; alongT: boolean; color: string }) {
+function Car({ s, t, alongT, color, stripes }: { s: number; t: number; alongT: boolean; color: string; stripes?: string }) {
   const o = SITE_GROUND;
-  // Work in the car's own frame: u along its length (front at u = 40), v across (0 to 18).
+  // The car's own frame: u along its length (rear 0, nose 46), v across (0 to 19), h up.
   const at = (u: number, v: number, h: number): [number, number, number] => (alongT ? [s + v, t + u, h] : [s + u, t + v, h]);
   const face = (list: [number, number, number][]) => solid(o, list.map(([u, v, h]) => at(u, v, h)));
-  const side = shade(color, 0.14);
-  const front = shade(color, 0.06);
-  const wheel = (u: number, v: number) => {
-    const [ws, wt, wh] = at(u, v, 3.2);
+  const side = shade(color, 0.16);
+  const nose = shade(color, 0.08);
+  const W = 19;
+  const wheel = (u: number) => {
+    const [ws, wt, wh] = at(u, W, 3.6);
     const [x, y] = iso(o, ws, wt);
     return (
-      <g key={`${u}-${v}`}>
-        <ellipse cx={x} cy={y - wh} rx="3.4" ry="3.4" fill="#262626" />
-        <ellipse cx={x} cy={y - wh} rx="1.5" ry="1.5" fill="#BDBDBD" />
+      <g key={u}>
+        <circle cx={x} cy={y - wh} r="4" fill="#1E1E1E" />
+        <circle cx={x} cy={y - wh} r="2.3" fill="#C9CDD2" />
+        <circle cx={x} cy={y - wh} r="0.8" fill="#6B7178" />
       </g>
     );
   };
-  // Visible faces: the side at v = 18 and the front at u = 40 (alongT), or the side at v = 18 and
-  // the front at u = 40 seen from the other angle (along s) — the same code serves both.
   return (
     <g>
-      <polygon points={face([[0, 0, 0], [40, 0, 0], [40, 18, 0], [0, 18, 0]])} fill="#000" fillOpacity="0.22" filter="url(#bld-blur-m)" transform="translate(3 4)" />
-      {/* Body */}
-      <polygon points={face([[2, 18, 3], [40, 18, 3], [40, 18, 10], [2, 18, 10]])} fill={side} />
-      <polygon points={face([[40, 0, 3], [40, 18, 3], [40, 18, 10], [40, 0, 10]])} fill={front} />
-      {vinyl((f) => <polygon points={face([[0, 0, 10], [40, 0, 10], [40, 18, 10], [0, 18, 10]])} fill={f} />, color)}
-      {/* Cabin: windows on the side, sloped windscreen at the front, roof in the body colour */}
-      <polygon points={face([[9, 16, 10], [31, 16, 10], [27, 14.5, 17], [12, 14.5, 17]])} fill="url(#bld-glass)" />
-      <polygon points={face([[31, 2, 10], [31, 16, 10], [27, 14.5, 17], [27, 3.5, 17]])} fill="url(#bld-glass)" />
-      <line {...lineAt(face([[20, 16, 10], [19.5, 14.5, 17]]))} stroke={side} strokeWidth="1.2" />
-      {vinyl((f) => <polygon points={face([[12, 3.5, 17], [27, 3.5, 17], [27, 14.5, 17], [12, 14.5, 17]])} fill={f} />, color)}
-      {/* Lights */}
-      <polygon points={face([[40, 2, 6.5], [40, 5.5, 6.5], [40, 5.5, 8.5], [40, 2, 8.5]])} fill="#FFF4C2" />
-      <polygon points={face([[40, 12.5, 6.5], [40, 16, 6.5], [40, 16, 8.5], [40, 12.5, 8.5]])} fill="#FFF4C2" />
-      <polygon points={face([[2, 18, 6.5], [5, 18, 6.5], [5, 18, 8.5], [2, 18, 8.5]])} fill={RNDS} fillOpacity="0.85" />
-      {wheel(8, 18)}
-      {wheel(32, 18)}
+      <polygon points={face([[0, 0, 0], [46, 0, 0], [46, W, 0], [0, W, 0]])} fill="#000" fillOpacity="0.24" filter="url(#bld-blur-m)" transform="translate(3 4)" />
+      {/* Wedge body: side, nose, rear deck and plunging bonnet */}
+      <polygon points={face([[1, W, 2.4], [46, W, 2.4], [46, W, 5], [31, W, 8], [1, W, 8.6]])} fill={side} />
+      <polygon points={face([[46, 0, 2.4], [46, W, 2.4], [46, W, 5], [46, 0, 5]])} fill={nose} />
+      {vinyl((f) => <polygon points={face([[0, 0, 8.6], [31, 0, 8], [31, W, 8], [0, W, 8.6]])} fill={f} />, color)}
+      {vinyl((f) => <polygon points={face([[31, 0, 8], [46, 0, 5], [46, W, 5], [31, W, 8]])} fill={f} />, color)}
+      {stripes && (
+        <>
+          <polygon points={face([[0, 7, 8.6], [46, 7, 5], [46, 8.6, 5], [0, 8.6, 8.6]])} fill={stripes} />
+          <polygon points={face([[0, 10.4, 8.6], [46, 10.4, 5], [46, 12, 5], [0, 12, 8.6]])} fill={stripes} />
+        </>
+      )}
+      {/* Low cabin, set back, steep windscreen */}
+      <polygon points={face([[13, W - 2, 8.4], [30, W - 2, 8], [24, W - 3.4, 12.6], [16, W - 3.4, 12.6]])} fill="url(#bld-glass)" />
+      <polygon points={face([[30, 2, 8], [30, W - 2, 8], [24, W - 3.4, 12.6], [24, 3.4, 12.6]])} fill="url(#bld-glass)" />
+      {vinyl((f) => <polygon points={face([[16, 3.4, 12.6], [24, 3.4, 12.6], [24, W - 3.4, 12.6], [16, W - 3.4, 12.6]])} fill={f} />, color)}
+      {/* Rear wing on two posts */}
+      <line {...lineAt(face([[2, 3, 8.6], [2, 3, 11.4]]))} stroke="#1E1E1E" strokeWidth="1.2" />
+      <line {...lineAt(face([[2, W - 3, 8.6], [2, W - 3, 11.4]]))} stroke="#1E1E1E" strokeWidth="1.2" />
+      <polygon points={face([[0, 0.5, 11.4], [4.5, 0.5, 11.4], [4.5, W - 0.5, 11.4], [0, W - 0.5, 11.4]])} fill="#1E1E1E" />
+      {/* Slim light bar at the nose, light at the back */}
+      <polygon points={face([[46, 2.5, 3.8], [46, W - 2.5, 3.8], [46, W - 2.5, 4.6], [46, 2.5, 4.6]])} fill="#FFF7D6" />
+      <polygon points={face([[1, W, 6.6], [5, W, 6.6], [5, W, 7.6], [1, W, 7.6]])} fill={RNDS} />
+      {wheel(9)}
+      {wheel(36)}
     </g>
   );
 }
@@ -764,6 +813,75 @@ const CLUB_PEOPLE: Figure[] = [
   { s: 120, t: 214, walk: [100, 0], look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
 ];
 
+const CARS: { s: number; t: number; alongT: boolean; color: string; stripes?: string }[] = [
+  { s: 408, t: 206, alongT: true, color: RNDS },
+  { s: 383, t: 420, alongT: true, color: '#1E1E1E', stripes: '#F4F4F4' },
+  { s: 140, t: 624, alongT: false, color: '#F4F4F4', stripes: CLUB },
+];
+
+const LAMP_POSTS: Point[] = [
+  [448, 110],
+  [448, 300],
+  [70, 664],
+];
+
+/**
+ * Colour of the sky over the model: nothing by day, warm at dawn and dusk, deep blue at night
+ * (Building.css, from the scene's data-phase). Laid over everything with a multiply blend.
+ */
+function SkyTint({ box: [x, y, w, h] }: { box: [number, number, number, number] }) {
+  return <rect className="sky-tint" x={x} y={y} width={w} height={h} />;
+}
+
+/**
+ * What lights up when it gets dark, laid over the sky tint with a screen blend: the lamps over the
+ * ring and the dice table, the street lamps and the cars' headlights. `only` keeps one floor.
+ */
+function NightLights({ only }: { only?: ProjectId }) {
+  const R = RNDS_FLOOR;
+  const C = CLUB_FLOOR;
+  const [ringX, ringY] = iso(R, 150, 120);
+  return (
+    <g className="night-lights">
+      {only !== 'club421' && (
+        <>
+          <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp-night)" />
+          <ellipse cx={ringX} cy={ringY - 16} rx="70" ry="38" fill="#FFD66B" fillOpacity="0.5" filter="url(#bld-blur-m)" />
+          <ellipse cx="626" cy="98" rx="12" ry="4" fill="#FFF3B0" filter="url(#bld-blur-s)" />
+        </>
+      )}
+      {only !== 'rnds' && (
+        <>
+          <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp-night)" />
+          <ellipse cx="392" cy="400" rx="48" ry="26" fill="#FFD66B" fillOpacity="0.45" filter="url(#bld-blur-m)" />
+          <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
+          {/* The bottles on the bar shelf catch the light */}
+          <polygon points={solid(C, [[10, 48, 50], [14, 48, 50], [14, 160, 50], [10, 160, 50]])} fill="#FFE7A0" fillOpacity="0.5" filter="url(#bld-blur-s)" />
+        </>
+      )}
+      {!only && (
+        <>
+          {LAMP_POSTS.map(([ls, lt]) => {
+            const [x, y] = iso(SITE_GROUND, ls, lt);
+            return (
+              <g key={`${ls}-${lt}`}>
+                <ellipse cx={x - 10} cy={y + 2} rx="26" ry="13" fill="#FFD98A" fillOpacity="0.55" filter="url(#bld-blur-m)" />
+                <circle cx={x - 12} cy={y - 46} r="4" fill="#FFF6CC" filter="url(#bld-blur-s)" />
+              </g>
+            );
+          })}
+          {CARS.map((car) => {
+            // Two beams on the road ahead of the nose (u = 46 to 96 in the car's frame)
+            const at = (u: number, v: number): Point => (car.alongT ? [car.s + v, car.t + u] : [car.s + u, car.t + v]);
+            const beam = [at(46, 2), at(46, 17), at(96, 26), at(96, -7)];
+            return <polygon key={`${car.s}-${car.t}`} points={points(SITE_GROUND, beam)} fill="#FFF2C2" fillOpacity="0.5" filter="url(#bld-blur-s)" />;
+          })}
+        </>
+      )}
+    </g>
+  );
+}
+
 /** Gradients, filters and clips shared by the scenes. */
 function SceneDefs() {
   const R = RNDS_FLOOR;
@@ -810,6 +928,10 @@ function SceneDefs() {
         <linearGradient id="bld-lamp" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#FFE477" stopOpacity="0.6" />
           <stop offset="1" stopColor="#FFF3B8" stopOpacity="0.12" />
+        </linearGradient>
+        <linearGradient id="bld-lamp-night" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFE58A" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#FFE58A" stopOpacity="0.1" />
         </linearGradient>
         <linearGradient id="bld-canvas" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#2E2E30" />
@@ -1006,14 +1128,14 @@ function BuildingArt() {
       <ClubFloorArt />
 
       {/* In front: the road traffic, then the plots across the road */}
-      <Car s={408} t={210} alongT color="#F4F4F4" />
-      <Car s={384} t={420} alongT color="#2B2B2B" />
-      <Car s={150} t={624} alongT={false} color="#DCDCDC" />
+      {CARS.map((car) => (
+        <Car key={`${car.s}-${car.t}`} {...car} />
+      ))}
       <Slab s0={440} t0={70} s1={540} t1={480} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
       <Slab s0={40} t0={656} s1={400} t1={750} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
-      <Lamp s={448} t={110} />
-      <Lamp s={448} t={300} />
-      <Lamp s={70} t={664} />
+      {LAMP_POSTS.map(([ls, lt]) => (
+        <Lamp key={`${ls}-${lt}`} s={ls} t={lt} />
+      ))}
       <Tree s={482} t={130} />
       <Tree s={500} t={230} size={1.1} />
       <Tree s={480} t={340} size={0.9} />
@@ -1022,6 +1144,8 @@ function BuildingArt() {
       <Tree s={250} t={700} size={1.1} />
       <Tree s={360} t={708} size={0.9} />
 
+      <SkyTint box={[-80, -40, 1170, 730]} />
+      <NightLights />
       <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
     </svg>
   );
@@ -1062,18 +1186,23 @@ const SCENES: Record<ProjectId, {
  */
 export function ProjectScene({ project, current }: { project: Project; current: string }) {
   const scene = SCENES[project.id];
+  const [choice, setChoice] = usePhaseChoice();
+  const phase = usePhase(choice);
   const [vx, vy, vw, vh] = scene.viewBox;
   const [ox, oy] = scene.origin;
   const plate: Point = [ox, oy + 30];
   return (
-    <div className="scene" data-project={project.id}>
+    <div className="scene" data-project={project.id} data-phase={phase}>
       <svg viewBox={scene.viewBox.join(' ')} className="scene-art" aria-hidden="true">
         <SceneDefs />
         <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-ground)" />
         <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
         {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
+        <SkyTint box={scene.viewBox} />
+        <NightLights only={project.id} />
         <rect x={vx} y={vy} width={vw} height={vh} filter="url(#bld-grain)" />
       </svg>
+      <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
       <ul className="scene-spots" aria-label={`Rubriques de ${project.name} sur la maquette`}>
         {project.modules
           .filter((module) => scene.spots[module.slug])
