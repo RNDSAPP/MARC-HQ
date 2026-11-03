@@ -740,6 +740,10 @@
   filter: brightness(0.62) saturate(0.9);
 }
 
+[data-phase='night'] .night-figures {
+  filter: brightness(0.95);
+}
+
 /* Dumbbell curls: each forearm folds up in turn (seen from the front it shortens) and the fist
    with its dumbbell rises to the shoulder */
 .fig--curl .fig-curl-arm {

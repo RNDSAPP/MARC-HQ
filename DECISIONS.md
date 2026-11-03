@@ -188,3 +188,10 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 118. **RNDS STUDIO** est décalé vers la gauche sur le fond papier du studio.
 119. **Un DJ au 421**, dans le coin de devant : il hoche la tête au rythme et scratche, avec casque et casquette violette, derrière une cabine violette (deux platines et une table de mixage), une enceinte à côté, des notes qui montent. Un client danse devant.
 120. **Sol de la salle de boxe en noir clair** : des dalles en caoutchouc de salle de sport, avec quelques mouchetures.
+121. **Coureurs bien visibles la nuit** : ils sont redessinés presque à pleine lumière par-dessus le noir.
+122. **Clubs en salles de boxe** : façade vitrée avec ses montants, un sac de frappe rouge derrière la vitre, une enseigne dans la couleur de l'étape, un bloc technique sur le toit.
+123. **BDE en campus** : chaque quartier a son amphithéâtre en plein air (gradins en demi-cercle, étudiants assis, scène dans la couleur du projet). Les BDE nommés sont des facultés à colonnes, fronton et drapeau. Les autres sont des bâtiments de cours avec leurs rangées de fenêtres. Les maisons ne servent plus qu'aux projets ajoutés.
+124. **Abonnés en stades** : un stade par plateforme, d'autant plus grand qu'elle a d'abonnés. On y voit des gradins pleins de supporters (environ un pour vingt abonnés), une pelouse, quatre projecteurs et un tableau d'affichage aux couleurs de la plateforme avec son nom et son nombre. Plus d'objectif peint au sol.
+125. **App Store en fiche de l'App Store** : au lieu de la scène, une fiche comme celle d'Apple. Icône et nom, bandeau des chiffres clés, puis « Notes et avis » avec la note en grand, la répartition des étoiles, le nombre d'avis et ceux à qui répondre. Les cartes d'avis restent dessous.
+126. **Plan du projet en bas de l'aperçu** : toutes les rubriques (avec leur chiffre clé et leur phrase du moment) et tous les outils (avec ce qu'ils contiennent), dans le même ordre et avec les mêmes icônes que la barre latérale.
+127. **Passages piétons** sans pointillés dessus. **Nuit** : la bande de route vue par-dessus le muret du 421 n'est plus éclairée en blanc.

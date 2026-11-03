@@ -10,7 +10,7 @@ import type { Entity } from '../components/EntitySheet';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
-import { AmbassadorsPlaza, AppStoreScene, FollowerCards, FollowersScene, PipelineCity, PostCards, RevenueCards, RevenueScene, ReviewCards, StudioScene } from '../components/Scenes';
+import { AmbassadorsPlaza, AppStorePanel, FollowerCards, FollowersScene, PipelineCity, PostCards, RevenueCards, RevenueScene, ReviewCards, StudioScene } from '../components/Scenes';
 import logo421 from '../assets/logo-421-blanc.svg';
 import logoRnds from '../assets/logo-rnds.svg';
 import StatPanel from '../components/StatPanel';
@@ -18,6 +18,7 @@ import TabBar from '../components/TabBar';
 import WorkspaceHeader from '../components/WorkspaceHeader';
 import { useCustomProjects, useProjects } from '../data/customProjects';
 import { TOOLS, isTool } from '../data/sections';
+import ProjectMap from '../components/ProjectMap';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { dayLabel, isoDate } from '../lib/dates';
@@ -157,6 +158,20 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
               }}
             />
           )}
+          {module?.slug === 'vue-d-ensemble' && (
+            <ProjectMap
+              project={project}
+              counts={{
+                todo: `${tasks.tasks.filter((task) => !task.done).length}`,
+                notes: `${notes.notes.length}`,
+                idees: `${ideas.ideas.length}`,
+                versions: `${versions.versions.length}`,
+                retours: `${feedback.items.length}`,
+                objectifs: `${goals.goals.length}`,
+                liens: `${links.links.length}`,
+              }}
+            />
+          )}
         </main>
       </div>
 
@@ -228,7 +243,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           ) : module.slug === 'publications' ? (
             <StudioScene project={project} module={module} icon={logoRnds} onSelect={setOpen} />
           ) : module.slug === 'app-store' ? (
-            <AppStoreScene project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} onSelect={setOpen} />
+            <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} />
           ) : (
             <ProjectScene project={project} current={module.slug} />
           )}

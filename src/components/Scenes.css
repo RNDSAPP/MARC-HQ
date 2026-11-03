@@ -456,3 +456,226 @@
 [data-phase='night'] .ring-light {
   stroke: #fff6cc;
 }
+
+/* App Store: the store page of the app, in the style of Apple's */
+.store {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 26px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.store-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.store-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 22.5%;
+  background: var(--accent);
+  box-shadow: 0 8px 22px -10px var(--accent);
+}
+
+.store-icon img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+}
+
+.store-title {
+  min-width: 0;
+}
+
+.store-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.store-tag {
+  margin: 2px 0 0;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.store-note {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.store-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  margin: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.store-fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  text-align: center;
+}
+
+.store-fact + .store-fact {
+  border-left: 1px solid var(--hairline);
+}
+
+.store-fact dt {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.store-fact dd {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.store-fact .store-fact-delta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.store-ratings {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'head head'
+    'score bars'
+    'score count';
+  column-gap: 28px;
+  row-gap: 6px;
+  align-items: center;
+}
+
+.store-subhead {
+  grid-area: head;
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.store-score {
+  grid-area: score;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.store-score-num {
+  font-size: 58px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text-2);
+}
+
+.store-score-of {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.store-bars {
+  grid-area: bars;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.store-bars li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.store-bars-stars {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.store-bars-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fill-strong);
+  overflow: hidden;
+}
+
+.store-bars-track span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--text-2);
+}
+
+.store-count {
+  grid-area: count;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.store-waiting {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--alert-tint);
+  color: var(--alert);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .store {
+    padding: 20px;
+  }
+
+  .store-icon {
+    width: 68px;
+    height: 68px;
+  }
+
+  .store-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 14px;
+  }
+
+  .store-fact:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .store-score-num {
+    font-size: 46px;
+  }
+}

@@ -263,7 +263,9 @@ function Roads() {
           </g>
         </g>
       ))}
-      {/* Zebra crossings, one on each front road, near the corner */}
+      {/* Zebra crossings, one on each front road, near the corner: the centre line stops there */}
+      <polygon points={quad(386, 424, 545, 591, true)} fill="#C8CBDD" />
+      <polygon points={quad(604, 640, 319, 365, false)} fill="#C8CBDD" />
       <g fill="#F5F6FA">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <polygon key={`a${i}`} points={quad(382, 428, 548 + i * 7, 552 + i * 7, true)} />
@@ -1167,17 +1169,18 @@ const FLOOR_EDGES = (h: number): [number, number, number][] => [[0, 250, h], [32
  * What stays lit (white) at night: each space with its walls and the edges of its floor, so the
  * volume still reads. In the workspace scene, the plate under the floor too.
  */
+// The Club's outline follows its low right-hand wall: a hull would also light the strip of road
+// seen over that wall, between the two floors.
+const CLUB_ROOM: [number, number, number][] = [[0, 250, -18], [0, 250, 95], [0, 0, 95], [0, 0, 24], [320, 0, 24], [320, 0, -18], [320, 250, -18]];
 const LIT_SPACES: Record<string, string> = {
   rnds: litArea(RNDS_FLOOR, [...WALL_TOPS.rnds, ...FLOOR_EDGES(-18)]),
-  club421: litArea(CLUB_FLOOR, [...WALL_TOPS.club421, ...FLOOR_EDGES(-18)]),
+  club421: solid(CLUB_FLOOR, CLUB_ROOM),
 };
-const LIT_SCENES: Record<string, string> = Object.fromEntries(
-  Object.entries(WALL_TOPS).map(([id, tops]) => {
-    const origin = id === 'rnds' ? RNDS_FLOOR : CLUB_FLOOR;
-    const plate: [number, number, number][] = [[-22, -22, -30], [342, -22, -30], [342, 272, -30], [-22, 272, -30]];
-    return [id, litArea(origin, [...tops, ...FLOOR_EDGES(-18), ...plate])];
-  }),
-);
+const SCENE_PLATE: [number, number, number][] = [[-22, -22, -30], [342, -22, -30], [342, 272, -30], [-22, 272, -30]];
+const LIT_SCENES: Record<string, string[]> = {
+  rnds: [litArea(RNDS_FLOOR, [...WALL_TOPS.rnds, ...FLOOR_EDGES(-18), ...SCENE_PLATE])],
+  club421: [solid(CLUB_FLOOR, CLUB_ROOM), litArea(CLUB_FLOOR, [...FLOOR_EDGES(-18), ...SCENE_PLATE])],
+};
 
 /** Neon line along the two front edges of a floor: one crisp line, no blur. */
 function Neon({ origin, color }: { origin: Point; color: string }) {
@@ -1652,6 +1655,9 @@ function BuildingArt() {
         {CARS.map((car) => (
           <DrivingCar key={`${car.s}-${car.t}`} {...car} />
         ))}
+      </g>
+      {/* The runners too, almost at full brightness so they read well at night */}
+      <g className="night-cars night-figures" mask="url(#bld-night-cars)">
         <Runners />
       </g>
       <NightLights />
@@ -1904,7 +1910,7 @@ function FloorScene({ project, current }: { project: Project; current: string })
         <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F6F7FB" side="#CDD1E5" shadow={0.18} />
         {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
         <Neighbourhood ground={[ox, oy + 30]} part="front" />
-        <SkyTint box={scene.viewBox} lit={LIT_SCENES[project.id] ? [LIT_SCENES[project.id]] : []} />
+        <SkyTint box={scene.viewBox} lit={LIT_SCENES[project.id] ?? []} />
         <NightLights only={project.id} />
         <g className="night-lights">
           <Neighbourhood ground={[ox, oy + 30]} part="lights" />

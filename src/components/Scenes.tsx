@@ -194,9 +194,15 @@ function stageCount(column: PipelineColumn, module: Module) {
 }
 
 /** The city's size grows with its biggest stage: districts of n × n slots, never less than 5 × 5. */
+/** What the buildings are: boxing gyms (clubs), a university campus (student unions), or houses. */
+type CityKind = 'gym' | 'campus' | 'town';
+const cityKind = (module: Module): CityKind => (module.slug === 'clubs' ? 'gym' : module.slug === 'bde' ? 'campus' : 'town');
+
 function cityPlan(project: Project, module: Module) {
+  const kind = cityKind(module);
   const counts = project.pipeline.columns.map((column) => ({ column, count: stageCount(column, module) }));
-  const n = Math.max(5, Math.ceil(Math.sqrt(Math.max(...counts.map((c) => c.count)))));
+  // A campus keeps a 2 × 2 corner of each district for its lecture theatre
+  const n = Math.max(5, Math.ceil(Math.sqrt(Math.max(...counts.map((c) => c.count)) + (kind === 'campus' ? 4 : 0))));
   const district = n * SLOT;
   const span = district * 2 + STREET;
   const width = 0.866 * span * 2 + 120;
@@ -204,7 +210,8 @@ function cityPlan(project: Project, module: Module) {
   const box: [number, number, number, number] = [0, 0, width, span + 140];
   // Where each stage sits: affiliated at the back, the ones to sign at the front, nearest to Marc.
   const at: Record<PipelineTone, Point> = { accent: [0, 0], muted: [district + STREET, 0], new: [0, district + STREET], alert: [district + STREET, district + STREET] };
-  const order = spreadOrder(n);
+  const amphi = kind === 'campus' ? [n - 2, n - 1, 2 * n - 2, 2 * n - 1] : [];
+  const order = spreadOrder(n).filter((slot) => !amphi.includes(slot));
   const lots: Lot[] = [];
   for (const { column, count } of counts) {
     const [ds, dt] = at[column.tone];
@@ -220,38 +227,136 @@ function cityPlan(project: Project, module: Module) {
       lots.push({ s: ds + (slot % n) * SLOT + 5, t: dt + Math.floor(slot / n) * SLOT + 5, h, tone: column.tone, name: card?.name, meta: card?.meta, stage: column.name });
     }
   }
-  return { origin, box, district, at, counts, lots: lots.sort((a, b) => a.s + a.t - (b.s + b.t)) };
+  return { origin, box, district, at, counts, kind, n, lots: lots.sort((a, b) => a.s + a.t - (b.s + b.t)) };
 }
 
-/** A club building: white walls, a cap in the colour of its stage, a door; ghosts are still to contact. */
-function CityBuilding({ lot, o }: { lot: Lot; o: Point }) {
+/**
+ * An open-air lecture theatre on a campus, in a 2 × 2 corner of a district (s0, t0): stepped
+ * half-circles of seats, the highest at the back, each step with its front wall, students seated
+ * along the steps, a small stage in the project's colour at the bottom.
+ */
+function Amphitheatre({ o, s0, t0 }: { o: Point; s0: number; t0: number }) {
+  const cs = s0 + SLOT + 2;
+  const ct = t0 + SLOT - 2;
+  const base = 8;
+  // The back half of a circle (facing us), from 135° to 315° in floor axes
+  const half = (r: number, h: number) =>
+    Array.from({ length: 17 }, (_, i) => {
+      const a = ((135 + (180 * i) / 16) * Math.PI) / 180;
+      return [cs + r * Math.cos(a), ct + r * Math.sin(a), h] as [number, number, number];
+    });
+  const end = (r: number, sign: number): [number, number] => [cs + sign * r * Math.cos((135 * Math.PI) / 180), ct + sign * r * Math.sin((135 * Math.PI) / 180)];
+  const steps = [0, 1, 2, 3, 4].map((i) => ({ r: 40 - i * 7, h: base + (5 - i) * 4 }));
+  return (
+    <g>
+      <polygon points={points(o, [[cs - 44, ct - 44], [cs + 44, ct - 44], [cs + 44, ct + 20], [cs - 44, ct + 20]])} fill="#2E3470" fillOpacity="0.1" filter="url(#bld-blur-m)" transform={`translate(0 ${-base})`} />
+      {steps.map(({ r, h }, i) => {
+        const [as, at] = end(r, 1);
+        const [bs, bt] = end(r, -1);
+        return (
+          <g key={i}>
+            {/* Front wall of the step along the diameter, then its top */}
+            <polygon points={solid(o, [[as, at, base], [bs, bt, base], [bs, bt, h], [as, at, h]])} fill={i % 2 ? '#D9DCEA' : '#E2E5F0'} />
+            <polygon points={solid(o, half(r, h))} fill={i % 2 ? '#F7F8FC' : '#EEF0F7'} stroke="#DADDEB" strokeWidth="0.5" />
+            {/* Students seated along the step */}
+            {i < 4 &&
+              [0.16, 0.34, 0.52, 0.7, 0.86].map((f, k) => {
+                if ((i * 2 + k) % 3 === 2) return null;
+                const a = ((135 + 180 * f) * Math.PI) / 180;
+                const rr = r - 3.5;
+                const [x, y] = iso(o, cs + rr * Math.cos(a), ct + rr * Math.sin(a));
+                const look = LOOKS[(i * 5 + k * 2) % LOOKS.length];
+                return (
+                  <g key={k}>
+                    <rect x={x - 2.2} y={y - h - 5} width="4.4" height="4.6" rx="1.8" fill={look.top} />
+                    <circle cx={x} cy={y - h - 7.2} r="2.3" fill={look.skin} />
+                    <path d={`M${x - 2.3},${y - h - 7.6} a2.3 2.3 0 0 1 4.6,0 Z`} fill={look.headColor} />
+                  </g>
+                );
+              })}
+          </g>
+        );
+      })}
+      {/* The stage and its lectern */}
+      <polygon points={solid(o, half(9, base + 1))} className="lot-cap" />
+      <polygon points={solid(o, [[cs - 3, ct - 3, base + 1], [cs + 1, ct - 3, base + 1], [cs + 1, ct - 3, base + 9], [cs - 3, ct - 3, base + 9]])} fill="#FFFFFF" stroke="#D6D9E8" strokeWidth="0.5" />
+    </g>
+  );
+}
+
+/**
+ * A building of the city, by kind: a boxing gym (glass front, a sign band in the colour of its
+ * stage, a bag behind the glass), a campus building (a faculty with columns, pediment and a flag
+ * when it has a name, else a teaching block with rows of windows), or a house. Ghosts are still
+ * to contact.
+ */
+function CityBuilding({ lot, o, kind }: { lot: Lot; o: Point; kind: CityKind }) {
   const { s, t, h, tone } = lot;
   const base = 8;
   const size = LOT;
   const ghost = tone === 'new';
   const top = base + h;
+  const front = t + size;
+  const face = (s0: number, s1: number, h0: number, h1: number) => solid(o, [[s0, front, h0], [s1, front, h0], [s1, front, h1], [s0, front, h1]]);
+  const faculty = kind === 'campus' && !!lot.name;
   return (
     <g className={`lot lot--${tone}`}>
       <polygon points={points(o, [[s, t], [s + size + 6, t], [s + size + 6, t + size + 6], [s, t + size]])} fill="#2E3470" fillOpacity={ghost ? 0.06 : 0.16} filter="url(#bld-blur-m)" transform={`translate(0 ${-base})`} />
       <polygon points={solid(o, [[s + size, t, base], [s + size, t + size, base], [s + size, t + size, top], [s + size, t, top]])} fill={ghost ? '#FFFFFF' : '#D3D6E8'} fillOpacity={ghost ? 0.4 : 1} />
-      <polygon points={solid(o, [[s, t + size, base], [s + size, t + size, base], [s + size, t + size, top], [s, t + size, top]])} fill={ghost ? '#FFFFFF' : '#EBEBEB'} fillOpacity={ghost ? 0.5 : 1} />
+      <polygon points={face(s, s + size, base, top)} fill={ghost ? '#FFFFFF' : faculty ? '#DFE2EE' : '#EBEBEB'} fillOpacity={ghost ? 0.5 : 1} />
       <polygon points={solid(o, [[s, t, top], [s + size, t, top], [s + size, t + size, top], [s, t + size, top]])} fill="#FFFFFF" fillOpacity={ghost ? 0.6 : 1} className={ghost ? 'lot-ghost' : undefined} />
-      {!ghost && (
+      {!ghost && kind === 'gym' && (
+        <>
+          {/* Glass front with its frames, a bag hanging behind it, the sign band, a unit on the roof */}
+          <polygon points={face(s + 3, s + size - 3, base + 2, top - 8)} fill="#3B4250" />
+          <polygon points={face(s + 3, s + size - 3, top - 14, top - 8)} fill="#566070" />
+          {[s + 11, s + 19].map((ms) => (
+            <polygon key={ms} points={face(ms, ms + 0.8, base + 2, top - 8)} fill="#8C95A6" />
+          ))}
+          <polygon points={face(s + 6, s + 9, base + 6, top - 15)} fill="#FF0A3C" fillOpacity="0.85" />
+          <polygon className="lot-cap" points={face(s, s + size, top - 7, top - 2)} />
+          <polygon points={solid(o, [[s + 6, t + 6, top], [s + 16, t + 6, top], [s + 16, t + 14, top], [s + 6, t + 14, top]])} fill="#E6E8F1" />
+          <polygon points={solid(o, [[s + 6, t + 14, top], [s + 16, t + 14, top], [s + 16, t + 14, top + 5], [s + 6, t + 14, top + 5]])} fill="#D7DAE8" />
+          <polygon points={solid(o, [[s + 6, t + 6, top + 5], [s + 16, t + 6, top + 5], [s + 16, t + 14, top + 5], [s + 6, t + 14, top + 5]])} fill="#F7F8FC" />
+        </>
+      )}
+      {!ghost && kind === 'campus' && faculty && (
+        <>
+          {/* Four columns, the entablature and the pediment, a flag on the roof */}
+          {[s + 4, s + 11.5, s + 19, s + 26.5].map((cs) => (
+            <polygon key={cs} points={face(cs - 1.4, cs + 1.4, base, top - 6)} fill="#FBFBFE" />
+          ))}
+          <polygon points={face(s, s + size, top - 6, top)} fill="#F4F5FA" />
+          <polygon points={solid(o, [[s - 1, front, top], [s + size + 1, front, top], [s + size / 2, front, top + 10]])} fill="#FFFFFF" stroke="#DADDEB" strokeWidth="0.6" />
+          <polygon className="lot-cap" points={solid(o, [[s + 8, front, top + 2], [s + size - 8, front, top + 2], [s + size / 2, front, top + 7]])} />
+          <line {...upright(iso(o, s + size - 5, t + 5), top, top + 20)} stroke="#9AA0B8" strokeWidth="0.9" />
+          <polygon className="lot-cap" points={solid(o, [[s + size - 5, t + 5, top + 20], [s + size - 5, t + 15, top + 18], [s + size - 5, t + 5, top + 15]])} />
+        </>
+      )}
+      {!ghost && kind === 'campus' && !faculty && (
+        <>
+          {/* Teaching block: rows of windows, a band in the colour of its stage at the top */}
+          {Array.from({ length: Math.max(1, Math.floor((h - 8) / 9)) }, (_, r) => base + 6 + r * 9).flatMap((wh) =>
+            [s + 4, s + 12, s + 20].map((ws) => <polygon key={`${ws}-${wh}`} points={face(ws, ws + 6, wh, wh + 4.5)} fill="#C9D6E8" />),
+          )}
+          <polygon className="lot-cap" points={face(s, s + size, top - 3, top)} />
+        </>
+      )}
+      {!ghost && kind === 'town' && (
         <>
           {/* A pitched roof in the colour of its stage: back slope, gable, front slope */}
           <polygon className="lot-cap lot-roof-back" points={solid(o, [[s, t, top], [s + size, t, top], [s + size, t + size / 2, top + 11], [s, t + size / 2, top + 11]])} />
           <polygon points={solid(o, [[s + size, t, top], [s + size, t + size, top], [s + size, t + size / 2, top + 11]])} fill="#E4E6F1" />
           <polygon className="lot-cap" points={solid(o, [[s, t + size / 2, top + 11], [s + size, t + size / 2, top + 11], [s + size, t + size, top], [s, t + size, top]])} />
-          {/* Door and two windows on the face turned to us */}
-          <polygon points={solid(o, [[s + 12, t + size, base], [s + 19, t + size, base], [s + 19, t + size, base + 10], [s + 12, t + size, base + 10]])} fill="#5B6168" />
           {h > 22 && (
             <>
-              <polygon points={solid(o, [[s + 4, t + size, top - 9], [s + 10, t + size, top - 9], [s + 10, t + size, top - 4], [s + 4, t + size, top - 4]])} fill="#C9D6E8" />
-              <polygon points={solid(o, [[s + 21, t + size, top - 9], [s + 27, t + size, top - 9], [s + 27, t + size, top - 4], [s + 21, t + size, top - 4]])} fill="#C9D6E8" />
+              <polygon points={face(s + 4, s + 10, top - 9, top - 4)} fill="#C9D6E8" />
+              <polygon points={face(s + 21, s + 27, top - 9, top - 4)} fill="#C9D6E8" />
             </>
           )}
         </>
       )}
+      {!ghost && kind !== 'gym' && <polygon points={face(s + 12, s + 19, base, base + 10)} fill="#5B6168" />}
       {/* The named ones have someone outside: partying (partners), talking (in discussion), on the phone */}
       {lot.name && !ghost && (
         <g transform={`translate(${iso(o, s + size + 6, t + size - 2)[0].toFixed(1)} ${(iso(o, s + size + 6, t + size - 2)[1] - base).toFixed(1)}) scale(0.62)`}>
@@ -298,7 +403,7 @@ function CityWindows({ lots, o }: { lots: Lot[]; o: Point }) {
  * the map; a tap opens the club's card. The city grows with the pipeline.
  */
 export function PipelineCity({ project, module, onSelect }: { project: Project; module: Module; onSelect: (name: string) => void }) {
-  const { origin: o, box, district, at, counts, lots } = cityPlan(project, module);
+  const { origin: o, box, district, at, counts, lots, kind, n } = cityPlan(project, module);
   const span = district * 2 + STREET;
   const items: SceneItem[] = lots
     .filter((lot) => lot.name)
@@ -340,8 +445,14 @@ export function PipelineCity({ project, module, onSelect }: { project: Project; 
           })}
           <Tree origin={o} s={span - 18} t={14} size={0.8} base={8} />
           <Tree origin={o} s={14} t={span - 16} size={0.8} base={8} />
+          {/* On a campus, each district has its lecture theatre in its right-hand corner */}
+          {kind === 'campus' &&
+            counts.map(({ column }) => {
+              const [ds, dt] = at[column.tone];
+              return <Amphitheatre key={`amphi-${column.name}`} o={o} s0={ds + (n - 2) * SLOT} t0={dt} />;
+            })}
           {lots.map((lot) => (
-            <CityBuilding key={`${lot.s}-${lot.t}`} lot={lot} o={o} />
+            <CityBuilding key={`${lot.s}-${lot.t}`} lot={lot} o={o} kind={kind} />
           ))}
         </>
       }
@@ -499,120 +610,67 @@ export function AmbassadorsPlaza({ project, module, onSelect }: { project: Proje
 }
 
 // ---------------------------------------------------------------------------------------------
-// App Store: the game on a big phone standing on its plate, the reviews around it.
+// App Store: the app's store page (icon, figures, ratings), then the reviews as cards.
 
 const stars = (n: number) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
 
 /**
- * Someone who left a review: phone in hand, happy or not depending on the stars, and a bubble over
- * the head with the stars given. Amber outline while the review waits for an answer.
+ * The App Store module as its store page: the icon and name, a strip of key figures (as on the
+ * App Store), then the ratings: the average in big and how the stars spread, from the reviews.
  */
-function Reviewer({ review, at: [s, t], o, look }: { review: { text: string; note: number; status: string }; at: Point; o: Point; look: Look }) {
-  const [x, y] = iso(o, s, t);
-  const waiting = normalize(review.status).includes('repondre');
-  const top = y - 8 - 52;
-  return (
-    <g>
-      <Person origin={[o[0], o[1] - 8]} s={s} t={t} look={{ ...look, holds: 'phone' }} laugh={review.note >= 5} />
-      <g>
-        <rect x={x - 33} y={top - 26} width="66" height="22" rx="11" fill="#FFFFFF" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.2" />
-        <path d={`M${x - 4},${top - 4.6} L${x},${top + 1} L${x + 4},${top - 4.6} Z`} fill="#FFFFFF" />
-        <path d={`M${x - 4},${top - 4} L${x},${top + 1} L${x + 4},${top - 4}`} fill="none" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.2" />
-        <text x={x} y={top - 11} textAnchor="middle" fontSize="10.5" fill="#F0B44C" letterSpacing="1">
-          {stars(review.note)}
-        </text>
-      </g>
-    </g>
-  );
-}
-
-/**
- * The App Store module as a scene: a big phone shows the game's icon and its rating, the latest
- * reviews float around it as bubbles with their stars; those still waiting for an answer are amber.
- */
-export function AppStoreScene({ project, module, rating, icon, onSelect }: {
-  project: Project;
-  module: Module;
-  rating: string;
-  icon: string;
-  onSelect: (name: string) => void;
-}) {
+export function AppStorePanel({ project, module, rating, icon }: { project: Project; module: Module; rating: string; icon: string }) {
   if (module.view.kind !== 'table') return null;
-  const reviews = module.view.rows.map(([text, note, date, status]) => ({ text, note: parseInt(note, 10) || 0, date, status }));
-  const size = 360;
-  const o: Point = [0.866 * size + 60, 120];
-  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 170];
-  // The phone stands in the middle of the plate, its screen turned to us
-  const p = { s0: 150, s1: 214, t: 196, h: 150 };
-  const screen = (s: number, h: number): [number, number] => {
-    const [x, y] = iso(o, s, p.t);
-    return [x, y - h];
-  };
-  const [sx, sy] = screen(p.s0 + 8, p.h - 10);
-  // Bubbles around the phone, alternately left and right, rising
-  const spots: Point[] = [
-    [60, 250],
-    [300, 120],
-    [70, 140],
-    [310, 250],
-    [190, 330],
-    [30, 320],
-  ];
-  const items: SceneItem[] = reviews.map((review, i) => {
-    const [s, t] = spots[i % spots.length];
-    const [x, y] = iso(o, s, t);
-    const waiting = normalize(review.status).includes('repondre');
-    return {
-      id: review.text,
-      x,
-      y: y - 92,
-      label: `« ${review.text} »`,
-      sub: `${stars(review.note)} · ${review.date} · ${review.status}`,
-      tone: waiting ? 'alert' : 'accent',
-    };
-  });
-
+  const notes = module.view.rows.map(([, note]) => parseInt(note, 10) || 0).filter((n) => n > 0);
+  const spread = [5, 4, 3, 2, 1].map((n) => ({ n, count: notes.filter((x) => x === n).length }));
+  const most = Math.max(1, ...spread.map((row) => row.count));
+  const waiting = module.view.rows.filter(([, , , status]) => normalize(status).includes('repondre')).length;
   return (
-    <SceneFrame
-      project={project}
-      box={box}
-      title="Les avis App Store"
-      zoom={1.3}
-      items={items}
-      onSelect={onSelect}
-      hood={{ ground: o, size: [size, size] }}
-      lit={[points([o[0], o[1] - 8], [[0, 0], [size, 0], [size, size], [0, size]])]}
-      art={
-        <>
-          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={8} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          {/* Reviewers behind the phone first */}
-          {reviews.map((review, i) => (spots[i % spots.length][0] + spots[i % spots.length][1] < p.s0 + p.t ? <Reviewer key={review.text} review={review} at={spots[i % spots.length]} o={o} look={LOOKS[(i * 2 + 1) % LOOKS.length]} /> : null))}
-          {/* Phone: shadow, side, back edge, then the screen face */}
-          <polygon points={points(o, [[p.s0, p.t - 14], [p.s1 + 30, p.t - 14], [p.s1 + 30, p.t + 20], [p.s0, p.t + 6]])} fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-m)" />
-          <polygon points={solid(o, [[p.s1, p.t - 12, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s1, p.t - 12, 8 + p.h]])} fill="#2A2A2C" />
-          <polygon points={solid(o, [[p.s0, p.t - 12, 8 + p.h], [p.s1, p.t - 12, 8 + p.h], [p.s1, p.t, 8 + p.h], [p.s0, p.t, 8 + p.h]])} fill="#3A3A3D" />
-          <polygon points={solid(o, [[p.s0, p.t, 8], [p.s1, p.t, 8], [p.s1, p.t, 8 + p.h], [p.s0, p.t, 8 + p.h]])} fill="#1C1C1E" />
-          <polygon points={solid(o, [[p.s0 + 4, p.t, 14], [p.s1 - 4, p.t, 14], [p.s1 - 4, p.t, 4 + p.h], [p.s0 + 4, p.t, 4 + p.h]])} fill="#F4F2FA" />
-          {/* On the screen: the game's icon, its name and rating */}
-          <g transform={`matrix(0.866 0.5 0 1 ${sx} ${sy})`}>
-            <rect x="8" y="8" width="40" height="40" rx="10" className="lot-cap" />
-            <image href={icon} x="12" y="12" width="32" height="32" />
-            <text x="28" y="66" textAnchor="middle" fontSize="9" fontWeight="700" fill="#1C1C1E">
-              {project.name}
-            </text>
-            <text x="28" y="86" textAnchor="middle" fontSize="16" fontWeight="300" fill="#1C1C1E">
-              {rating}
-            </text>
-            <text x="28" y="98" textAnchor="middle" fontSize="8" fill="#F0B44C">
-              ★★★★★
-            </text>
-            <rect x="12" y="108" width="32" height="10" rx="5" className="lot-cap" />
-          </g>
-          {/* Reviewers in front of the phone */}
-          {reviews.map((review, i) => (spots[i % spots.length][0] + spots[i % spots.length][1] >= p.s0 + p.t ? <Reviewer key={review.text} review={review} at={spots[i % spots.length]} o={o} look={LOOKS[(i * 2 + 1) % LOOKS.length]} /> : null))}
-        </>
-      }
-    />
+    <section className="store" data-project={project.id} aria-label={`${project.name} sur l'App Store`}>
+      <header className="store-head">
+        <span className="store-icon">
+          <img src={icon} alt="" />
+        </span>
+        <div className="store-title">
+          <h3 className="store-name">{project.name}</h3>
+          <p className="store-tag">{project.tag}</p>
+          <p className="store-note">Avis d'exemple : les vrais arriveront avec App Store Connect.</p>
+        </div>
+      </header>
+
+      <dl className="store-strip">
+        {module.kpis.map((kpi) => (
+          <div key={kpi.label} className="store-fact">
+            <dt>{kpi.label}</dt>
+            <dd>{kpi.value}</dd>
+            <dd className="store-fact-delta">{kpi.delta}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="store-ratings">
+        <h4 className="store-subhead">Notes et avis</h4>
+        <div className="store-score">
+          <span className="store-score-num">{rating}</span>
+          <span className="store-score-of">sur 5</span>
+        </div>
+        <ul className="store-bars" aria-label="Répartition des étoiles">
+          {spread.map(({ n, count }) => (
+            <li key={n}>
+              <span className="store-bars-stars" aria-label={`${n} étoiles`}>
+                {'★'.repeat(n)}
+              </span>
+              <span className="store-bars-track">
+                <span style={{ width: `${(count / most) * 100}%` }} />
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="store-count">
+          {notes.length} avis
+          {waiting > 0 && <span className="store-waiting">{waiting} à répondre</span>}
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -1150,92 +1208,151 @@ export function PostCards({ rows, onOpen, onAction }: { rows: string[][]; onOpen
 const CROWD = ['#1F1F1F', '#F4F4F4', '#FF0A3C', '#9CC8F2', '#B8AE7E', '#2C4FB8', '#EFE7D2', '#8A5A3C'];
 const CROWD_SKIN = [SKIN.light, SKIN.rose, SKIN.tan, SKIN.deep];
 
+/** A platform's colours on its stadium: the scoreboard and the band round the stands. */
+function platformColour(name: string) {
+  const key = normalize(name);
+  if (key.includes('insta')) return { main: '#E1306C', ink: '#FFFFFF' };
+  if (key.includes('tiktok')) return { main: '#111111', ink: '#25F4EE' };
+  if (key.includes('youtube')) return { main: '#FF0000', ink: '#FFFFFF' };
+  return { main: '', ink: '#FFFFFF' };
+}
+
 /**
- * The Abonnés module as grandstands: one per platform, three tiers high, with one little
- * spectator for about every hundred followers. The goal is painted on the floor with its
- * progress bar.
+ * The Abonnés module as stadiums, one per platform, as big as its following: an oval of stands
+ * full of fans (about one per twenty followers), a green pitch, four floodlights and a scoreboard
+ * in the platform's colours with its name and count.
  */
 export function FollowersScene({ project, module, onSelect }: { project: Project; module: Module; onSelect: (name: string) => void }) {
   if (module.view.kind !== 'table') return null;
   const platforms = module.view.rows.map(([name, count, month, trend]) => ({ name, count, value: euros(count), month, trend }));
-  const goalKpi = module.kpis.find((k) => normalize(k.label).includes('objectif'));
-  const goalTarget = goalKpi ? euros(goalKpi.label) : 0;
-  const goalShare = goalKpi ? parseInt(goalKpi.value, 10) || 0 : 0;
-  const size = 380;
-  const o: Point = [0.866 * size + 60, 150];
-  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 190];
+  const size = 400;
+  const o: Point = [0.866 * size + 60, 170];
+  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 210];
   const b = 8;
-  const width = 90;
-  const stands = platforms.map((p, i) => ({ ...p, s: 20 + i * 120, t: 110, crowd: Math.min(27, Math.max(1, Math.round(p.value / 110))) }));
-  const tiers = [
-    { dt: 0, h: 30 },
-    { dt: 22, h: 20 },
-    { dt: 44, h: 10 },
+  const P: Point = [o[0], o[1] - b];
+  // Biggest stadium at the back, the others in front, each sized by its followers
+  const spots: Point[] = [
+    [115, 125],
+    [298, 152],
+    [182, 306],
+    [330, 330],
+    [60, 330],
   ];
-  const items: SceneItem[] = stands.map((stand) => {
-    const [x, y] = iso(o, stand.s + width / 2, stand.t + 10);
-    return { id: stand.name, x, y: y - b - 30 - 34, label: stand.name, sub: `${stand.month} en 30 jours · ${stand.trend}`, tone: 'accent', value: stand.count };
+  const stadiums = [...platforms]
+    .sort((a, b2) => b2.value - a.value)
+    .map((p, i) => ({ ...p, at: spots[i % spots.length], r: Math.min(100, 46 + Math.sqrt(p.value) * 0.95), colour: platformColour(p.name) }))
+    .sort((a, b2) => a.at[0] + a.at[1] - (b2.at[0] + b2.at[1]));
+  const H = 20; // height of the stands
+  const items: SceneItem[] = stadiums.map((st) => {
+    const [x, y] = iso(P, st.at[0] - st.r * 0.62, st.at[1] - st.r * 0.62);
+    return { id: st.name, x, y: y - H - 48, label: st.name, sub: `${st.month} en 30 jours · ${st.trend}`, tone: 'accent', value: st.count };
   });
+  const oval = ([cs, ct]: Point, r: number, h: number) => {
+    const [x, y] = iso(P, cs, ct);
+    return { cx: x, cy: y - h, rx: r * 1.2247, ry: r * 0.7071 };
+  };
 
   return (
     <SceneFrame
       project={project}
       box={box}
       title="Les abonnés, plateforme par plateforme"
+      zoom={1.35}
       items={items}
       onSelect={onSelect}
       hood={{ ground: o, size: [size, size] }}
-      lit={[
-        points([o[0], o[1] - b], [[0, 0], [size, 0], [size, size], [0, size]]),
-        ...stands.map(({ s, t }) => solid(o, [[s, t + 66, b], [s + width, t + 66, b], [s + width, t, b], [s + width, t, b + 30], [s, t, b + 30], [s, t + 66, b + 30]])),
-      ]}
+      lit={[points(P, [[0, 0], [size, 0], [size, size], [0, size]])]}
+      lights={
+        <>
+          {stadiums.map((st) => {
+            const pitch = oval(st.at, st.r * 0.56, 4);
+            return <ellipse key={st.name} {...pitch} fill="#FFF4CC" fillOpacity="0.35" filter="url(#bld-blur-m)" />;
+          })}
+        </>
+      }
       art={
         <>
           <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F5F6FA" side="#CDD1E5" shadow={0.16} />
-          {/* Goal painted on the floor, with its progress */}
-          {goalTarget > 0 && (
-            <>
-              <FloorText origin={[o[0], o[1] - b]} s={30} t={size - 40} size={16}>
-                {`OBJECTIF ${new Intl.NumberFormat('fr-FR').format(goalTarget)} · ${goalShare} %`}
-              </FloorText>
-              <polygon points={points([o[0], o[1] - b], [[30, size - 30], [330, size - 30], [330, size - 20], [30, size - 20]])} fill="#E3E5F1" />
-              <polygon className="lot-cap" points={points([o[0], o[1] - b], [[30, size - 30], [30 + 3 * goalShare, size - 30], [30 + 3 * goalShare, size - 20], [30, size - 20]])} />
-            </>
-          )}
-          {stands.map((stand) => (
-            <g key={stand.name}>
-              <polygon points={points([o[0], o[1] - b], [[stand.s, stand.t], [stand.s + width + 12, stand.t], [stand.s + width + 12, stand.t + 70], [stand.s, stand.t + 66]])} fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-m)" />
-              {tiers.map(({ dt, h }, k) => {
-                const s0 = stand.s;
-                const t0 = stand.t + dt;
-                const t1 = t0 + 22;
-                // People of this tier, in a row along it
-                const perTier = Math.ceil(stand.crowd / 3);
-                const here = Math.max(0, Math.min(perTier, stand.crowd - k * perTier));
-                return (
-                  <g key={dt}>
-                    <polygon points={solid(o, [[s0 + width, t0, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0 + width, t0, b + h]])} fill="#D0D3E6" />
-                    <polygon points={solid(o, [[s0, t1, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#EBEDF5" />
-                    <polygon points={solid(o, [[s0, t0, b + h], [s0 + width, t0, b + h], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#FFFFFF" />
-                    {Array.from({ length: here }, (_, j) => {
-                      const [x, y] = iso(o, s0 + 8 + j * (width - 12) / Math.max(perTier, 1), t0 + 11);
-                      const top = y - b - h;
-                      const seed = (k * 7 + j * 3 + stand.s) % 8;
-                      return (
-                        <g key={j}>
-                          <rect x={x - 2.6} y={top - 7} width="5.2" height="7" rx="2.2" fill={CROWD[seed]} />
-                          <circle cx={x} cy={top - 9.6} r="2.8" fill={CROWD_SKIN[seed % 4]} />
-                        </g>
-                      );
-                    })}
-                  </g>
-                );
-              })}
-              <FloorText origin={[o[0], o[1] - b]} s={stand.s + 6} t={stand.t + 86} size={12}>
-                {stand.name.toUpperCase()}
-              </FloorText>
-            </g>
-          ))}
+          {stadiums.map((st, si) => {
+            const { at, r, colour } = st;
+            const [cs, ct] = at;
+            const outer = oval(at, r, H);
+            const base = oval(at, r, 0);
+            const hole = oval(at, r * 0.6, H);
+            const pitch = oval(at, r * 0.56, 4);
+            const clip = `stadium-${project.id}-${si}`;
+            const fans = Math.min(220, Math.max(12, Math.round(st.value / 20)));
+            const mast = (a: number) => {
+              const rad = (a * Math.PI) / 180;
+              const [x, y] = iso(P, cs + r * 1.04 * Math.cos(rad), ct + r * 1.04 * Math.sin(rad));
+              return (
+                <g key={a}>
+                  <line x1={x} y1={y} x2={x} y2={y - H - 34} stroke="#B9BED3" strokeWidth="1.6" />
+                  <rect x={x - 5} y={y - H - 40} width="10" height="6" rx="1.4" fill="#E8EAF2" stroke="#B9BED3" strokeWidth="0.6" />
+                  <rect x={x - 3.6} y={y - H - 38.6} width="7.2" height="3.2" rx="0.8" fill="#FFF6D6" />
+                </g>
+              );
+            };
+            const [bx, by] = iso(P, cs - r * 0.62, ct - r * 0.62);
+            return (
+              <g key={st.name}>
+                <ellipse cx={base.cx + 8} cy={base.cy + 6} rx={base.rx} ry={base.ry} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+                {/* Back floodlights, the scoreboard, then the bowl */}
+                {[200, 250].map(mast)}
+                <line x1={bx - 16} y1={by - H + 4} x2={bx - 16} y2={by - H - 18} stroke="#B9BED3" strokeWidth="1.6" />
+                <line x1={bx + 16} y1={by - H + 4} x2={bx + 16} y2={by - H - 18} stroke="#B9BED3" strokeWidth="1.6" />
+                <g transform={`translate(${bx} ${by - H - 30})`}>
+                  <rect x="-30" y="-12" width="60" height="26" rx="4" fill={colour.main || 'var(--accent)'} />
+                  <text y="-1" textAnchor="middle" fontSize="8.5" fontWeight="700" fill={colour.ink} fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif">
+                    {st.name}
+                  </text>
+                  <text y="10" textAnchor="middle" fontSize="9" fontWeight="300" fill="#FFFFFF" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif">
+                    {st.count}
+                  </text>
+                </g>
+                {/* Outer wall, a band in the platform's colour, the stands */}
+                <ellipse {...base} fill="#D3D6E8" />
+                <rect x={base.cx - base.rx} y={outer.cy} width={base.rx * 2} height={base.cy - outer.cy} fill="#D3D6E8" />
+                <ellipse cx={outer.cx} cy={outer.cy + 7} rx={outer.rx} ry={outer.ry} fill={colour.main || 'var(--accent)'} />
+                <rect x={base.cx - base.rx} y={outer.cy} width={base.rx * 2} height="7" fill={colour.main || 'var(--accent)'} />
+                <ellipse {...outer} fill="#EEF0F7" />
+                {[0.9, 0.8, 0.7].map((f) => (
+                  <ellipse key={f} {...oval(at, r * f, H)} fill="none" stroke="#DADDEB" strokeWidth="0.7" />
+                ))}
+                {/* The bowl: inner wall, then the pitch seen through the opening */}
+                <ellipse {...hole} fill="#C9CDDF" />
+                <clipPath id={clip}>
+                  <ellipse {...hole} />
+                </clipPath>
+                <g clipPath={`url(#${clip})`}>
+                  <ellipse {...pitch} fill="#CFE3C3" />
+                  <ellipse {...oval(at, r * 0.56, 4)} fill="none" stroke="#FFFFFF" strokeOpacity="0.8" strokeWidth="1" />
+                  <line {...(() => {
+                    const [x1, y1] = iso(P, cs, ct - r * 0.56);
+                    const [x2, y2] = iso(P, cs, ct + r * 0.56);
+                    return { x1, y1: y1 - 4, x2, y2: y2 - 4 };
+                  })()} stroke="#FFFFFF" strokeOpacity="0.8" strokeWidth="1" />
+                  <ellipse {...oval(at, r * 0.14, 4)} fill="none" stroke="#FFFFFF" strokeOpacity="0.8" strokeWidth="1" />
+                </g>
+                {/* Fans all round the stands */}
+                {Array.from({ length: fans }, (_, j) => {
+                  const ring = j % 3;
+                  const a = ((j * 137.5) % 360) * (Math.PI / 180);
+                  const rr = r * (0.66 + ring * 0.1);
+                  const [x, y] = iso(P, cs + rr * Math.cos(a), ct + rr * Math.sin(a));
+                  const seed = (j * 5 + si) % 8;
+                  return (
+                    <g key={j}>
+                      <rect x={x - 1.5} y={y - H - 3.6} width="3" height="3.4" rx="1.2" fill={CROWD[seed]} />
+                      <circle cx={x} cy={y - H - 4.8} r="1.4" fill={CROWD_SKIN[seed % 4]} />
+                    </g>
+                  );
+                })}
+                {/* Front floodlights */}
+                {[20, 70].map(mast)}
+              </g>
+            );
+          })}
         </>
       }
     />
