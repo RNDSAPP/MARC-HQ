@@ -4,7 +4,6 @@ import { TOOLS, shortLabel } from '../data/sections';
 import type { Project } from '../data/types';
 import ModuleIcon from './ModuleIcon';
 import { openNewProject } from './NewProjectDialog';
-import ProjectMark from './ProjectMark';
 import './TabBar.css';
 
 type Props = {
@@ -95,27 +94,51 @@ export default function TabBar({ project }: Props) {
   );
 }
 
+/** Tab glyph for a project: a rounded square with its mark, outlined, filled when it is open. */
+function ProjectGlyph({ project, active }: { project: Project; active: boolean }) {
+  const mark = project.id === 'club421' ? '421' : project.mark;
+  return (
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+      <rect x="2.5" y="2.5" width="21" height="21" rx="6" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" />
+      <text
+        x="13"
+        y="17.4"
+        textAnchor="middle"
+        fontSize={mark.length > 1 ? 8.5 : 12.5}
+        fontWeight="800"
+        letterSpacing={mark.length > 1 ? '-0.3' : '0'}
+        fill={active ? 'var(--bg)' : 'currentColor'}
+        fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif"
+      >
+        {mark}
+      </text>
+    </svg>
+  );
+}
+
 /**
- * The same bar on the home page, on phones: home itself, one tab per project (its logo, a dot when
- * its agent is waiting for Marc) and a tab to add a project. It replaces the side rail there.
+ * The same bar on the home page, on phones, drawn like an iPhone app's: monochrome glyphs, the
+ * open tab filled and tinted, the others grey. Home itself, one tab per project (a dot when its
+ * agent waits for Marc) and a tab to add a project. It replaces the side rail there.
  */
 export function HomeTabBar({ projects }: { projects: Project[] }) {
   return (
-    <nav className="tabbar" aria-label="Navigation">
+    <nav className="tabbar tabbar--home" aria-label="Navigation">
       <ul className="tabbar-list">
         <li>
           <Link to="/" className="tabbar-item active" aria-current="page">
-            <span className="tabbar-hq" aria-hidden="true">
-              HQ
-            </span>
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.6 10.4 12 3.6l8.4 6.8V19a1.6 1.6 0 0 1-1.6 1.6h-4.2v-5.4H9.4v5.4H5.2A1.6 1.6 0 0 1 3.6 19Z" fill="currentColor" />
+            </svg>
             <span className="tabbar-label">Accueil</span>
           </Link>
         </li>
         {projects.map((project) => (
           <li key={project.id}>
-            <Link to={`/${project.id}/vue-d-ensemble`} className="tabbar-item" data-project={project.id}>
-              <span className="tabbar-mark" aria-hidden="true">
-                <ProjectMark project={project} />
+            <Link to={`/${project.id}/vue-d-ensemble`} className="tabbar-item">
+              <span className="tabbar-glyph">
+                <ProjectGlyph project={project} active={false} />
+                {project.agents.some((agent) => agent.status === 'wait') && <span className="tabbar-badge" aria-label="un agent attend ta réponse" />}
               </span>
               <span className="tabbar-label">{project.name}</span>
             </Link>
@@ -123,9 +146,9 @@ export function HomeTabBar({ projects }: { projects: Project[] }) {
         ))}
         <li>
           <button type="button" className="tabbar-item" onClick={openNewProject}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-              <rect x="3.5" y="3.5" width="17" height="17" rx="5" strokeDasharray="3 2.4" />
-              <path d="M12 8.5v7M8.5 12h7" />
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v8M8 12h8" />
             </svg>
             <span className="tabbar-label">Nouveau</span>
           </button>
