@@ -10,7 +10,7 @@ import type { Entity } from '../components/EntitySheet';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
-import { AmbassadorsPlaza, AppStoreScene, PipelineCity, RevenueCards, RevenueScene, ReviewCards } from '../components/Scenes';
+import { AmbassadorsPlaza, AppStoreScene, FollowerCards, FollowersScene, PipelineCity, PostCards, RevenueCards, RevenueScene, ReviewCards, StudioScene } from '../components/Scenes';
 import logo421 from '../assets/logo-421-blanc.svg';
 import logoRnds from '../assets/logo-rnds.svg';
 import StatPanel from '../components/StatPanel';
@@ -223,6 +223,10 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             <AmbassadorsPlaza project={project} module={module} onSelect={setOpen} />
           ) : module.slug === 'revenus' ? (
             <RevenueScene project={project} module={module} onSelect={setOpen} />
+          ) : module.slug === 'abonnes' ? (
+            <FollowersScene project={project} module={module} onSelect={setOpen} />
+          ) : module.slug === 'publications' ? (
+            <StudioScene project={project} module={module} icon={logoRnds} onSelect={setOpen} />
           ) : module.slug === 'app-store' ? (
             <AppStoreScene project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} onSelect={setOpen} />
           ) : (
@@ -274,6 +278,10 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           <ReviewCards rows={rows} onOpen={setOpen} onAction={onAction} />
         ) : module.slug === 'revenus' ? (
           <RevenueCards rows={rows} onOpen={setOpen} />
+        ) : module.slug === 'abonnes' ? (
+          <FollowerCards rows={rows} onOpen={setOpen} />
+        ) : module.slug === 'publications' ? (
+          <PostCards rows={rows} onOpen={setOpen} onAction={onAction} />
         ) : module.view.kind === 'table' ? (
           <DataTable caption={listTitle} columns={module.view.columns} rows={rows} onOpen={setOpen} />
         ) : (

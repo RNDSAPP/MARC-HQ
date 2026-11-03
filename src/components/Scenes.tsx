@@ -665,3 +665,264 @@ export function RevenueCards({ rows, onOpen }: { rows: string[][]; onOpen: (name
     </ul>
   );
 }
+
+// ---------------------------------------------------------------------------------------------
+// Posts: a content studio, with the week's posts floating around as thumbnails.
+
+/** A post thumbnail's shape: tall for reels, TikToks and stories, square for carousels. */
+const isTall = (format: string) => !normalize(format).includes('carrousel');
+
+/**
+ * The Publications module as a content studio: a white backdrop with the project's logo, a boxer
+ * posing, a phone on a tripod filming him and a ring light. The week's posts float around as
+ * thumbnails in their format, with their day; those waiting for approval are amber.
+ */
+export function StudioScene({ project, module, icon, onSelect }: { project: Project; module: Module; icon: string; onSelect: (name: string) => void }) {
+  if (module.view.kind !== 'table') return null;
+  const posts = module.view.rows.map(([title, format, date, status]) => ({ title, format, date, status }));
+  const size = 360;
+  const o: Point = [0.866 * size + 60, 130];
+  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 180];
+  const b = 8;
+  // Backdrop along the back left edge, logo in the middle
+  const [lx, ly] = iso(o, 30, 150);
+  // Thumbnails around the set, rising on thin stems
+  const spots: Point[] = [
+    [70, 290],
+    [310, 90],
+    [300, 290],
+    [70, 70],
+    [190, 330],
+  ];
+  const items: SceneItem[] = posts.map((post, i) => {
+    const [s, t] = spots[i % spots.length];
+    const [x, y] = iso(o, s, t);
+    const waiting = normalize(post.status).startsWith('a ');
+    return { id: post.title, x, y: y - (isTall(post.format) ? 92 : 78), label: post.title, sub: `${post.format} · ${post.date} · ${post.status}`, tone: waiting ? 'alert' : 'accent' };
+  });
+  const [px, py] = iso(o, 230, 200);
+
+  return (
+    <SceneFrame
+      project={project}
+      box={box}
+      title="Le studio et les contenus de la semaine"
+      items={items}
+      onSelect={onSelect}
+      lit={[
+        points([o[0], o[1] - b], [[0, 0], [size, 0], [size, size], [0, size]]),
+        solid(o, [[18, 40, b], [18, 300, b], [18, 300, b + 120], [18, 40, b + 120]]),
+      ]}
+      art={
+        <>
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          <FloorText origin={[o[0], o[1] - b]} s={30} t={size - 16} size={18}>
+            {`${posts.length} CONTENUS CETTE SEMAINE`}
+          </FloorText>
+          {/* Backdrop: a curved white sheet hanging on a bar, the logo on it */}
+          <polygon points={solid(o, [[14, 40, b], [14, 300, b], [14, 300, b + 120], [14, 40, b + 120]])} fill="#FAFAFA" stroke="#E2E2E2" />
+          <polygon points={solid(o, [[14, 40, b], [14, 300, b], [60, 300, b], [60, 40, b]])} fill="#FFFFFF" />
+          <line {...lineOf(iso(o, 14, 34), iso(o, 14, 306), b + 124)} stroke="#BDBDBD" strokeWidth="2.4" />
+          <g transform={`matrix(0.866 -0.5 0 1 ${lx} ${ly - b - 92})`}>
+            <rect x="30" y="0" width="44" height="44" rx="10" className="lot-cap" />
+            <image href={icon} x="34" y="4" width="36" height="36" />
+          </g>
+          {/* Ring light and tripod phone, turned to the boxer */}
+          <line x1={px + 40} y1={py - b} x2={px + 40} y2={py - b - 70} stroke="#9A9A9A" strokeWidth="2" />
+          <ellipse cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#E8E8E8" strokeWidth="5" />
+          <ellipse className="ring-light" cx={px + 40} cy={py - b - 86} rx="14" ry="16" fill="none" stroke="#FFFFFF" strokeWidth="2" />
+          <line x1={px} y1={py - b} x2={px - 8} y2={py - b + 8} stroke="#7A7A7A" strokeWidth="1.6" />
+          <line x1={px} y1={py - b} x2={px + 9} y2={py - b + 6} stroke="#7A7A7A" strokeWidth="1.6" />
+          <line x1={px} y1={py - b} x2={px} y2={py - b - 52} stroke="#7A7A7A" strokeWidth="1.8" />
+          <rect x={px - 5} y={py - b - 66} width="10" height="16" rx="2.5" fill="#1C1C1E" />
+          <circle cx={px - 1.5} cy={py - b - 62} r="1.4" fill="#5A5A5E" />
+          <Person origin={[o[0], o[1] - b]} s={120} t={150} look={{ skin: SKIN.tan, top: '#1F1F1F', bottom: '#FF0A3C', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: '#FF0A3C' }} />
+          {/* Thumbnails of the week's posts */}
+          {posts.map((post, i) => {
+            const [s, t] = spots[i % spots.length];
+            const [x, y] = iso(o, s, t);
+            const tall = isTall(post.format);
+            const w = tall ? 30 : 38;
+            const h = tall ? 50 : 38;
+            const waiting = normalize(post.status).startsWith('a ');
+            return (
+              <g key={post.title}>
+                <ellipse cx={x} cy={y - b} rx="10" ry="4" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+                <line x1={x} y1={y - b} x2={x} y2={y - b - 26} stroke="#CFCFCF" strokeWidth="1.5" />
+                <rect x={x - w / 2} y={y - b - 26 - h} width={w} height={h} rx="6" fill="#1C1C1E" stroke={waiting ? '#F0B44C' : '#E2E2E2'} strokeWidth="1.6" />
+                <rect x={x - w / 2 + 3} y={y - b - 23 - h} width={w - 6} height={h - 14} rx="4" className="lot-cap" opacity="0.85" />
+                <path d={`M${x - 3},${y - b - 26 - h / 2 - 9} l7,4 l-7,4 z`} fill="#FFFFFF" />
+                <text x={x} y={y - b - 30} textAnchor="middle" fontSize="7" fontWeight="700" fill="#FFFFFF">
+                  {post.date.split(' ')[0].toUpperCase()}
+                </text>
+              </g>
+            );
+          })}
+        </>
+      }
+      lights={<ellipse cx={px + 40} cy={py - b - 86} rx="22" ry="24" fill="#FFFFFF" fillOpacity="0.6" filter="url(#bld-blur-s)" />}
+    />
+  );
+}
+
+/** x1/y1/x2/y2 of a line between two floor points, raised by h. */
+function lineOf([x1, y1]: Point, [x2, y2]: Point, h: number) {
+  return { x1, y1: y1 - h, x2, y2: y2 - h };
+}
+
+/** The week's posts as cards: format, title, when, status, and a button to approve those waiting. */
+export function PostCards({ rows, onOpen, onAction }: { rows: string[][]; onOpen: (name: string) => void; onAction: (label: string) => void }) {
+  return (
+    <ul className="posts">
+      {rows.map(([title, format, date, status]) => {
+        const waiting = normalize(status).startsWith('a ');
+        return (
+          <li key={title} className={`post${waiting ? ' post--waiting' : ''}`}>
+            <span className={`post-thumb${isTall(format) ? ' post-thumb--tall' : ''}`} aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 7.5v9l7.5-4.5z" />
+              </svg>
+            </span>
+            <div className="post-body">
+              <span className="post-format">{format}</span>
+              <button type="button" className="post-title" onClick={() => onOpen(title)}>
+                {title}
+              </button>
+              <span className="post-date">{date}</span>
+            </div>
+            <div className="post-side">
+              <span className={`review-status${waiting ? ' review-status--waiting' : ''}`}>{status}</span>
+              {waiting && (
+                <button type="button" className="review-answer" onClick={() => onAction(`Valider : ${title}`)}>
+                  Valider
+                </button>
+              )}
+            </div>
+          </li>
+        );
+      })}
+      {rows.length === 0 && <li className="tool-empty">Aucun contenu ne correspond.</li>}
+    </ul>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Followers: a grandstand per platform, filled with a crowd as big as its audience.
+
+const CROWD = ['#1F1F1F', '#F4F4F4', '#FF0A3C', '#9CC8F2', '#B8AE7E', '#2C4FB8', '#EFE7D2', '#8A5A3C'];
+const CROWD_SKIN = [SKIN.light, SKIN.rose, SKIN.tan, SKIN.deep];
+
+/**
+ * The Abonnés module as grandstands: one per platform, three tiers high, with one little
+ * spectator for about every hundred followers. The goal is painted on the floor with its
+ * progress bar.
+ */
+export function FollowersScene({ project, module, onSelect }: { project: Project; module: Module; onSelect: (name: string) => void }) {
+  if (module.view.kind !== 'table') return null;
+  const platforms = module.view.rows.map(([name, count, month, trend]) => ({ name, count, value: euros(count), month, trend }));
+  const goalKpi = module.kpis.find((k) => normalize(k.label).includes('objectif'));
+  const goalTarget = goalKpi ? euros(goalKpi.label) : 0;
+  const goalShare = goalKpi ? parseInt(goalKpi.value, 10) || 0 : 0;
+  const size = 380;
+  const o: Point = [0.866 * size + 60, 150];
+  const box: [number, number, number, number] = [0, 0, 0.866 * size * 2 + 120, size + 190];
+  const b = 8;
+  const width = 90;
+  const stands = platforms.map((p, i) => ({ ...p, s: 20 + i * 120, t: 110, crowd: Math.min(27, Math.max(1, Math.round(p.value / 110))) }));
+  const tiers = [
+    { dt: 0, h: 30 },
+    { dt: 22, h: 20 },
+    { dt: 44, h: 10 },
+  ];
+  const items: SceneItem[] = stands.map((stand) => {
+    const [x, y] = iso(o, stand.s + width / 2, stand.t + 10);
+    return { id: stand.name, x, y: y - b - 30 - 34, label: stand.name, sub: `${stand.month} en 30 jours · ${stand.trend}`, tone: 'accent', value: stand.count };
+  });
+
+  return (
+    <SceneFrame
+      project={project}
+      box={box}
+      title="Les abonnés, plateforme par plateforme"
+      items={items}
+      onSelect={onSelect}
+      lit={[
+        points([o[0], o[1] - b], [[0, 0], [size, 0], [size, size], [0, size]]),
+        ...stands.map(({ s, t }) => solid(o, [[s, t + 66, b], [s + width, t + 66, b], [s + width, t, b], [s + width, t, b + 30], [s, t, b + 30], [s, t + 66, b + 30]])),
+      ]}
+      art={
+        <>
+          <Slab origin={o} s0={0} t0={0} s1={size} t1={size} r={32} h={b} top="#F6F6F6" side="#CFCFCF" shadow={0.16} />
+          {/* Goal painted on the floor, with its progress */}
+          {goalTarget > 0 && (
+            <>
+              <FloorText origin={[o[0], o[1] - b]} s={30} t={size - 40} size={16}>
+                {`OBJECTIF ${new Intl.NumberFormat('fr-FR').format(goalTarget)} · ${goalShare} %`}
+              </FloorText>
+              <polygon points={points([o[0], o[1] - b], [[30, size - 30], [330, size - 30], [330, size - 20], [30, size - 20]])} fill="#E4E4E4" />
+              <polygon className="lot-cap" points={points([o[0], o[1] - b], [[30, size - 30], [30 + 3 * goalShare, size - 30], [30 + 3 * goalShare, size - 20], [30, size - 20]])} />
+            </>
+          )}
+          {stands.map((stand) => (
+            <g key={stand.name}>
+              <polygon points={points([o[0], o[1] - b], [[stand.s, stand.t], [stand.s + width + 12, stand.t], [stand.s + width + 12, stand.t + 70], [stand.s, stand.t + 66]])} fill="#000" fillOpacity="0.14" filter="url(#bld-blur-m)" />
+              {tiers.map(({ dt, h }, k) => {
+                const s0 = stand.s;
+                const t0 = stand.t + dt;
+                const t1 = t0 + 22;
+                // People of this tier, in a row along it
+                const perTier = Math.ceil(stand.crowd / 3);
+                const here = Math.max(0, Math.min(perTier, stand.crowd - k * perTier));
+                return (
+                  <g key={dt}>
+                    <polygon points={solid(o, [[s0 + width, t0, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0 + width, t0, b + h]])} fill="#D2D2D2" />
+                    <polygon points={solid(o, [[s0, t1, b], [s0 + width, t1, b], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#ECECEC" />
+                    <polygon points={solid(o, [[s0, t0, b + h], [s0 + width, t0, b + h], [s0 + width, t1, b + h], [s0, t1, b + h]])} fill="#FFFFFF" />
+                    {Array.from({ length: here }, (_, j) => {
+                      const [x, y] = iso(o, s0 + 8 + j * (width - 12) / Math.max(perTier, 1), t0 + 11);
+                      const top = y - b - h;
+                      const seed = (k * 7 + j * 3 + stand.s) % 8;
+                      return (
+                        <g key={j}>
+                          <rect x={x - 2.6} y={top - 7} width="5.2" height="7" rx="2.2" fill={CROWD[seed]} />
+                          <circle cx={x} cy={top - 9.6} r="2.8" fill={CROWD_SKIN[seed % 4]} />
+                        </g>
+                      );
+                    })}
+                  </g>
+                );
+              })}
+              <FloorText origin={[o[0], o[1] - b]} s={stand.s + 6} t={stand.t + 86} size={12}>
+                {stand.name.toUpperCase()}
+              </FloorText>
+            </g>
+          ))}
+        </>
+      }
+    />
+  );
+}
+
+/** Platforms as cards: followers in big, gained in 30 days, trend, and their share of the total. */
+export function FollowerCards({ rows, onOpen }: { rows: string[][]; onOpen: (name: string) => void }) {
+  const total = rows.reduce((sum, [, count]) => sum + euros(count), 0) || 1;
+  return (
+    <ul className="revenue-cards">
+      {rows.map(([name, count, month, trend]) => (
+        <li key={name} className="revenue">
+          <button type="button" className="revenue-open" onClick={() => onOpen(name)}>
+            <span className="revenue-month">{name}</span>
+            <span className="revenue-ca">{count}</span>
+            <span className="revenue-bar" aria-hidden="true">
+              <span style={{ width: `${(euros(count) / total) * 100}%`, background: 'var(--accent)' }} />
+            </span>
+            <span className="revenue-foot">
+              <span>{month} en 30 jours</span>
+              <span className={`revenue-trend revenue-trend--${normalize(trend)}`}>{trend}</span>
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}

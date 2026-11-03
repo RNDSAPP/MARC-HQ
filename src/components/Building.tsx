@@ -862,7 +862,7 @@ const CLUB_PEOPLE: Figure[] = [
   { s: 262, t: 150, look: { skin: SKIN.rose, top: '#B8AE7E', bottom: '#EFEBE3', shoes: '#1F1F1F', head: 'buzz', headColor: '#8C8C8C' } },
   { s: 312, t: 96, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'bucket', headColor: '#EFEBE3' } },
   // Walking in
-  { s: 120, t: 214, walk: [100, 0], look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
+  { s: 120, t: 214, look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
 ];
 
 const CARS: { s: number; t: number; alongT: boolean; color: string; stripes?: string }[] = [
@@ -939,18 +939,6 @@ function Neon({ origin, color }: { origin: Point; color: string }) {
   );
 }
 
-/** A band of lit windows along a wall's inner face, at height h. */
-function WindowBand({ origin, from, to, h }: { origin: Point; from: Point; to: Point; h: number }) {
-  const [x1, y1] = iso(origin, from[0], from[1]);
-  const [x2, y2] = iso(origin, to[0], to[1]);
-  return (
-    <g strokeLinecap="butt">
-      <line x1={x1} y1={y1 - h} x2={x2} y2={y2 - h} stroke="#DDEEFF" strokeWidth="9" strokeOpacity="0.45" strokeDasharray="16 7" filter="url(#bld-blur-s)" />
-      <line x1={x1} y1={y1 - h} x2={x2} y2={y2 - h} stroke="#EEF7FF" strokeWidth="5" strokeDasharray="16 7" />
-    </g>
-  );
-}
-
 /**
  * What lights up when it gets dark, laid over the sky tint with a screen blend: the lamps over the
  * ring and the dice table, the street lamps and the cars' headlights. `only` keeps one floor.
@@ -964,9 +952,6 @@ function NightLights({ only }: { only?: ProjectId }) {
       {only !== 'club421' && (
         <>
           <Neon origin={R} color={RNDS} />
-          <WindowBand origin={R} from={[8, 30]} to={[8, 236]} h={60} />
-          <WindowBand origin={R} from={[30, 8]} to={[306, 8]} h={60} />
-          <ellipse cx={iso(R, 8, 152)[0]} cy={iso(R, 8, 152)[1] - 58} rx="42" ry="22" fill="#FFFFFF" fillOpacity="0.35" filter="url(#bld-blur-m)" />
           <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp-night)" />
           <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="#FFCF5C" fillOpacity="0.28" filter="url(#bld-blur-m)" />
           <ellipse cx="626" cy="98" rx="12" ry="4" fill="#FFF3B0" filter="url(#bld-blur-s)" />
@@ -975,8 +960,6 @@ function NightLights({ only }: { only?: ProjectId }) {
       {only !== 'rnds' && (
         <>
           <Neon origin={C} color={CLUB} />
-          <WindowBand origin={C} from={[8, 24]} to={[8, 150]} h={80} />
-          <ellipse cx={iso(C, 8, 202)[0]} cy={iso(C, 8, 202)[1] - 58} rx="36" ry="24" fill={CLUB} fillOpacity="0.55" filter="url(#bld-blur-m)" />
           <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp-night)" />
           <ellipse cx="392" cy="400" rx="52" ry="28" fill="#FFCF5C" fillOpacity="0.25" filter="url(#bld-blur-m)" />
           <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
