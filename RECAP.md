@@ -7,7 +7,7 @@ Les six étapes du brief sont faites, dans l'ordre, avec un commit local pour ch
 1. **Projet** : Vite, React, TypeScript, React Router, tokens de couleur et polices (Big Shoulders Display, Geist, Geist Mono).
 2. **Données** : `src/data/rnds.ts` et `src/data/club421.ts` (tous les textes et chiffres de la maquette), derrière `src/data/api.ts`.
 3. **Espace RNDS** : les 5 rubriques (vue d'ensemble, clubs, ambassadeurs, publications, abonnés) avec barre latérale, fil d'Ariane, recherche, bloc titre avec graphique sur 12 semaines, chiffres clés, pipeline ou tableau, agents et tâches.
-4. **Espace Club 421** : mêmes composants, ses propres données et sa couleur menthe (vue d'ensemble, BDE, soirées, App Store, revenus).
+4. **Espace Club 421** : mêmes composants, ses propres données et sa couleur (violet depuis le 3 novembre) (vue d'ensemble, BDE, soirées, App Store, revenus).
 5. **Accueil** : le bâtiment isométrique de la maquette, les deux étages cliquables, les deux cartes projet et « Ce qui t'attend aujourd'hui ».
 6. **Finitions** : responsive jusqu'au téléphone (vérifié sur les 11 pages, sans défilement horizontal), navigation au clavier avec focus visible, `npm run build` passe sans erreur TypeScript.
 
@@ -24,7 +24,7 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (46 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (48 points).
 
 ## Lancer l'app
 
@@ -58,7 +58,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 
 ## Points à valider avec toi
 
-1. **Couleurs.** L'app est passée en thème clair, à ta demande. Le vert de Club 421 est plus foncé que la menthe du brief, pour rester lisible sur du blanc. Dis-moi si tu préfères garder la menthe sur certains éléments. RNDS suit maintenant sa charte (rouge `#FF0A3C`) ; pour Club 421, envoie-moi sa charte et je l'applique de la même façon.
+1. **Couleurs.** L'app est passée en thème clair, à ta demande. RNDS suit sa charte (rouge `#FF0A3C`). Club 421 est en violet (`#7C4DFF`) à ta demande ; envoie-moi sa charte quand elle est prête pour caler la teinte exacte.
 2. ~~**Titres façon Apple ou façon affiche ?**~~ Réglé : les grands titres restent dans la police d'Apple, en minuscules (validé par Marc le 3 novembre).
 3. **Identité des commits.** Ton identité Git globale est celle de TTP Creators. Pour ne pas mélanger, les commits de ce dépôt sont signés « Marc Bouraoui » avec ton adresse Gmail. Dis-moi à quel compte rattacher Marc HQ, et je changerai l'identité (et l'auteur des commits déjà faits si tu veux).
 4. **Salutation.** « Bonsoir » à partir de 16 h, pour coller à la maquette. On peut passer à 18 h si tu préfères.

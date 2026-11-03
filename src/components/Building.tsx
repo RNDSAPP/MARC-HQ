@@ -60,9 +60,7 @@ export default function Building({ projects }: Props) {
 // Project colours, same values as src/styles/tokens.css. The rest of the model is white and grey.
 const RNDS = '#FF0A3C';
 const RNDS_DARK = '#C8002C';
-const CLUB = '#1F9A5A';
-const CLUB_SOFT = '#8FE0B0';
-const ALERT = '#F0B44C';
+const CLUB = '#7C4DFF';
 
 type Point = [number, number];
 
@@ -78,6 +76,48 @@ function iso([x, y]: Point, s: number, t: number): Point {
 
 function points(origin: Point, list: Point[]) {
   return list.map(([s, t]) => iso(origin, s, t).map((n) => n.toFixed(1)).join(',')).join(' ');
+}
+
+/** Same as points(), with a height h above the floor for each point: (s, t, h). */
+function solid(origin: Point, list: [number, number, number][]) {
+  return list
+    .map(([s, t, h]) => {
+      const [x, y] = iso(origin, s, t);
+      return `${x.toFixed(1)},${(y - h).toFixed(1)}`;
+    })
+    .join(' ');
+}
+
+/**
+ * The two back walls of a floor, with a real thickness: inner faces, the top seen from above
+ * and the cut ends. `left` runs along t at s = 0, `right` along s at t = 0, both `thick` deep.
+ */
+function Walls({ origin, left, right, thick }: {
+  origin: Point;
+  left?: number;
+  right?: number;
+  thick: number;
+}) {
+  const o = origin;
+  const k = thick;
+  return (
+    <g stroke="#DCDCDC" strokeWidth="0.8" strokeLinejoin="round">
+      {left !== undefined && (
+        <>
+          <polygon points={solid(o, [[k, k, 0], [k, 250, 0], [k, 250, left], [k, k, left]])} fill="url(#bld-wall-left)" />
+          <polygon points={solid(o, [[0, 250, 0], [k, 250, 0], [k, 250, left], [0, 250, left]])} fill="url(#bld-wall-right)" />
+          <polygon points={solid(o, [[0, 0, left], [k, k, left], [k, 250, left], [0, 250, left]])} fill="#FFFFFF" />
+        </>
+      )}
+      {right !== undefined && (
+        <>
+          <polygon points={solid(o, [[k, k, 0], [320, k, 0], [320, k, right], [k, k, right]])} fill="url(#bld-wall-right)" />
+          <polygon points={solid(o, [[320, 0, 0], [320, k, 0], [320, k, right], [320, 0, right]])} fill="url(#bld-wall-left)" />
+          <polygon points={solid(o, [[0, 0, right], [320, 0, right], [320, k, right], [k, k, right]])} fill="#FFFFFF" />
+        </>
+      )}
+    </g>
+  );
 }
 
 /** A word painted on the floor, read along s (or along t with `alongT`). */
@@ -158,8 +198,8 @@ const RNDS_PEOPLE: Figure[] = [
 ];
 
 const CLUB_PEOPLE: Figure[] = [
-  { s: 46, t: 126, tone: 2 },
-  { s: 46, t: 168, tone: 0 },
+  { s: 58, t: 96, tone: 2 },
+  { s: 58, t: 168, tone: 0 },
   { s: 160, t: 150, tone: 3 },
   { s: 203, t: 111, tone: 0 },
   { s: 206, t: 156, tone: 2 },
@@ -242,16 +282,12 @@ function BuildingArt() {
       <polygon points="600,120 877,280 660.5,405 383.5,245" fill="url(#bld-top)" stroke="#E3E3E3" />
       <g stroke="#F0F0F0" strokeWidth="1"><line x1="655" y1="152" x2="438" y2="277" /><line x1="710" y1="184" x2="493" y2="309" /><line x1="765" y1="216" x2="548" y2="341" /><line x1="820" y1="248" x2="603" y2="373" /></g>
       <g clipPath="url(#bld-clip-rnds)" filter="url(#bld-blur-m)" fill="#000" fillOpacity="0.09">
-        <polygon points={points(R, [[0, 0], [0, 250], [22, 250], [22, 0]])} />
-        <polygon points={points(R, [[0, 0], [320, 0], [320, 22], [0, 22]])} />
+        <polygon points={points(R, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
+        <polygon points={points(R, [[8, 8], [320, 8], [320, 30], [8, 30]])} />
       </g>
-      <polygon points="600,120 383.5,245 383.5,150 600,25" fill="url(#bld-wall-left)" />
-      <polygon points="600,120 877,280 877,185 600,25" fill="url(#bld-wall-right)" />
-      <line x1="383.5" y1="150" x2="600" y2="25" stroke="#D6D6D6" strokeWidth="1.5" />
-      <line x1="600" y1="25" x2="877" y2="185" stroke="#E0E0E0" strokeWidth="1.5" />
-      <line x1="600" y1="25" x2="600" y2="120" stroke="#D2D2D2" strokeWidth="1" />
+      <Walls origin={R} left={95} right={95} thick={8} />
       {/* RNDS logo as in the brand kit: Kode Mono Bold, black on light, red dot top right, no tilt or effect */}
-      <g transform="matrix(0.866 -0.5 0 1 446 190)">
+      <g transform={`matrix(0.866 -0.5 0 1 ${iso(R, 8, 196).join(' ')}) translate(0 -40)`}>
         <text fontFamily="'Kode Mono', ui-monospace, monospace" fontWeight="700" fontSize="34" fill="#000000" textLength="88" lengthAdjust="spacing">RNDS</text>
         <circle cx="95" cy="-24" r="3.6" fill={RNDS} />
         <text y="15" fontFamily="'Kode Mono', ui-monospace, monospace" fontSize="9" fill="#8E8E8B" letterSpacing="2.2">BOXING CLUB</text>
@@ -299,27 +335,28 @@ function BuildingArt() {
       <polygon points="348.9,265 626,425 409.5,550 132.4,390" fill="url(#bld-top)" stroke="#E3E3E3" />
       <g stroke="#F0F0F0" strokeWidth="1"><line x1="404" y1="297" x2="187" y2="422" /><line x1="459" y1="329" x2="242" y2="454" /><line x1="514" y1="361" x2="297" y2="486" /><line x1="569" y1="393" x2="352" y2="518" /></g>
       <g clipPath="url(#bld-clip-club)" filter="url(#bld-blur-m)" fill="#000" fillOpacity="0.09">
-        <polygon points={points(C, [[0, 0], [0, 250], [22, 250], [22, 0]])} />
-        <polygon points={points(C, [[0, 0], [320, 0], [320, 16], [0, 16]])} />
+        <polygon points={points(C, [[8, 8], [8, 250], [30, 250], [30, 8]])} />
+        <polygon points={points(C, [[8, 8], [320, 8], [320, 22], [8, 22]])} />
       </g>
-      <polygon points="348.9,265 132.4,390 132.4,295 348.9,170" fill="url(#bld-wall-left)" />
-      <line x1="132.4" y1="295" x2="348.9" y2="170" stroke="#D6D6D6" strokeWidth="1.5" />
-      <text transform="matrix(0.866 -0.5 0 1 160 300)" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fontWeight="800" fontStyle="italic" fontSize="34" fill={CLUB} letterSpacing="2">421</text>
-      <text transform="matrix(0.866 -0.5 0 1 162 316)" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fontWeight="600" fontSize="10" fill={CLUB} letterSpacing="3">CLUB</text>
-      <line x1="246" y1="268" x2="336" y2="216" stroke="#CFCFCF" strokeWidth="2" />
-      <rect x="252" y="250" width="5" height="14" fill={CLUB_SOFT} /><rect x="266" y="242" width="5" height="14" fill="#C8C8C8" /><rect x="282" y="233" width="5" height="14" fill={ALERT} fillOpacity="0.85" /><rect x="298" y="224" width="5" height="14" fill={CLUB_SOFT} /><rect x="316" y="214" width="5" height="14" fill="#C8C8C8" />
-      <polygon points="348.9,265 626,425 626,401 348.9,241" fill="url(#bld-wall-right)" fillOpacity="0.9" />
-      <line x1="348.9" y1="241" x2="626" y2="401" stroke="#E0E0E0" strokeWidth="1.5" />
+      <Walls origin={C} left={95} thick={8} />
+      <Walls origin={C} right={24} thick={8} />
+      {/* Club 421 sign, centred on the back wall above the bar */}
+      <g transform={`matrix(0.866 -0.5 0 1 ${iso(C, 8, 176).join(' ')}) translate(0 -46)`}>
+        <text fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fontWeight="800" fontStyle="italic" fontSize="38" fill={CLUB} letterSpacing="1">421</text>
+        <text x="3" y="16" fontFamily="-apple-system, BlinkMacSystemFont, Geist, sans-serif" fontWeight="600" fontSize="10" fill={CLUB} letterSpacing="3.2">CLUB</text>
+      </g>
 
-      <FloorText origin={C} s={70} t={112} alongT size={18}>BAR</FloorText>
+      <FloorText origin={C} s={74} t={146} alongT size={18}>BAR</FloorText>
       <FloorText origin={C} s={150} t={236} size={18}>TABLES</FloorText>
-      <Route origin={C} color={CLUB} solid={[[40, 184], [290, 184], [290, 142]]} dashed={[[40, 196], [302, 196], [302, 142]]} />
+      <Route origin={C} color={CLUB} solid={[[52, 184], [290, 184], [290, 142]]} dashed={[[52, 196], [302, 196], [302, 142]]} />
 
       {/* Bar counter */}
-      <polygon points="366.2,282 193,382 193,412 366.2,312" fill="#000" fillOpacity="0.1" filter="url(#bld-blur-m)" />
-      <polygon points="366.2,276 193,376 193,406 366.2,306" fill="url(#bld-side-right)" />
-      <polygon points="340.2,261 366.2,276 193,376 167,361" fill="url(#bld-top)" stroke="#E0E0E0" />
-      <line x1="345" y1="270" x2="180" y2="365" stroke="#DADADA" />
+      <polygon points={points(C, [[16, 44], [46, 44], [46, 208], [16, 208]])} fill="#000" fillOpacity="0.12" filter="url(#bld-blur-m)" />
+      <g stroke="#DCDCDC" strokeWidth="0.8" strokeLinejoin="round">
+        <polygon points={solid(C, [[40, 40, 0], [40, 200, 0], [40, 200, 24], [40, 40, 24]])} fill="url(#bld-side-left)" />
+        <polygon points={solid(C, [[16, 200, 0], [40, 200, 0], [40, 200, 24], [16, 200, 24]])} fill="url(#bld-side-right)" />
+        <polygon points={solid(C, [[16, 40, 24], [40, 40, 24], [40, 200, 24], [16, 200, 24]])} fill="url(#bld-top)" />
+      </g>
       <line x1="392" y1="318" x2="392" y2="356" stroke="#CFCFCF" />
       <ellipse cx="392" cy="360" rx="13" ry="5" fill="#D4D4D4" />
       <polygon points="380,362 404,362 440,405 392,430 344,405" fill="#FFFFFF" fillOpacity="0.5" />
@@ -341,11 +378,6 @@ function BuildingArt() {
         <Person key={`c-${figure.s}-${figure.t}`} origin={C} {...figure} />
       ))}
 
-      {/* Leaders from each floor to its label */}
-      <line x1="760" y1="110" x2="760" y2="160" stroke={RNDS} strokeOpacity="0.6" strokeDasharray="3 4" />
-      <circle cx="760" cy="162" r="3" fill={RNDS} />
-      <line x1="150" y1="200" x2="150" y2="296" stroke={CLUB} strokeOpacity="0.6" strokeDasharray="3 4" />
-      <circle cx="150" cy="298" r="3" fill={CLUB} />
     </svg>
   );
 }

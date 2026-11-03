@@ -42,9 +42,10 @@
   --rnds-ink: #000000;
   --rnds-black: #000000;
   --rnds-chalk: #ececea;
-  --club: #1f9a5a;
-  --club-soft: #17804a;
-  --club-tint: #e0f5e9;
+  /* Club 421: violet, as asked by Marc on 3 November (until its brand kit arrives) */
+  --club: #7c4dff;
+  --club-soft: #5b2fd6;
+  --club-tint: #efe9ff;
 
   /* Current project accent (overridden by [data-project]) */
   --accent: var(--text);
