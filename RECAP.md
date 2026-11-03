@@ -24,7 +24,7 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (142 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (143 points).
 
 ## Lancer l'app
 
@@ -54,7 +54,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 2. **Brancher les boutons d'action** : « Signer les contrats », « Confier à l'agent », « Valider », « Signer », « Relancer », « Ajouter un club »… Ils affichent pour l'instant un message « pas encore branché ».
 3. **Synchroniser tâches, notes et idées entre appareils** : aujourd'hui elles sont enregistrées dans le navigateur seulement. Avec Supabase, elles seront les mêmes partout.
 5. **Afficher les outils à l'intérieur de Marc HQ** (sans quitter la page) : possible seulement avec une version « app de bureau » (Tauri ou Electron), les sites refusant d'être intégrés dans une page web.
-6. **Mettre l'app en ligne** : tout est prêt pour GitHub Pages (ttpcreators.github.io/marc.hq/). Il reste à passer le dépôt en public et à activer Pages.
+6. **Mettre l'app en ligne** : tout est prêt pour Vercel (`vercel.json`). Il reste à importer le dépôt dans Vercel et à y coller l'adresse et la clé publique Supabase.
 
 ## Points à valider avec toi
 

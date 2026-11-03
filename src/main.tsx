@@ -6,7 +6,7 @@ import './styles/global.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* Under /marc.hq/ on GitHub Pages (built with --base, see .github/workflows/pages.yml), at the root locally */}
+    {/* Follows Vite's base path: the root on Vercel and locally */}
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <App />
     </BrowserRouter>
