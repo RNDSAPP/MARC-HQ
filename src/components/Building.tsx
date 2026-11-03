@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import type { Project } from '../data/types';
+import type { Project, ProjectId } from '../data/types';
 import { agentStatusLabel, projectStatus } from '../lib/format';
+import ModuleIcon from './ModuleIcon';
 import logo421 from '../assets/logo-421-violet.svg';
 import './Building.css';
 
@@ -162,7 +163,8 @@ function roundedRect(s0: number, t0: number, s1: number, t1: number, r: number):
 const toPath = (list: Point[]) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
 
 /** A slab with rounded corners standing on the table, `h` high, with its soft shadow. */
-function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12 }: {
+function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12, origin = SITE_GROUND }: {
+  origin?: Point;
   s0: number;
   t0: number;
   s1: number;
@@ -173,7 +175,7 @@ function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12 }: {
   side: string;
   shadow?: number;
 }) {
-  const outline = roundedRect(s0, t0, s1, t1, r).map(([s, t]) => iso(SITE_GROUND, s, t));
+  const outline = roundedRect(s0, t0, s1, t1, r).map(([s, t]) => iso(origin, s, t));
   const raised = outline.map(([x, y]) => [x, y - h] as Point);
   return (
     <g>
@@ -184,46 +186,95 @@ function Slab({ s0, t0, s1, t1, r, h, top, side, shadow = 0.12 }: {
   );
 }
 
-/** A box on the table: top and the two faces turned to us. */
-function Box({ s0, s1, t0, t1, h0, h1, color, origin = SITE_GROUND }: {
-  s0: number;
-  s1: number;
-  t0: number;
-  t1: number;
-  h0: number;
-  h1: number;
-  color: string;
-  origin?: Point;
-}) {
+// Roads around the site, in ground units: [from, to] across the road, and the road's axis.
+const ROADS: { across: [number, number]; alongT: boolean }[] = [
+  { across: [378, 432], alongT: true },
+  { across: [596, 648], alongT: false },
+  { across: [-50, -8], alongT: true },
+  { across: [-50, -8], alongT: false },
+];
+
+/** Asphalt bands with edge lines, a dashed centre line and zebra crossings by the front corner. */
+function Roads() {
+  const far = [-200, 820] as const;
+  const quad = (a0: number, a1: number, b0: number, b1: number, alongT: boolean) =>
+    points(SITE_GROUND, alongT ? [[a0, b0], [a1, b0], [a1, b1], [a0, b1]] : [[b0, a0], [b1, a0], [b1, a1], [b0, a1]]);
+  const line = (a: number, alongT: boolean) =>
+    points(SITE_GROUND, alongT ? [[a, far[0]], [a, far[1]]] : [[far[0], a], [far[1], a]]);
   return (
     <g>
-      <polygon points={solid(origin, [[s1, t0, h0], [s1, t1, h0], [s1, t1, h1], [s1, t0, h1]])} fill={shade(color, 0.16)} />
-      <polygon points={solid(origin, [[s0, t1, h0], [s1, t1, h0], [s1, t1, h1], [s0, t1, h1]])} fill={shade(color, 0.07)} />
-      <polygon points={solid(origin, [[s0, t0, h1], [s1, t0, h1], [s1, t1, h1], [s0, t1, h1]])} fill={color} />
+      {ROADS.map(({ across: [a0, a1], alongT }) => (
+        <g key={`${a0}-${alongT}`}>
+          <polygon points={quad(a0, a1, far[0], far[1], alongT)} fill="url(#bld-asphalt)" />
+          <g fill="none" stroke="#F4F4F4" strokeLinecap="round">
+            <polyline points={line(a0 + 3, alongT)} strokeWidth="1" strokeOpacity="0.8" />
+            <polyline points={line(a1 - 3, alongT)} strokeWidth="1" strokeOpacity="0.8" />
+            <polyline points={line((a0 + a1) / 2, alongT)} strokeWidth="1.8" strokeDasharray="14 12" />
+          </g>
+        </g>
+      ))}
+      {/* Zebra crossings, one on each front road, near the corner */}
+      <g fill="#F6F6F6">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <polygon key={`a${i}`} points={quad(382, 428, 548 + i * 7, 552 + i * 7, true)} />
+        ))}
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <polygon key={`b${i}`} points={quad(600, 644, 322 + i * 7, 326 + i * 7, false)} />
+        ))}
+      </g>
     </g>
   );
 }
 
-/** A small clay car on the road, driving along t (or along s). */
+/**
+ * A small clay car driving along t (or along s): rounded body, a cabin with a sloped windscreen
+ * and tinted windows, wheels with hubs, headlights at the front and lights at the back.
+ */
 function Car({ s, t, alongT, color }: { s: number; t: number; alongT: boolean; color: string }) {
-  const [ls, lt] = alongT ? [18, 40] : [40, 18];
-  const glass = '#59616B';
-  const cab = alongT ? { s0: s + 2, s1: s + 16, t0: t + 10, t1: t + 28 } : { s0: s + 10, s1: s + 28, t0: t + 2, t1: t + 16 };
-  const wheels: Point[] = alongT
-    ? [[s + ls, t + 8], [s + ls, t + 32], [s + 4, t + lt], [s + 14, t + lt]]
-    : [[s + 8, t + lt], [s + 32, t + lt], [s + ls, t + 4], [s + ls, t + 14]];
+  const o = SITE_GROUND;
+  // Work in the car's own frame: u along its length (front at u = 40), v across (0 to 18).
+  const at = (u: number, v: number, h: number): [number, number, number] => (alongT ? [s + v, t + u, h] : [s + u, t + v, h]);
+  const face = (list: [number, number, number][]) => solid(o, list.map(([u, v, h]) => at(u, v, h)));
+  const side = shade(color, 0.14);
+  const front = shade(color, 0.06);
+  const wheel = (u: number, v: number) => {
+    const [ws, wt, wh] = at(u, v, 3.2);
+    const [x, y] = iso(o, ws, wt);
+    return (
+      <g key={`${u}-${v}`}>
+        <ellipse cx={x} cy={y - wh} rx="3.4" ry="3.4" fill="#262626" />
+        <ellipse cx={x} cy={y - wh} rx="1.5" ry="1.5" fill="#BDBDBD" />
+      </g>
+    );
+  };
+  // Visible faces: the side at v = 18 and the front at u = 40 (alongT), or the side at v = 18 and
+  // the front at u = 40 seen from the other angle (along s) — the same code serves both.
   return (
     <g>
-      <polygon points={points(SITE_GROUND, [[s, t], [s + ls, t], [s + ls, t + lt], [s, t + lt]])} fill="#000" fillOpacity="0.2" filter="url(#bld-blur-m)" transform="translate(4 4)" />
-      <Box s0={s} s1={s + ls} t0={t} t1={t + lt} h0={3} h1={11} color={color} />
-      <Box {...cab} h0={11} h1={18} color={glass} />
-      <polygon points={solid(SITE_GROUND, [[cab.s0, cab.t0, 18], [cab.s1, cab.t0, 18], [cab.s1, cab.t1, 18], [cab.s0, cab.t1, 18]])} fill={color} />
-      {wheels.map(([ws, wt]) => {
-        const [x, y] = iso(SITE_GROUND, ws, wt);
-        return <circle key={`${ws}-${wt}`} cx={x} cy={y - 3} r="3.2" fill="#2B2B2B" />;
-      })}
+      <polygon points={face([[0, 0, 0], [40, 0, 0], [40, 18, 0], [0, 18, 0]])} fill="#000" fillOpacity="0.22" filter="url(#bld-blur-m)" transform="translate(3 4)" />
+      {/* Body */}
+      <polygon points={face([[2, 18, 3], [40, 18, 3], [40, 18, 10], [2, 18, 10]])} fill={side} />
+      <polygon points={face([[40, 0, 3], [40, 18, 3], [40, 18, 10], [40, 0, 10]])} fill={front} />
+      {vinyl((f) => <polygon points={face([[0, 0, 10], [40, 0, 10], [40, 18, 10], [0, 18, 10]])} fill={f} />, color)}
+      {/* Cabin: windows on the side, sloped windscreen at the front, roof in the body colour */}
+      <polygon points={face([[9, 16, 10], [31, 16, 10], [27, 14.5, 17], [12, 14.5, 17]])} fill="url(#bld-glass)" />
+      <polygon points={face([[31, 2, 10], [31, 16, 10], [27, 14.5, 17], [27, 3.5, 17]])} fill="url(#bld-glass)" />
+      <line {...lineAt(face([[20, 16, 10], [19.5, 14.5, 17]]))} stroke={side} strokeWidth="1.2" />
+      {vinyl((f) => <polygon points={face([[12, 3.5, 17], [27, 3.5, 17], [27, 14.5, 17], [12, 14.5, 17]])} fill={f} />, color)}
+      {/* Lights */}
+      <polygon points={face([[40, 2, 6.5], [40, 5.5, 6.5], [40, 5.5, 8.5], [40, 2, 8.5]])} fill="#FFF4C2" />
+      <polygon points={face([[40, 12.5, 6.5], [40, 16, 6.5], [40, 16, 8.5], [40, 12.5, 8.5]])} fill="#FFF4C2" />
+      <polygon points={face([[2, 18, 6.5], [5, 18, 6.5], [5, 18, 8.5], [2, 18, 8.5]])} fill={RNDS} fillOpacity="0.85" />
+      {wheel(8, 18)}
+      {wheel(32, 18)}
     </g>
   );
+}
+
+/** x1/y1/x2/y2 of a two-point "x,y x,y" string, for a <line>. */
+function lineAt(pair: string) {
+  const [[x1, y1], [x2, y2]] = pair.split(' ').map((p) => p.split(',').map(Number));
+  return { x1, y1, x2, y2 };
 }
 
 /** A white clay tree: a trunk and three round crowns. */
@@ -315,7 +366,12 @@ type Look = {
   /** Boxing gloves up in guard, in this colour. */
   gloves?: string;
 };
-type Figure = { s: number; t: number; look: Look };
+/**
+ * A figure at floor point (s, t). `walk`: it strolls there and back by (ds, dt).
+ * `fight`: one of the two sparring boxers, 'a' on the left, 'b' on the right, or 'bag' for the one on the punching bag.
+ * `rope`: skipping rope.
+ */
+type Figure = { s: number; t: number; look: Look; walk?: [number, number]; fight?: 'a' | 'b' | 'bag'; rope?: boolean };
 
 const SKIN = { light: '#F3C9AE', rose: '#EDB89A', tan: '#C98B62', deep: '#8A5636' };
 const INK = '#1E1E1E';
@@ -386,8 +442,16 @@ function limb(x1: number, y1: number, x2: number, y2: number, width: number) {
 }
 
 /** A designer-toy figure standing at floor point (s, t). */
-function Person({ origin, s, t, look }: Figure & { origin: Point }) {
+function Person({ origin, s, t, look, walk, fight, rope }: Figure & { origin: Point }) {
   const [x, y] = iso(origin, s, t);
+  // Small idle motions (Building.css): boxers hop and jab, walkers stroll, the others breathe.
+  // Each figure starts at a different point of its loop so they never move in step.
+  const motion = {
+    '--delay': fight ? '0s' : `${-((s * 7 + t * 13) % 2400) / 1000}s`,
+    '--dx': walk ? `${(0.866 * (walk[0] - walk[1])).toFixed(1)}px` : '0px',
+    '--dy': walk ? `${(0.5 * (walk[0] + walk[1])).toFixed(1)}px` : '0px',
+  } as CSSProperties;
+  const kind = fight ? ` fig--boxer fig--fight-${fight}` : look.gloves ? ' fig--boxer' : rope ? ' fig--rope' : walk ? ' fig--walk' : '';
   const sleeve = shade(look.top, 0.08);
   const legBottom = look.shorts ? -6.6 : -2.4;
   const crease = shade(look.top, 0.28);
@@ -395,26 +459,26 @@ function Person({ origin, s, t, look }: Figure & { origin: Point }) {
     ? [limb(-6, -21, -6.6, -24.6, 4), limb(6, -21, 6.8, -25.2, 4)]
     : [limb(-6.2, -22.4, -8, -14, 4), limb(6.2, -22.4, 8, -14, 4)];
   return (
+    <g className={`fig${kind}`} style={motion}>
+    <g className="fig-body">
     <g transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(0.92)`}>
       <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#000" fillOpacity="0.2" filter="url(#bld-blur-s)" />
 
       {look.head === 'long' && vinyl((f) => <rect x="-9.6" y="-40" width="19.2" height="25" rx="8" fill={f} />, look.headColor)}
 
-      {/* Legs and sneakers */}
-      {look.shorts && (
-        <>
-          {vinyl((f) => <rect x="-4.4" y="-7.4" width="3" height="6" rx="1.5" fill={f} />, look.skin)}
-          {vinyl((f) => <rect x="1.4" y="-7.4" width="3" height="6" rx="1.5" fill={f} />, look.skin)}
-        </>
-      )}
-      {vinyl((f) => <rect x="-5.7" y="-12.4" width="5.1" height={12.4 + legBottom} rx="2.3" fill={f} />, look.bottom)}
-      {vinyl((f) => <rect x="0.6" y="-12.4" width="5.1" height={12.4 + legBottom} rx="2.3" fill={f} />, look.bottom)}
-      <line x1="-3.1" y1="-10" x2="-3.1" y2={legBottom - 0.6} stroke={shade(look.bottom, 0.22)} strokeWidth="0.5" strokeLinecap="round" />
-      <line x1="3.1" y1="-10" x2="3.1" y2={legBottom - 0.6} stroke={shade(look.bottom, 0.22)} strokeWidth="0.5" strokeLinecap="round" />
-      <ellipse cx="-3.2" cy="-0.7" rx="3.8" ry="1.2" fill="#FAFAFA" />
-      <ellipse cx="3.4" cy="-0.5" rx="3.8" ry="1.2" fill="#FAFAFA" />
-      {vinyl((f) => <ellipse cx="-3.2" cy="-1.8" rx="3.6" ry="2.1" fill={f} />, look.shoes)}
-      {vinyl((f) => <ellipse cx="3.4" cy="-1.6" rx="3.6" ry="2.1" fill={f} />, look.shoes)}
+      {/* Legs and sneakers, one group per leg so a walker can lift them in turn */}
+      {[
+        { side: 'l', x: -5.7, skinX: -4.4, shoe: -3.2, drop: 0 },
+        { side: 'r', x: 0.6, skinX: 1.4, shoe: 3.4, drop: 0.2 },
+      ].map((leg) => (
+        <g key={leg.side} className={`fig-leg fig-leg--${leg.side}`}>
+          {look.shorts && vinyl((f) => <rect x={leg.skinX} y="-7.4" width="3" height="6" rx="1.5" fill={f} />, look.skin)}
+          {vinyl((f) => <rect x={leg.x} y="-12.4" width="5.1" height={12.4 + legBottom} rx="2.3" fill={f} />, look.bottom)}
+          <line x1={leg.x + 2.6} y1="-10" x2={leg.x + 2.6} y2={legBottom - 0.6} stroke={shade(look.bottom, 0.22)} strokeWidth="0.5" strokeLinecap="round" />
+          <ellipse cx={leg.shoe} cy={-0.7 + leg.drop} rx="3.8" ry="1.2" fill="#FAFAFA" />
+          {vinyl((f) => <ellipse cx={leg.shoe} cy={-1.8 + leg.drop} rx="3.6" ry="2.1" fill={f} />, look.shoes)}
+        </g>
+      ))}
 
       {/* Body, with a zip or placket and a hem */}
       {vinyl((f) => <rect x="-7" y="-25.4" width="14" height="15.4" rx="5.6" fill={f} />, look.top)}
@@ -423,15 +487,20 @@ function Person({ origin, s, t, look }: Figure & { origin: Point }) {
       <path d="M-4.6,-20 Q-3.2,-17.6 -4.2,-15" fill="none" stroke={crease} strokeWidth="0.45" strokeLinecap="round" />
 
       {/* Arms, hands, what they hold */}
-      {arms.map((arm, index) => (
-        <g key={index}>{vinyl(arm, sleeve)}</g>
-      ))}
-      {!look.gloves && (
+      {look.gloves ? (
+        arms.map((arm, index) => <g key={index}>{vinyl(arm, sleeve)}</g>)
+      ) : (
         <>
-          {look.holds === 'cup' && vinyl((f) => <path d="M-11.2,-17.8 L-5.4,-17.8 L-6.3,-10.8 L-10.3,-10.8 Z" fill={f} />, '#5B8DEF')}
-          {vinyl((f) => <circle cx="-8.2" cy="-12.6" r="2.8" fill={f} />, look.skin)}
-          {vinyl((f) => <circle cx="8.2" cy="-12.6" r="2.8" fill={f} />, look.skin)}
-          {look.holds === 'phone' && <rect x="7.4" y="-19.6" width="3.4" height="6.2" rx="0.9" fill="#2F6B4C" />}
+          <g className="fig-arm fig-arm--l">
+            {vinyl(arms[0], sleeve)}
+            {look.holds === 'cup' && vinyl((f) => <path d="M-11.2,-17.8 L-5.4,-17.8 L-6.3,-10.8 L-10.3,-10.8 Z" fill={f} />, '#5B8DEF')}
+            {vinyl((f) => <circle cx="-8.2" cy="-12.6" r="2.8" fill={f} />, look.skin)}
+          </g>
+          <g className="fig-arm fig-arm--r">
+            {vinyl(arms[1], sleeve)}
+            {vinyl((f) => <circle cx="8.2" cy="-12.6" r="2.8" fill={f} />, look.skin)}
+            {look.holds === 'phone' && <rect x="7.4" y="-19.6" width="3.4" height="6.2" rx="0.9" fill="#2F6B4C" />}
+          </g>
         </>
       )}
 
@@ -488,12 +557,166 @@ function Person({ origin, s, t, look }: Figure & { origin: Point }) {
         </>
       )}
 
+      {/* Skipping rope: from hand to hand, it swings over the head and under the feet (Building.css) */}
+      {rope && <path className="fig-rope" d="M-8.2,-12.6 Q0,-72 8.2,-12.6" fill="none" stroke="#1F1F1F" strokeWidth="0.9" strokeLinecap="round" />}
+
       {look.gloves && (
-        <>
+        <g className="fig-gloves">
           {vinyl((f) => <circle cx="-6.4" cy="-25.6" r="3.9" fill={f} />, look.gloves)}
           {vinyl((f) => <circle cx="6.8" cy="-26.2" r="3.9" fill={f} />, look.gloves)}
-        </>
+        </g>
       )}
+    </g>
+    </g>
+    </g>
+  );
+}
+
+// The ring, in RNDS floor units: canvas from (80, 50) to (220, 190), 16 high, posts 30 above it.
+const RING = { s0: 80, s1: 220, t0: 50, t1: 190, h: 16, post: 30 };
+const ROPES: { h: number; color: string }[] = [
+  { h: 9, color: RNDS },
+  { h: 17, color: '#F4F4F4' },
+  { h: 25, color: RNDS },
+];
+
+/** A round post with a corner pad. */
+function RingPost({ origin, s, t, pad }: { origin: Point; s: number; t: number; pad: string }) {
+  const [x, y0] = iso(origin, s, t);
+  const y = y0 - RING.h;
+  return (
+    <g>
+      {vinyl((f) => <rect x={x - 2.6} y={y - RING.post - 2} width="5.2" height={RING.post + 2} rx="2.6" fill={f} />, '#D9D9D9')}
+      {vinyl((f) => <rect x={x - 3.6} y={y - RING.post + 2} width="7.2" height={RING.post - 8} rx="3" fill={f} />, pad)}
+      <ellipse cx={x} cy={y - RING.post - 2} rx="2.6" ry="1.2" fill="#F2F2F2" />
+    </g>
+  );
+}
+
+/** One side of ropes between two corners, with a soft shadow under each rope. */
+function Ropes({ origin, from, to }: { origin: Point; from: Point; to: Point }) {
+  return (
+    <g strokeLinecap="round">
+      {ROPES.map((rope) => {
+        const [x1, y1] = iso(origin, from[0], from[1]);
+        const [x2, y2] = iso(origin, to[0], to[1]);
+        const lift = RING.h + rope.h;
+        return (
+          <g key={rope.h}>
+            <line x1={x1} y1={y1 - lift + 1.4} x2={x2} y2={y2 - lift + 1.4} stroke="#000" strokeOpacity="0.18" strokeWidth="2.2" />
+            <line x1={x1} y1={y1 - lift} x2={x2} y2={y2 - lift} stroke={rope.color} strokeWidth="2.2" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/**
+ * The boxing ring. Drawn in two passes around the boxers: `back` draws the platform, the canvas
+ * and the far posts and ropes; without it, the near ropes and the front post, which pass in front.
+ */
+function Ring({ origin, back = false }: { origin: Point; back?: boolean }) {
+  const { s0, s1, t0, t1, h } = RING;
+  const o = origin;
+  if (!back) {
+    return (
+      <g>
+        <Ropes origin={o} from={[s1, t0]} to={[s1, t1]} />
+        <Ropes origin={o} from={[s0, t1]} to={[s1, t1]} />
+        <RingPost origin={o} s={s1} t={t1} pad="#1F1F1F" />
+      </g>
+    );
+  }
+  const [lx, ly] = iso(o, s0 + 16, t1);
+  const [rx, ry] = iso(o, s1, t1 - 40);
+  const [cx, cy] = iso(o, (s0 + s1) / 2, (t0 + t1) / 2);
+  return (
+    <g>
+      <polygon points={solid(o, [[s0, t0, 0], [s1, t0, 0], [s1 + 8, t1 + 8, 0], [s0, t1, 0]])} fill="#000" fillOpacity="0.22" filter="url(#bld-blur-m)" />
+      {/* Apron, black, with the RNDS logo in white and its red dot, as on black in the brand kit */}
+      <polygon points={solid(o, [[s0, t1, 0], [s1, t1, 0], [s1, t1, h], [s0, t1, h]])} fill="#1A1A1B" />
+      <polygon points={solid(o, [[s1, t0, 0], [s1, t1, 0], [s1, t1, h], [s1, t0, h]])} fill="#0F0F10" />
+      <g transform={`matrix(0.866 0.5 0 1 ${lx} ${ly - 4})`}>
+        <text fontFamily="'Kode Mono', ui-monospace, monospace" fontWeight="700" fontSize="9" fill="#ECECEA" textLength="26" lengthAdjust="spacing">RNDS</text>
+        <circle cx="28.4" cy="-6.6" r="1.1" fill={RNDS} />
+      </g>
+      <g transform={`matrix(0.866 -0.5 0 1 ${rx} ${ry - 4})`}>
+        <text fontFamily="'Kode Mono', ui-monospace, monospace" fontWeight="700" fontSize="9" fill="#ECECEA" textLength="26" lengthAdjust="spacing" opacity="0.85">RNDS</text>
+        <circle cx="28.4" cy="-6.6" r="1.1" fill={RNDS} />
+      </g>
+      {/* Canvas */}
+      <polygon points={solid(o, [[s0, t0, h], [s1, t0, h], [s1, t1, h], [s0, t1, h]])} fill="url(#bld-canvas)" />
+      <polygon points={solid(o, [[s0 + 7, t0 + 7, h], [s1 - 7, t0 + 7, h], [s1 - 7, t1 - 7, h], [s0 + 7, t1 - 7, h]])} fill="none" stroke="#3C3C3E" strokeWidth="0.8" />
+      <ellipse cx={cx} cy={cy - h} rx="74" ry="40" fill="#FFE477" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      {/* The RNDS "R" painted in the middle of the canvas */}
+      <g transform={`matrix(0.866 0.5 -0.866 0.5 ${cx} ${cy - h})`}>
+        <g transform="scale(0.042) translate(-471 -471)" opacity="0.92">
+          <circle cx="471" cy="471" r="471" fill={RNDS} />
+          <path fillRule="evenodd" fill="#000000" d="M312,236 L547,236 L622,346 L622,421 L563,482 L622,569 L622,686 L544,686 L544,581 L485,496 L423,496 L389,475 L389,686 L312,686 Z M389,309 L508,309 L544,360 L544,399 L519,424 L389,424 Z" />
+        </g>
+      </g>
+      <RingPost origin={o} s={s0} t={t0} pad={RNDS} />
+      <Ropes origin={o} from={[s0, t0]} to={[s1, t0]} />
+      <Ropes origin={o} from={[s0, t0]} to={[s0, t1]} />
+      <RingPost origin={o} s={s1} t={t0} pad="#F4F4F4" />
+      <RingPost origin={o} s={s0} t={t1} pad="#F4F4F4" />
+    </g>
+  );
+}
+
+/** Impact star on the face of the boxer who takes the punch, in time with the fight (Building.css). */
+function Pow({ at: [x, y], side }: { at: Point; side: 'a' | 'b' }) {
+  const cx = x + (side === 'b' ? -5 : 5);
+  const cy = y - 27;
+  const star = Array.from({ length: 16 }, (_, i) => {
+    const r = i % 2 === 0 ? 7 : 3;
+    const a = (i * Math.PI) / 8;
+    return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+  return <polygon points={star} className={`pow pow--${side}`} fill="#FFD84D" stroke={RNDS} strokeWidth="1" strokeLinejoin="round" />;
+}
+
+// Pips of each die face, on a 3 × 3 grid (0 = top left, 8 = bottom right).
+const PIPS: Record<number, number[]> = { 1: [4], 2: [0, 8], 4: [0, 2, 6, 8] };
+
+/** A white die showing `face`; when `roll` is set it is thrown, tumbles and lands, in turn (Building.css). */
+function Die({ x, y, face, roll }: { x: number; y: number; face: 1 | 2 | 4; roll?: number }) {
+  const size = 8;
+  return (
+    <g className={roll === undefined ? undefined : `die die--${roll}`}>
+      <rect x={x - size / 2} y={y - size / 2} width={size} height={size} rx="2" fill="#FFFFFF" stroke="#D2D2D2" strokeWidth="0.5" />
+      {PIPS[face].map((pip) => (
+        <circle key={pip} cx={x - 2.4 + (pip % 3) * 2.4} cy={y - 2.4 + Math.floor(pip / 3) * 2.4} r="0.85" fill={face === 1 ? RNDS : INK} />
+      ))}
+    </g>
+  );
+}
+
+/**
+ * A 421 dice track: round table on its foot, a white rim around violet felt, a dice cup,
+ * and the three dice of a 421 (4, 2, 1). On the `rolling` table they are thrown again and again.
+ */
+function DiceTable({ cx, cy, rx, ry, rolling = false }: { cx: number; cy: number; rx: number; ry: number; rolling?: boolean }) {
+  const felt = 0.74;
+  return (
+    <g>
+      <ellipse cx={cx + 4} cy={cy + 28} rx={rx * 0.7} ry={ry * 0.45} fill="#000" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <ellipse cx={cx} cy={cy + 26} rx={rx * 0.32} ry={ry * 0.22} fill="#C9C9C9" />
+      <rect x={cx - 2.6} y={cy + 4} width="5.2" height="22" rx="2.6" fill="url(#bld-post)" />
+      {/* Thickness of the top, then the white rim and the felt */}
+      <ellipse cx={cx} cy={cy + 5} rx={rx} ry={ry} fill="#C8C8C8" />
+      <rect x={cx - rx} y={cy} width={rx * 2} height="5" fill="#C8C8C8" />
+      {vinyl((f) => <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={f} />, '#F6F6F6')}
+      <ellipse cx={cx} cy={cy + 0.8} rx={rx * felt} ry={ry * felt} fill="#000" fillOpacity="0.18" />
+      <ellipse cx={cx} cy={cy + 1.2} rx={rx * felt} ry={ry * felt} fill={CLUB} />
+      <ellipse cx={cx} cy={cy + 1.2} rx={rx * felt} ry={ry * felt} fill="url(#bld-felt)" />
+      {/* Dice cup on the rim */}
+      {vinyl((f) => <path d={`M${cx + rx * 0.62},${cy - ry * 0.55} l7,0 l-1,-8 l-5,0 Z`} fill={f} />, '#2B2B2B')}
+      <ellipse cx={cx + rx * 0.62 + 3.5} cy={cy - ry * 0.55 - 8} rx="2.6" ry="0.9" fill="#3A3A3A" />
+      <Die x={cx - 9} y={cy - 1} face={4} roll={rolling ? 0 : undefined} />
+      <Die x={cx + 1} y={cy + 4} face={2} roll={rolling ? 1 : undefined} />
+      <Die x={cx + 10} y={cy - 2} face={1} roll={rolling ? 2 : undefined} />
     </g>
   );
 }
@@ -513,12 +736,15 @@ function People({ origin, figures, prefix }: { origin: Point; figures: Figure[];
 
 const RNDS_PEOPLE: Figure[] = [
   // The two boxers sparring in the ring
-  { s: 122, t: 126, look: { skin: SKIN.tan, top: '#1F1F1F', bottom: RNDS, shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: RNDS } },
-  { s: 172, t: 110, look: { skin: SKIN.light, top: '#F4F4F4', bottom: '#2B2B2B', shoes: '#1F1F1F', head: 'hair', headColor: '#6B4A32', shorts: true, gloves: '#1F1F1F' } },
+  { s: 122, t: 126, fight: 'a', look: { skin: SKIN.tan, top: '#1F1F1F', bottom: RNDS, shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: RNDS } },
+  { s: 172, t: 110, fight: 'b', look: { skin: SKIN.light, top: '#F4F4F4', bottom: '#2B2B2B', shoes: '#1F1F1F', head: 'hair', headColor: '#6B4A32', shorts: true, gloves: '#1F1F1F' } },
   // Coach by the bags
-  { s: 268, t: 58, look: { skin: SKIN.rose, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'bucket', headColor: '#1F1F1F', holds: 'phone' } },
-  { s: 60, t: 212, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#EFEBE3', shoes: '#F4F4F4', head: 'hair', headColor: '#4A3A30', eyes: 'glasses', holds: 'cup' } },
-  { s: 300, t: 200, look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#DADADA', shorts: true } },
+  { s: 240, t: 96, look: { skin: SKIN.rose, top: '#1F1F1F', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'bucket', headColor: '#1F1F1F', holds: 'phone' } },
+  // Working the punching bag
+  { s: 262, t: 46, fight: 'bag', look: { skin: SKIN.deep, top: RNDS, bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'cap', headColor: '#1F1F1F', shorts: true, gloves: '#1F1F1F' } },
+  // Skipping rope beside the ring
+  { s: 60, t: 212, rope: true, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#EFEBE3', shoes: '#F4F4F4', head: 'hair', headColor: '#4A3A30', eyes: 'glasses' } },
+  { s: 300, t: 200, walk: [0, -60], look: { skin: SKIN.deep, top: '#B8AE7E', bottom: '#B8AE7E', shoes: '#1F1F1F', head: 'cap', headColor: '#F4F4F4', brim: '#DADADA', shorts: true } },
   { s: 300, t: 110, look: { skin: SKIN.rose, top: '#F2F2F2', bottom: '#F2F2F2', shoes: '#F4F4F4', head: 'cap', headColor: '#2C4FB8' } },
 ];
 
@@ -534,20 +760,15 @@ const CLUB_PEOPLE: Figure[] = [
   { s: 262, t: 150, look: { skin: SKIN.rose, top: '#B8AE7E', bottom: '#EFEBE3', shoes: '#1F1F1F', head: 'buzz', headColor: '#8C8C8C' } },
   { s: 312, t: 96, look: { skin: SKIN.light, top: '#9CC8F2', bottom: '#2B2B2B', shoes: '#F4F4F4', head: 'bucket', headColor: '#EFEBE3' } },
   // Walking in
-  { s: 120, t: 214, look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
+  { s: 120, t: 214, walk: [100, 0], look: { skin: SKIN.tan, top: '#2B2B2B', bottom: '#B8AE7E', shoes: '#F4F4F4', head: 'hair', headColor: '#1F1F1F', eyes: 'sunglasses' } },
 ];
 
-/**
- * Drawing based on reference/maquette.dc.html, redrawn as a white clay scale model:
- * soft shading on every face, contact shadows, words painted on the floor and one route per
- * project in its colour. The project colours stay on a few details only.
- */
-function BuildingArt() {
+/** Gradients, filters and clips shared by the scenes. */
+function SceneDefs() {
   const R = RNDS_FLOOR;
   const C = CLUB_FLOOR;
   return (
-    <svg viewBox="-80 -40 1170 730" className="building-art" aria-hidden="true">
-      <defs>
+    <defs>
         <linearGradient id="bld-top" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#FFFFFF" />
           <stop offset="1" stopColor="#F2F2F2" />
@@ -584,6 +805,27 @@ function BuildingArt() {
           <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.6" />
           <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
         </radialGradient>
+        {/* Warm light under the lamps, a light yellow so it reads on the white model */}
+        <linearGradient id="bld-lamp" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FFE477" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#FFF3B8" stopOpacity="0.12" />
+        </linearGradient>
+        <linearGradient id="bld-canvas" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#2E2E30" />
+          <stop offset="1" stopColor="#111112" />
+        </linearGradient>
+        <radialGradient id="bld-felt" cx="0.4" cy="0.35" r="0.7">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.22" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="bld-asphalt" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#CDCDCF" />
+          <stop offset="1" stopColor="#C2C2C4" />
+        </linearGradient>
+        <linearGradient id="bld-glass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#7C8794" />
+          <stop offset="1" stopColor="#3E454E" />
+        </linearGradient>
         <radialGradient id="bld-ground" cx="0.5" cy="0.45" r="0.75">
           <stop offset="0" stopColor="#E9E9E9" />
           <stop offset="1" stopColor="#D6D6D6" />
@@ -608,36 +850,15 @@ function BuildingArt() {
         <clipPath id="bld-clip-club">
           <polygon points={points(C, [[0, 0], [320, 0], [320, 250], [0, 250]])} />
         </clipPath>
-      </defs>
+    </defs>
+  );
+}
 
-      {/* The table: grey ground, and the roads that run between the plots */}
-      <rect x="-80" y="-40" width="1170" height="730" fill="url(#bld-ground)" />
-      <g fill="none" stroke="#F7F7F7" strokeWidth="2.2" strokeDasharray="12 10" strokeLinecap="round">
-        <polyline points={points(SITE_GROUND, [[403, -120], [403, 760]])} />
-        <polyline points={points(SITE_GROUND, [[-120, 621], [620, 621]])} />
-        <polyline points={points(SITE_GROUND, [[-28, -120], [-28, 760]])} />
-        <polyline points={points(SITE_GROUND, [[-120, -28], [620, -28]])} />
-      </g>
-      {/* Zebra crossing at the front corner */}
-      <g fill="#F7F7F7">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <polygon key={i} points={points(SITE_GROUND, [[372 + i * 13, 596], [379 + i * 13, 596], [379 + i * 13, 646], [372 + i * 13, 646]])} />
-        ))}
-      </g>
-
-      {/* Plots behind the building */}
-      <Slab s0={-140} t0={40} s1={-56} t1={540} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
-      <Slab s0={30} t0={-140} s1={380} t1={-56} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
-      <Tree s={-100} t={110} />
-      <Tree s={-92} t={270} size={0.9} />
-      <Tree s={-102} t={430} />
-      <Tree s={90} t={-100} size={0.9} />
-      <Tree s={220} t={-96} />
-      <Tree s={340} t={-102} size={0.85} />
-
-      {/* Base plate */}
-      <Slab s0={0} t0={0} s1={366} t1={586} r={26} h={14} top="#F7F7F7" side="#CFCFCF" shadow={0.16} />
-
+/** RNDS floor: the boxing gym, its walls, logo, ring, bags and boxers. */
+function RndsFloorArt() {
+  const R = RNDS_FLOOR;
+  return (
+    <>
       {/* RNDS floor */}
       <polygon points="877,280 877,298 660.5,423 660.5,405" fill="url(#bld-side-right)" />
       <polygon points="660.5,405 660.5,423 383.5,263 383.5,245" fill="url(#bld-side-left)" />
@@ -656,7 +877,8 @@ function BuildingArt() {
       </g>
       <line x1="626" y1="40" x2="626" y2="92" stroke="#CFCFCF" />
       <ellipse cx="626" cy="96" rx="16" ry="6" fill="#D4D4D4" />
-      <polygon points="612,98 640,98 742,255 626,322 510,255" fill="#FFFFFF" fillOpacity="0.5" />
+      <ellipse cx="626" cy="98" rx="10" ry="2.6" fill="#FFF3B0" />
+      <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp)" />
 
       <FloorText origin={R} s={262} t={204} alongT>RING</FloorText>
       <Route origin={R} color={RNDS} solid={[[282, 70], [282, 120], [236, 120]]} dashed={[[294, 70], [294, 132], [236, 132]]} />
@@ -664,31 +886,32 @@ function BuildingArt() {
       {/* Punching bags */}
       <ellipse cx="812" cy="276" rx="9" ry="3.5" fill="#000" fillOpacity="0.12" filter="url(#bld-blur-s)" />
       <ellipse cx="846" cy="296" rx="9" ry="3.5" fill="#000" fillOpacity="0.12" filter="url(#bld-blur-s)" />
-      <line x1="808" y1="192" x2="808" y2="228" stroke="#B4B4B4" strokeWidth="2" />
-      <rect x="801" y="228" width="14" height="38" rx="6" fill={RNDS} />
-      <rect x="801" y="236" width="14" height="4" fill={RNDS_DARK} />
-      <rect x="801" y="228" width="14" height="38" rx="6" fill="url(#bld-sheen)" />
+      {/* This one swings each time the boxer beside it lands a punch */}
+      <g className="bag-swing">
+        <line x1="808" y1="192" x2="808" y2="228" stroke="#B4B4B4" strokeWidth="2" />
+        <rect x="801" y="228" width="14" height="38" rx="6" fill={RNDS} />
+        <rect x="801" y="236" width="14" height="4" fill={RNDS_DARK} />
+        <rect x="801" y="228" width="14" height="38" rx="6" fill="url(#bld-sheen)" />
+      </g>
       <line x1="842" y1="212" x2="842" y2="248" stroke="#B4B4B4" strokeWidth="2" />
       <rect x="835" y="248" width="14" height="38" rx="6" fill={RNDS} />
       <rect x="835" y="256" width="14" height="4" fill={RNDS_DARK} />
       <rect x="835" y="248" width="14" height="38" rx="6" fill="url(#bld-sheen)" />
 
-      {/* Ring */}
-      <polygon points="504.7,263 626,193 747.2,263 626,333" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-m)" />
-      <polygon points="504.7,255 626,325 626,339 504.7,269" fill="url(#bld-side-left)" />
-      <polygon points="626,325 747.2,255 747.2,269 626,339" fill="url(#bld-side-right)" />
-      <polygon points="626,185 747.2,255 626,325 504.7,255" fill="url(#bld-top)" stroke="#DADADA" />
-      <polygon points="626,203 716,255 626,307 536,255" fill="none" stroke={RNDS} strokeOpacity="0.35" />
-      <circle cx="626" cy="255" r="14" fill="none" stroke={RNDS} strokeOpacity="0.3" />
-      <rect x="624" y="153" width="4" height="32" rx="2" fill="url(#bld-post)" />
-      <rect x="745.2" y="223" width="4" height="32" rx="2" fill="url(#bld-post)" />
-      <rect x="502.7" y="223" width="4" height="32" rx="2" fill="url(#bld-post)" />
-      <polygon points="626,155 747.2,225 626,295 504.7,225" fill="none" stroke={RNDS} strokeWidth="1.6" />
-      <polygon points="626,167 747.2,237 626,307 504.7,237" fill="none" stroke={RNDS} strokeWidth="1.6" />
-      <polygon points="626,179 747.2,249 626,319 504.7,249" fill="none" stroke={RNDS} strokeWidth="1.2" strokeOpacity="0.6" />
+      <Ring origin={R} back />
       <People origin={R} figures={RNDS_PEOPLE} prefix="r" />
-      <rect x="624" y="293" width="4" height="32" rx="2" fill="url(#bld-post)" />
+      <Pow at={iso(R, 172, 110)} side="b" />
+      <Pow at={iso(R, 122, 126)} side="a" />
+      <Ring origin={R} />
+    </>
+  );
+}
 
+/** Club 421 floor: the bar with its bottles, the dice tables and the students. */
+function ClubFloorArt() {
+  const C = CLUB_FLOOR;
+  return (
+    <>
       {/* Club 421 floor */}
       <polygon points="626,425 626,443 409.5,568 409.5,550" fill="url(#bld-side-right)" />
       <polygon points="409.5,550 409.5,568 132.4,408 132.4,390" fill="url(#bld-side-left)" />
@@ -742,26 +965,49 @@ function BuildingArt() {
       })()}
       <line x1="392" y1="318" x2="392" y2="356" stroke="#CFCFCF" />
       <ellipse cx="392" cy="360" rx="13" ry="5" fill="#D4D4D4" />
-      <polygon points="380,362 404,362 440,405 392,430 344,405" fill="#FFFFFF" fillOpacity="0.5" />
+      <ellipse cx="392" cy="362" rx="8" ry="2.2" fill="#FFF3B0" />
+      <polygon points="380,362 404,362 440,405 392,430 344,405" fill="url(#bld-lamp)" />
 
       {/* Dice tables */}
-      <ellipse cx="396" cy="424" rx="26" ry="9" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-m)" />
-      <ellipse cx="504" cy="492" rx="22" ry="8" fill="#000" fillOpacity="0.14" filter="url(#bld-blur-m)" />
-      <rect x="389.5" y="398" width="5" height="24" rx="2.5" fill="url(#bld-post)" />
-      <ellipse cx="392" cy="402" rx="38" ry="21" fill="#D6D6D6" />
-      <ellipse cx="392" cy="398" rx="38" ry="21" fill="url(#bld-top)" stroke={CLUB} strokeOpacity="0.5" />
-      <rect x="380" y="389" width="9" height="9" rx="2" fill="#A8A8A8" transform="rotate(20 384.5 393.5)" />
-      <rect x="394" y="394" width="9" height="9" rx="2" fill="#A8A8A8" transform="rotate(-15 398.5 398.5)" />
-      <rect x="405" y="385" width="9" height="9" rx="2" fill={CLUB} transform="rotate(35 409.5 389.5)" />
-      <rect x="497.5" y="468" width="5" height="22" rx="2.5" fill="url(#bld-post)" />
-      <ellipse cx="500" cy="471" rx="32" ry="18" fill="#D6D6D6" />
-      <ellipse cx="500" cy="468" rx="32" ry="18" fill="url(#bld-top)" />
-      <rect x="494" y="462" width="8" height="8" rx="2" fill="#A8A8A8" transform="rotate(10 498 466)" />
+      <DiceTable cx={392} cy={398} rx={40} ry={22} rolling />
+      <DiceTable cx={500} cy={468} rx={34} ry={19} />
       <People origin={C} figures={CLUB_PEOPLE} prefix="c" />
+    </>
+  );
+}
+
+/**
+ * The whole site, as a white clay scale model: both floors on their plate, the roads,
+ * plots, trees and cars around. The project colours stay on a few details only.
+ */
+function BuildingArt() {
+  return (
+    <svg viewBox="-80 -40 1170 730" className="building-art" aria-hidden="true">
+      <SceneDefs />
+      {/* The table: grey ground, and the roads that run between the plots */}
+      <rect x="-80" y="-40" width="1170" height="730" fill="url(#bld-ground)" />
+      <Roads />
+
+      {/* Plots behind the building */}
+      <Slab s0={-140} t0={40} s1={-56} t1={540} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
+      <Slab s0={30} t0={-140} s1={380} t1={-56} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
+      <Tree s={-100} t={110} />
+      <Tree s={-92} t={270} size={0.9} />
+      <Tree s={-102} t={430} />
+      <Tree s={90} t={-100} size={0.9} />
+      <Tree s={220} t={-96} />
+      <Tree s={340} t={-102} size={0.85} />
+
+      {/* Base plate */}
+      <Slab s0={0} t0={0} s1={366} t1={586} r={26} h={14} top="#F7F7F7" side="#CFCFCF" shadow={0.16} />
+
+      <RndsFloorArt />
+      <ClubFloorArt />
 
       {/* In front: the road traffic, then the plots across the road */}
       <Car s={408} t={210} alongT color="#F4F4F4" />
-      <Car s={160} t={628} alongT={false} color="#DADADA" />
+      <Car s={384} t={420} alongT color="#2B2B2B" />
+      <Car s={150} t={624} alongT={false} color="#DCDCDC" />
       <Slab s0={440} t0={70} s1={540} t1={480} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
       <Slab s0={40} t0={656} s1={400} t1={750} r={22} h={6} top="#EFEFEF" side="#D0D0D0" />
       <Lamp s={448} t={110} />
@@ -776,7 +1022,80 @@ function BuildingArt() {
       <Tree s={360} t={708} size={0.9} />
 
       <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
-
     </svg>
+  );
+}
+
+// One floor on its own, for the workspace: which part of the drawing to show, and the spots
+// that open each module, as floor points (s, t) and a height h above the floor.
+const SCENES: Record<ProjectId, {
+  origin: Point;
+  viewBox: [number, number, number, number];
+  spots: Record<string, [number, number, number]>;
+}> = {
+  rnds: {
+    origin: RNDS_FLOOR,
+    viewBox: [330, -20, 600, 480],
+    spots: {
+      clubs: [150, 120, 52],
+      ambassadeurs: [268, 58, 46],
+      publications: [8, 150, 74],
+      abonnes: [300, 210, 34],
+    },
+  },
+  club421: {
+    origin: CLUB_FLOOR,
+    viewBox: [80, 125, 600, 480],
+    spots: {
+      bde: [158, 108, 44],
+      soirees: [28, 110, 44],
+      'app-store': [8, 216, 70],
+      revenus: [290, 116, 40],
+    },
+  },
+};
+
+/**
+ * The project's floor alone on its plate, as in the home scene, with round buttons placed on
+ * the drawing that open the matching modules.
+ */
+export function ProjectScene({ project, current }: { project: Project; current: string }) {
+  const scene = SCENES[project.id];
+  const [vx, vy, vw, vh] = scene.viewBox;
+  const [ox, oy] = scene.origin;
+  const plate: Point = [ox, oy + 30];
+  return (
+    <div className="scene" data-project={project.id}>
+      <svg viewBox={scene.viewBox.join(' ')} className="scene-art" aria-hidden="true">
+        <SceneDefs />
+        <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-ground)" />
+        <Slab origin={plate} s0={-22} t0={-22} s1={342} t1={272} r={26} h={12} top="#F7F7F7" side="#CFCFCF" shadow={0.18} />
+        {project.id === 'rnds' ? <RndsFloorArt /> : <ClubFloorArt />}
+        <rect x={vx} y={vy} width={vw} height={vh} filter="url(#bld-grain)" />
+      </svg>
+      <ul className="scene-spots" aria-label={`Rubriques de ${project.name} sur la maquette`}>
+        {project.modules
+          .filter((module) => scene.spots[module.slug])
+          .map((module) => {
+            const [s, t, h] = scene.spots[module.slug];
+            const [x, y] = iso(scene.origin, s, t);
+            const left = ((x - vx) / vw) * 100;
+            const top = ((y - h - vy) / vh) * 100;
+            const active = module.slug === current;
+            return (
+              <li key={module.slug} className="scene-spot-item" style={{ left: `${left}%`, top: `${top}%` }}>
+                <Link
+                  to={`/${project.id}/${module.slug}`}
+                  className={`scene-spot${active ? ' scene-spot--active' : ''}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <ModuleIcon slug={module.slug} size={18} />
+                  <span className="scene-spot-label">{module.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+      </ul>
+    </div>
   );
 }

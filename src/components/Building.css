@@ -194,3 +194,393 @@
     display: none;
   }
 }
+
+/* Workspace scene: one floor alone, with round buttons on the drawing (ProjectScene) */
+.scene {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #dcdcdc;
+}
+
+.scene-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.scene-spots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scene-spot-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.scene-spot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.35), var(--shadow-pop);
+  color: var(--accent);
+}
+
+.scene-spot:hover {
+  background: var(--surface);
+}
+
+.scene-spot--active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.scene-spot--active:hover {
+  background: var(--accent);
+}
+
+/* Name of the module, shown on hover or focus, and always for the open one */
+.scene-spot-label {
+  position: absolute;
+  left: calc(100% + 10px);
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease);
+  pointer-events: none;
+}
+
+.scene-spot:hover .scene-spot-label,
+.scene-spot:focus-visible .scene-spot-label,
+.scene-spot--active .scene-spot-label {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 860px) {
+  .scene {
+    border-radius: var(--r-2xl);
+  }
+
+  .scene-spot {
+    width: 38px;
+    height: 38px;
+  }
+
+  .scene-spot-label {
+    display: none;
+  }
+}
+
+/* Figures come alive: boxers hop and jab, walkers stroll and back, the others breathe.
+   Everything stops when the device asks for reduced motion (global.css). */
+.fig,
+.fig-body,
+.fig-gloves {
+  animation-delay: var(--delay);
+}
+
+.fig-body {
+  animation: fig-breathe 2.6s ease-in-out infinite;
+}
+
+.fig--boxer .fig-body {
+  animation: fig-hop 0.55s ease-in-out infinite alternate;
+}
+
+.fig-gloves {
+  animation: fig-jab 1.2s ease-in-out infinite;
+}
+
+/* Walkers: steady pace there and back, a real step cycle instead of gliding.
+   Legs lift in turn, arms swing from the shoulder, the body dips on each footfall. */
+.fig--walk {
+  animation: fig-walk 12s linear infinite;
+}
+
+.fig--walk .fig-body {
+  animation: fig-step 0.3s ease-in-out infinite alternate;
+}
+
+.fig--walk .fig-leg {
+  animation: fig-leg 0.6s ease-in-out infinite;
+}
+
+.fig--walk .fig-leg--r {
+  animation-delay: -0.3s;
+}
+
+.fig--walk .fig-arm {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: fig-arm 0.6s ease-in-out infinite;
+}
+
+.fig--walk .fig-arm--l {
+  animation-delay: -0.3s;
+}
+
+@keyframes fig-leg {
+  0%,
+  50%,
+  100% {
+    transform: none;
+  }
+
+  25% {
+    transform: translate(0.6px, -2.4px);
+  }
+}
+
+@keyframes fig-arm {
+  0%,
+  100% {
+    transform: rotate(14deg);
+  }
+
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+
+@keyframes fig-breathe {
+  50% {
+    transform: translateY(-0.8px);
+  }
+}
+
+@keyframes fig-hop {
+  to {
+    transform: translateY(-2.4px);
+  }
+}
+
+@keyframes fig-jab {
+  0%,
+  60%,
+  80%,
+  100% {
+    transform: none;
+  }
+
+  70% {
+    transform: translate(2.4px, -0.6px);
+  }
+
+  90% {
+    transform: translate(-2px, -0.4px);
+  }
+}
+
+@keyframes fig-step {
+  from {
+    transform: translateY(0.4px);
+  }
+
+  to {
+    transform: translateY(-1.2px);
+  }
+}
+
+@keyframes fig-walk {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+
+/* Sparring in the ring, on a 3.6 s loop: A lunges and lands a jab on B, then B answers.
+   The one who takes the punch rocks back on its heels, and a star pops on its face. */
+.fig--fight-a,
+.fig--fight-b {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.fig--fight-a {
+  animation: fight-a 3.6s ease-in-out infinite;
+}
+
+.fig--fight-b {
+  animation: fight-b 3.6s ease-in-out infinite;
+}
+
+.fig--fight-a .fig-gloves {
+  animation: jab-a 3.6s ease-in-out infinite;
+}
+
+.fig--fight-b .fig-gloves {
+  animation: jab-b 3.6s ease-in-out infinite;
+}
+
+@keyframes fight-a {
+  0%, 16%, 40%, 54%, 78%, 100% { transform: none; }
+  24% { transform: translate(7px, 2px); }
+  30% { transform: translate(5px, 1.5px); }
+  60% { transform: translate(-4px, -1px) rotate(-10deg); }
+  68% { transform: translate(-2px, 0) rotate(5deg); }
+}
+
+@keyframes fight-b {
+  0%, 18%, 42%, 52%, 76%, 100% { transform: none; }
+  25% { transform: translate(4px, 1px) rotate(10deg); }
+  33% { transform: translate(2px, 0) rotate(-5deg); }
+  60% { transform: translate(-7px, -2px); }
+  66% { transform: translate(-5px, -1.5px); }
+}
+
+@keyframes jab-a {
+  0%, 18%, 32%, 100% { transform: none; }
+  24% { transform: translate(5px, -1px); }
+}
+
+@keyframes jab-b {
+  0%, 54%, 68%, 100% { transform: none; }
+  60% { transform: translate(-5px, -1px); }
+}
+
+.pow {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.pow--b {
+  animation: pow-b 3.6s ease-out infinite;
+}
+
+.pow--a {
+  animation: pow-a 3.6s ease-out infinite;
+}
+
+@keyframes pow-b {
+  0%, 23%, 34%, 100% { opacity: 0; transform: scale(0.4); }
+  25% { opacity: 1; transform: scale(1.15); }
+  31% { opacity: 1; transform: scale(0.9) rotate(15deg); }
+}
+
+@keyframes pow-a {
+  0%, 59%, 70%, 100% { opacity: 0; transform: scale(0.4); }
+  61% { opacity: 1; transform: scale(1.15); }
+  67% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
+}
+
+/* 421: the three dice are thrown from the cup, tumble on the felt and land, one after the other */
+.die {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: die-roll 4.5s cubic-bezier(0.3, 0.7, 0.4, 1) infinite;
+}
+
+.die--1 {
+  animation-delay: 0.12s;
+}
+
+.die--2 {
+  animation-delay: 0.24s;
+}
+
+@keyframes die-roll {
+  0% {
+    transform: translate(16px, -14px) rotate(-260deg) scale(0.9);
+  }
+
+  14% {
+    transform: translate(6px, -9px) rotate(-120deg);
+  }
+
+  22% {
+    transform: translate(2px, -2px) rotate(-30deg);
+  }
+
+  27% {
+    transform: translate(0, -3px) rotate(-8deg);
+  }
+
+  32%,
+  100% {
+    transform: none;
+  }
+}
+
+/* Boxer on the punching bag: a one-two every 1.4 s, the bag swings back from its hook */
+.fig--fight-bag .fig-gloves {
+  animation: jab-bag 1.4s ease-in-out infinite;
+}
+
+.bag-swing {
+  transform-box: view-box;
+  transform-origin: 808px 192px;
+  animation: bag-swing 1.4s ease-in-out infinite;
+}
+
+@keyframes jab-bag {
+  0%, 10%, 30%, 40%, 60%, 100% { transform: none; }
+  18% { transform: translate(5px, 0.5px); }
+  48% { transform: translate(4px, -1px); }
+}
+
+@keyframes bag-swing {
+  0%, 16%, 100% { transform: none; }
+  26% { transform: rotate(-7deg); }
+  40% { transform: rotate(3deg); }
+  52% { transform: rotate(-5deg); }
+  70% { transform: rotate(2deg); }
+  84% { transform: none; }
+}
+
+/* Skipping rope: the rope turns (seen from the front, it flips from over the head to under the
+   feet) and the figure hops each time it passes under */
+.fig--rope .fig-body {
+  animation: rope-hop 0.6s linear infinite;
+}
+
+.fig-rope {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: rope-turn 0.6s linear infinite;
+}
+
+@keyframes rope-turn {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(-0.47);
+  }
+}
+
+@keyframes rope-hop {
+  0%,
+  30%,
+  70%,
+  100% {
+    transform: none;
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}

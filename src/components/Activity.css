@@ -1,0 +1,162 @@
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.activity-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.activity-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-date {
+  margin-top: -8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Week strip: today raised in white, a dot under the days that have a task */
+.activity-week {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.activity-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0 6px;
+  border-radius: var(--r-pill);
+}
+
+.activity-day--today {
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.activity-day-date {
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-day-name {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.activity-day-dot {
+  width: 5px;
+  height: 5px;
+  margin-top: 2px;
+  border-radius: 50%;
+}
+
+.activity-day-dot--on {
+  background: var(--accent);
+}
+
+/* Timeline of tasks */
+.activity-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.activity-when {
+  padding-top: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.activity-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 64px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--fill);
+  cursor: pointer;
+}
+
+/* The next task to do: tinted in the project colour, with fine diagonal stripes */
+.activity-card--next {
+  background:
+    repeating-linear-gradient(135deg, transparent 0 7px, color-mix(in srgb, var(--accent) 12%, transparent) 7px 8px),
+    var(--accent-tint);
+}
+
+.activity-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-card);
+}
+
+.activity-card--done .activity-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.activity-box {
+  appearance: none;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+  background: var(--surface);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.activity-box::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  margin-top: -2px;
+  border-left: 2px solid var(--on-accent);
+  border-bottom: 2px solid var(--on-accent);
+  transform: rotate(-45deg) scale(0);
+  transition: transform var(--fast) var(--ease);
+}
+
+.activity-box:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.activity-box:checked::after {
+  transform: rotate(-45deg) scale(1);
+}

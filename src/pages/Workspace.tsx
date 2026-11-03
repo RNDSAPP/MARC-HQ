@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, NavLink, useParams } from 'react-router-dom';
+import Activity from '../components/Activity';
 import AgentCard from '../components/AgentCard';
+import { ProjectScene } from '../components/Building';
 import DataTable from '../components/DataTable';
 import Hero from '../components/Hero';
 import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
-import Sidebar from '../components/Sidebar';
+import StatPanel from '../components/StatPanel';
 import TabBar from '../components/TabBar';
-import TodoList from '../components/TodoList';
-import Topbar from '../components/Topbar';
+import WorkspaceHeader from '../components/WorkspaceHeader';
 import { getProjects } from '../data/api';
 import type { PipelineColumn, ProjectId, TableRow } from '../data/types';
 import { useData } from '../data/useData';
@@ -85,82 +86,78 @@ export default function Workspace({ project: projectId }: Props) {
   const shown = isPipeline ? columns.reduce((sum, column) => sum + column.cards.length, 0) : rows.length;
   const unit = isPipeline ? 'au total' : 'lignes';
   const listMeta = query ? `${shown} sur ${total}` : `${total} ${unit}`;
-  const doneCount = project.todos.filter((todo) => todos.ids.has(todo.id)).length;
 
   return (
     <div className="workspace" data-project={project.id}>
       <a className="skip-link" href="#contenu">
         Aller au contenu
       </a>
-      <Sidebar current={project} projects={projects} />
 
-      <main className="workspace-main" id="contenu" tabIndex={-1}>
-        <Topbar
-          projectName={project.name}
-          projectHref={`/${project.id}/vue-d-ensemble`}
-          moduleLabel={module.label}
-          searchPlaceholder={project.searchPlaceholder}
-          search={search}
-          onSearch={setSearch}
-        />
+      <div className="workspace-main">
+        <WorkspaceHeader project={project} projects={projects} search={search} onSearch={setSearch} />
 
-        <div className="workspace-body">
-          <Hero
-            eyebrow={`${project.name} · ${dayLabel()}`}
-            headline={module.headline}
-            sub={module.sub}
-            cta={module.cta}
-            heroLabel={module.heroLabel}
-            heroNum={module.heroNum}
-            heroDelta={module.heroDelta}
-            series={module.series}
-            onAction={showAction}
-          />
+        <main className="workspace-body" id="contenu" tabIndex={-1}>
+          <div className="workspace-stage">
+            <div className="workspace-center">
+              <Hero eyebrow={`${project.name} · ${dayLabel()}`} headline={module.headline} sub={module.sub} cta={module.cta} onAction={showAction} />
 
-          <KpiStrip kpis={module.kpis} />
+              <nav className="workspace-pills" aria-label={`Rubriques ${project.name}`}>
+                {project.modules.map((item) => (
+                  <NavLink key={item.slug} to={`/${project.id}/${item.slug}`} className="workspace-pill">
+                    {item.label}
+                    {item.count && <span className="workspace-pill-count">{item.count}</span>}
+                  </NavLink>
+                ))}
+              </nav>
 
-          <div className="workspace-columns">
-            <section className="workspace-list" aria-labelledby="list-title">
-              <div className="workspace-section-head">
-                <h2 id="list-title" className="workspace-h2">
-                  {listTitle}
-                </h2>
-                <span className="workspace-meta" aria-live="polite">
-                  {listMeta}
-                </span>
-              </div>
-              {module.view.kind === 'table' ? (
-                <DataTable caption={listTitle} columns={module.view.columns} rows={rows} />
-              ) : (
-                <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={showAction} />
-              )}
-            </section>
+              <ProjectScene project={project} current={module.slug} />
+            </div>
 
-            <aside className="workspace-aside" aria-label="Agents et tâches">
-              <section className="workspace-agents" aria-labelledby="agents-title">
-                <h2 id="agents-title" className="workspace-h2">
-                  Tes agents
+            <div className="workspace-side">
+              <section className="workspace-group" aria-labelledby="agents-title">
+                <h2 id="agents-title" className="workspace-h3">
+                  Agents <span className="workspace-h3-count">{project.agents.length}</span>
                 </h2>
                 {project.agents.map((agent) => (
                   <AgentCard key={agent.name} agent={agent} onAction={showAction} />
                 ))}
               </section>
 
-              <section aria-labelledby="todo-title">
-                <div className="workspace-section-head workspace-todo-head">
-                  <h2 id="todo-title" className="workspace-h2">
-                    À faire
-                  </h2>
-                  <span className="workspace-meta">
-                    {doneCount} / {project.todos.length}
-                  </span>
-                </div>
-                <TodoList todos={project.todos} done={todos.ids} onToggle={todos.toggle} />
+              <section className="workspace-group" aria-labelledby="figures-title">
+                <h2 id="figures-title" className="workspace-h3">
+                  Chiffres <span className="workspace-h3-count">{module.kpis.length}</span>
+                </h2>
+                <KpiStrip kpis={module.kpis} />
               </section>
-            </aside>
+            </div>
           </div>
-        </div>
-      </main>
+
+          <section className="workspace-list" aria-labelledby="list-title">
+            <div className="workspace-section-head">
+              <h2 id="list-title" className="workspace-h2">
+                {listTitle}
+              </h2>
+              <span className="workspace-meta" aria-live="polite">
+                {listMeta}
+              </span>
+            </div>
+            {module.view.kind === 'table' ? (
+              <DataTable caption={listTitle} columns={module.view.columns} rows={rows} />
+            ) : (
+              <Pipeline columns={columns} hotAction={project.pipeline.hotAction} onAction={showAction} />
+            )}
+          </section>
+        </main>
+      </div>
+
+      <aside className="workspace-panel" aria-label={`${module.label} : chiffre clé et tâches`}>
+        <p className="workspace-panel-title">
+          <span className="workspace-panel-light">{project.space}</span>
+          <span className="workspace-panel-bold">{module.label}</span>
+        </p>
+        <StatPanel label={module.heroLabel} value={module.heroNum} delta={module.heroDelta} series={module.series} />
+        <Activity todos={project.todos} done={todos.ids} onToggle={todos.toggle} />
+      </aside>
 
       <TabBar project={project} />
 

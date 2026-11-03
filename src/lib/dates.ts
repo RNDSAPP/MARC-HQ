@@ -32,3 +32,22 @@ export function greeting(today = new Date()): string {
   const hour = today.getHours();
   return hour >= 5 && hour < 16 ? 'Bonjour' : 'Bonsoir';
 }
+
+const SHORT_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+/** The 7 days of this week, Monday first: short name ("Mer"), day of the month, and whether it is today. */
+export function weekDays(today = new Date()): { short: string; date: number; isToday: boolean }[] {
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  return SHORT_DAYS.map((short, index) => {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + index);
+    return { short, date: day.getDate(), isToday: day.toDateString() === today.toDateString() };
+  });
+}
+
+/** Index in the week (Monday = 0) of a due label such as "Auj." or "Mer.", or -1. */
+export function dueDayIndex(due: string, today = new Date()): number {
+  if (due.startsWith('Auj')) return (today.getDay() + 6) % 7;
+  return SHORT_DAYS.findIndex((short) => due.startsWith(short));
+}

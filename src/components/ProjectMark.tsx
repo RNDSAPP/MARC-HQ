@@ -1,5 +1,6 @@
 import type { ProjectId } from '../data/types';
 import logo421White from '../assets/logo-421-blanc.svg';
+import './ProjectMark.css';
 
 /**
  * Each project's own logo, as supplied by Marc: the RNDS "R" on Rouge Gong,

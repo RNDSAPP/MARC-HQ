@@ -1,0 +1,17 @@
+/* Project logos, filling the box they are placed in */
+.project-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.project-mark--club421 {
+  padding: 10%;
+  background: var(--club);
+}
+
+.project-mark--club421 img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

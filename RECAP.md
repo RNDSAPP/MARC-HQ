@@ -24,7 +24,7 @@ Puis une passe « maquette blanche », d'après ton image de référence : thèm
 
 Enfin, d'après tes deux autres références : le bâtiment est devenu une maquette en pâte blanche (ombres douces, inscriptions peintes au sol, un tracé par projet, personnages en figurines), RNDS a pris les couleurs et le logo de sa charte graphique (rouge `#FF0A3C`), et le graphique des 12 semaines est devenu un graphique en plateaux avec un grand chiffre fin.
 
-Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (53 points).
+Toutes les décisions prises sans toi sont expliquées dans `DECISIONS.md` (59 points).
 
 ## Lancer l'app
 
@@ -43,7 +43,7 @@ Puis ouvre l'adresse affichée (en général http://localhost:5173).
 ## Comment le code est rangé
 
 1. `src/pages` : les deux écrans, `Home` (accueil) et `Workspace` (espace de travail d'un projet).
-2. `src/components` : un composant par fichier, avec son CSS à côté : `Sidebar`, `Topbar`, `Hero`, `WeeklySteps`, `KpiStrip`, `Pipeline`, `DataTable`, `StatusBadge`, `AgentCard`, `TodoList`, `Building`, plus `ProjectCard` (cartes de l'accueil), `TabBar` (barre d'onglets mobile) et `ModuleIcon` (icônes des rubriques).
+2. `src/components` : un composant par fichier, avec son CSS à côté : `WorkspaceHeader`, `Hero`, `StatPanel`, `WeeklySteps`, `Activity`, `KpiStrip`, `Pipeline`, `DataTable`, `StatusBadge`, `AgentCard`, `Building` (maquette de l'accueil et scène de chaque projet), `ProjectCard`, `ProjectMark` (logos), `TabBar` (barre d'onglets mobile) et `ModuleIcon` (icônes des rubriques).
 3. `src/data` : les données d'exemple, leurs types et la couche d'accès.
 4. `src/lib` : petits outils (dates, initiales, couleur des statuts).
 5. `src/styles/tokens.css` : toutes les couleurs, polices et arrondis à un seul endroit.

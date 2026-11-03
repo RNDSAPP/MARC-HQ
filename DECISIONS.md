@@ -85,3 +85,23 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 51. **Points d'état à la couleur du projet** dans la barre latérale, à la demande de Marc, au lieu de l'ambre. Un projet qui attend une réponse garde un halo autour de son point, pour que l'information ne se perde pas.
 52. **Abords du bâtiment**, d'après la référence de Marc : sol gris mat avec un léger grain, routes avec lignes pointillées et passage piéton, parcelles à coins arrondis autour (ombres douces), arbres en pâte blanche, réverbères et deux voitures. La scène est plus large (`viewBox` « -80 -40 1170 730 ») ; les zones cliquables ont été recalées.
 53. **Bar du 421 garni** : une étagère de bouteilles au mur, des bouteilles, des verres et un gobelet à dés sur le comptoir.
+
+## Tableaux de bord façon scène 3D, maquette animée (3 novembre)
+
+54. **Nouveau tableau de bord de chaque projet**, d'après la référence de Marc (maison en maquette blanche) :
+    1. **En-tête** : retour vers HQ, logo et nom du projet, recherche (`⌘K`), sélecteur RNDS / Club 421 (`src/components/WorkspaceHeader.tsx`). La barre latérale et le fil d'Ariane disparaissent.
+    2. **Centre** : titre de la rubrique et ses deux actions, rubriques en pilules, puis la scène 3D de l'étage du projet seul sur sa plaque (`ProjectScene` dans `Building.tsx`). Des boutons ronds posés sur la maquette ouvrent les rubriques : le ring pour « Clubs », le mur et son logo pour « Publications », la table pour « BDE », le bar pour « Soirées »…
+    3. **Colonne de gauche** : les agents et les chiffres clés deux par deux.
+    4. **Panneau blanc à droite** : « Espace RNDS » en fin et la rubrique en gras, le grand chiffre fin avec son graphique en plateaux (`StatPanel`), puis « À faire » : la semaine en frise (aujourd'hui en relief, un point sous les jours qui ont une tâche) et les tâches en chronologie, la prochaine à faire rayée à la couleur du projet (`Activity`).
+    5. **En dessous** : le pipeline ou le tableau, avec la recherche.
+    6. **Écrans plus petits** : sous 1 280 px, le panneau passe sous la page ; sous 960 px, la colonne passe sous la scène ; sur téléphone, la barre d'onglets remplace les pilules.
+55. **Personnages animés** (CSS, désactivé si l'appareil demande moins d'animations) :
+    1. les deux boxeurs du ring se battent : chacun son tour, l'un avance et frappe, l'autre encaisse et recule, avec une étoile d'impact ;
+    2. un boxeur frappe le sac, qui balance à chaque coup ;
+    3. un personnage fait de la corde à sauter ;
+    4. les marcheurs ont un vrai pas (jambes, bras, rebond à chaque appui, vitesse régulière) ;
+    5. les autres respirent, chacun à son rythme.
+56. **Ring redessiné** : tapis noir avec liseré et le « R » de RNDS au centre, tablier noir avec le logo RNDS en blanc et son point rouge (comme « sur noir » dans la charte), poteaux ronds avec coussins de coin, trois cordes rouge, blanc, rouge. Les cordes de devant passent devant les boxeurs.
+57. **Pistes de 421** : table ronde sur pied, rebord blanc, tapis violet, gobelet ; sur la première, les trois dés d'un 421 (4, 2, 1) sont lancés, roulent et retombent en boucle.
+58. **Lumière jaune pâle** sous les lampes, et une tache de lumière douce sur le tapis du ring.
+59. **Routes et voitures** : bitume gris avec lignes de rive, ligne centrale en pointillés et passages piétons. Voitures en pâte : carrosserie, vitres teintées, pare-brise incliné, roues avec jantes, phares et feux arrière.
