@@ -5,6 +5,7 @@ import { TOOLS, shortLabel } from '../data/sections';
 import { agentStatusLabel, projectStatus } from '../lib/format';
 import { useStored } from '../hooks/useStored';
 import AccountButton from './AccountButton';
+import HqMark from './HqMark';
 import ModuleIcon from './ModuleIcon';
 import { openNewProject } from './NewProjectDialog';
 import ProjectMark from './ProjectMark';
@@ -29,7 +30,7 @@ export default function AppRail({ projects, current }: Props) {
   return (
     <nav className={`rail${wide ? ' rail--wide' : ''}`} aria-label="Navigation">
       <Link to="/" className={`rail-hq${current ? '' : ' rail-hq--active'}`} aria-label="Accueil Marc HQ" aria-current={current ? undefined : 'page'}>
-        HQ
+        <HqMark size={22} />
       </Link>
 
       <ul className="rail-projects">

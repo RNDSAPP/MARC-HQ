@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { setRemember, supabase } from '../lib/supabase';
+import HqMark from '../components/HqMark';
 import './Login.css';
 
 /** Where to come back after an e-mail link: the page Marc asked for. */
@@ -73,7 +74,7 @@ export default function Login({ refused, recovering, onSignOut, onPasswordSet }:
     <main className="login">
       <div className="login-card">
         <span className="login-logo" aria-hidden="true">
-          HQ
+          <HqMark size={32} />
         </span>
         <h1 className="login-title">
           <span className="login-light">Marc HQ</span> <span className="login-bold">RNDS et Club 421</span>

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import AccountButton from '../components/AccountButton';
 import AppRail from '../components/AppRail';
+import HqMark from '../components/HqMark';
 import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
 import { HomeTabBar } from '../components/TabBar';
@@ -30,7 +31,7 @@ export default function Home() {
         <header className="home-header">
           <div className="home-title-block">
             <span className="home-logo" aria-hidden="true">
-              HQ
+              <HqMark size={26} />
             </span>
             <div className="home-title-text">
               <span className="home-eyebrow">
