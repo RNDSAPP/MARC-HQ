@@ -306,3 +306,6 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - Revenus (Club 421) : le CA du mois en grand, la courbe des 12 derniers mois, les achats, le panier moyen et le tableau mois par mois ;
     - carte de l'accueil : le CA du mois, et la version en ligne devant le nombre de clubs ou de BDE (qui ne disparaît plus).
     Les monnaies restent séparées (« 2,10 € + 0,69 $US »). Les chiffres ont un jour de retard : Apple publie chaque rapport le lendemain.
+187. **Marc HQ dans le Dock, toujours à jour** :
+    - **Installer** : sur Mac avec Safari, menu Fichier › Ajouter au Dock ; avec Chrome ou Edge, le menu de ton rond propose « Installer Marc HQ sur cet ordinateur » ; sur iPhone, Partager › Sur l'écran d'accueil. Le menu de ton rond indique la bonne manière selon le navigateur, et n'affiche plus rien une fois l'app installée.
+    - **Mises à jour** : chaque version publiée porte un numéro (version.json, jamais gardé en cache). L'app le compare au sien quand tu reviens dessus et toutes les 10 minutes. Si tu étais parti, la nouvelle version se charge toute seule ; si tu es dessus, une bulle « Nouvelle version de Marc HQ · Mettre à jour » apparaît en haut. Rien n'est gardé en cache par l'app (le service worker ne sert qu'aux notifications), donc chaque ouverture charge la dernière version.

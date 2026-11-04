@@ -4,6 +4,7 @@ import CommandPalette from './components/CommandPalette';
 import NewProjectDialog from './components/NewProjectDialog';
 import PhaseTheme from './components/PhaseTheme';
 import ProjectStyles from './components/ProjectStyles';
+import UpdateBanner from './components/UpdateBanner';
 import Home from './pages/Home';
 import Workspace from './pages/Workspace';
 
@@ -20,17 +21,20 @@ function ProjectHome() {
 
 export default function App() {
   return (
-    <AuthGate>
-      <PhaseTheme />
-      <ProjectStyles />
-      <CommandPalette />
-      <NewProjectDialog />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/:project" element={<ProjectHome />} />
-        <Route path="/:project/:module" element={<ProjectRoute />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthGate>
+    <>
+      <UpdateBanner />
+      <AuthGate>
+        <PhaseTheme />
+        <ProjectStyles />
+        <CommandPalette />
+        <NewProjectDialog />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/:project" element={<ProjectHome />} />
+          <Route path="/:project/:module" element={<ProjectRoute />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthGate>
+    </>
   );
 }

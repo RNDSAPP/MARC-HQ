@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ChangeEvent } from 'react';
+import { useInstall } from '../lib/install';
 import { disablePush, enablePush, testPush, usePushState } from '../lib/push';
 import { useSession } from '../lib/session';
 import { supabase } from '../lib/supabase';
@@ -33,6 +34,7 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
   const box = useRef<HTMLDivElement>(null);
   const photo = session?.user.user_metadata?.avatar_url as string | undefined;
   const [push, setPush] = usePushState();
+  const install = useInstall();
   const [pushNote, setPushNote] = useState('');
 
   async function pushAction(run: () => Promise<unknown>) {
@@ -168,6 +170,14 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
           {push === 'install' && <p className="account-email">Pour les notifications sur iPhone : Partager › Sur l’écran d’accueil, puis ouvre Marc HQ depuis l’icône.</p>}
           {push === 'blocked' && <p className="account-email">Notifications bloquées : autorise-les pour Marc HQ dans les réglages du navigateur.</p>}
           {pushNote && <p className="account-email">{pushNote}</p>}
+          {/* Marc HQ as its own app: in the Dock on the Mac, on the home screen on the iPhone */}
+          {install.way === 'prompt' && (
+            <button type="button" role="menuitem" className="account-item" onClick={install.install}>
+              Installer Marc HQ sur cet ordinateur
+            </button>
+          )}
+          {install.way === 'safari-mac' && <p className="account-email">Pour l’avoir dans le Dock : dans Safari, menu Fichier › Ajouter au Dock.</p>}
+          {install.way === 'iphone' && push !== 'install' && <p className="account-email">Pour l’avoir en app : Partager › Sur l’écran d’accueil.</p>}
           <button
             type="button"
             role="menuitem"
