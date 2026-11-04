@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { useSettling } from '../../data/tools';
 import type { Task } from '../../data/types';
 import { daysFromToday, dueLabel, isoDate } from '../../lib/dates';
 import './Tools.css';
@@ -29,9 +30,12 @@ export default function TodoPage({ tasks, query, onAdd, onToggle, onRemove }: Pr
   const [due, setDue] = useState(isoDate());
   const [filter, setFilter] = useState<Filter>('open');
 
+  const { settling, tick } = useSettling(onToggle, tasks);
+
   const visible = tasks.filter((task) => query(task.text));
-  const open = visible.filter((task) => !task.done).sort((a, b) => (a.due ?? '9999').localeCompare(b.due ?? '9999'));
-  const done = visible.filter((task) => task.done);
+  // A task just ticked stays a moment in "En cours", struck through, then moves to "Faites"
+  const open = visible.filter((task) => !task.done || settling.has(task.id)).sort((a, b) => (a.due ?? '9999').localeCompare(b.due ?? '9999'));
+  const done = visible.filter((task) => task.done && !settling.has(task.id));
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -42,9 +46,9 @@ export default function TodoPage({ tasks, query, onAdd, onToggle, onRemove }: Pr
   }
 
   const row = (task: Task) => (
-    <li key={task.id} className={`task${task.done ? ' task--done' : ''}`}>
+    <li key={task.id} className={`task${task.done ? ' task--done' : ''}${settling.has(task.id) ? ' task--leaving' : ''}`}>
       <label className="task-main">
-        <input type="checkbox" className="tool-check" checked={task.done} onChange={() => onToggle(task.id)} />
+        <input type="checkbox" className="tool-check" checked={task.done} onChange={() => tick(task.id)} />
         <span className="task-text">{task.text}</span>
       </label>
       {task.due && (
@@ -93,7 +97,7 @@ export default function TodoPage({ tasks, query, onAdd, onToggle, onRemove }: Pr
           <p className="tool-empty">Tout est fait. Ajoute une tâche juste au-dessus.</p>
         ) : (
           GROUPS.map((group) => {
-            const items = open.filter(group.test);
+            const items = open.filter((task) => group.test(task));
             if (items.length === 0) return null;
             return (
               <div key={group.key} className="tool-group">

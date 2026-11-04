@@ -150,3 +150,18 @@
 .today-check:checked::after {
   transform: rotate(-45deg) scale(1);
 }
+
+/* Just ticked: it fades out, then leaves the list for "Faites" (useSettling, 0.9 s) */
+.today-item--leaving {
+  animation: task-leave 0.9s ease-in forwards;
+}
+
+@keyframes task-leave {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

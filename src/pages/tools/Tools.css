@@ -1356,3 +1356,18 @@
   align-items: center;
   align-self: flex-start;
 }
+
+/* Just ticked: it fades out, then moves to "Faites" (useSettling, 0.9 s) */
+.task--leaving {
+  animation: task-leave 0.9s ease-in forwards;
+}
+
+@keyframes task-leave {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

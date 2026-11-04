@@ -1,6 +1,6 @@
 // The project tools (To do, Notes, Idées…), one set per project. Tasks go to Supabase once Marc
 // is signed in to Marc HQ; the other tools are still kept in this browser's local storage.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { newId, useStored } from '../hooks/useStored';
 import { useSession } from '../lib/session';
 import { supabase } from '../lib/supabase';
@@ -38,6 +38,35 @@ const TASKS_CHANGED = 'marc-hq:tasks-changed';
  * site share one list (and one Google calendar); the first time, the tasks already typed in this
  * browser are brought over. Not signed in, they stay in this browser as before.
  */
+/**
+ * Tasks ticked a moment ago: they stay in place, struck through, for a short while so the tick is
+ * seen, then move to "Faites". `tick` wraps the toggle.
+ */
+export function useSettling(toggle: (id: string) => void, tasks: Task[]) {
+  const [settling, setSettling] = useState<Set<string>>(() => new Set());
+  const timers = useRef(new Map<string, number>());
+  useEffect(() => () => timers.current.forEach((timer) => window.clearTimeout(timer)), []);
+  const tick = (id: string) => {
+    const task = tasks.find((item) => item.id === id);
+    if (task && !task.done) {
+      setSettling((prev) => new Set(prev).add(id));
+      timers.current.set(
+        id,
+        window.setTimeout(() => {
+          timers.current.delete(id);
+          setSettling((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }, 900),
+      );
+    }
+    toggle(id);
+  };
+  return { settling, tick };
+}
+
 export function useTasks(project: Project) {
   const session = useSession();
   const [local, setLocal] = useStored<Task[]>(`marc-hq:${project.id}:tasks`, () => seedTasks(project));
@@ -64,20 +93,27 @@ export function useTasks(project: Project) {
     setRemote((data as TaskRow[]).map(fromRow));
   }, [session, project.id, moved, local, setMoved]);
 
-  // Load, then again when another view changed them or when coming back to the app
+  // Load, then again when another view changed them, when coming back to the app, and live when
+  // the phone or the computer changes one (Supabase realtime on the tasks table)
   useEffect(() => {
-    if (!online) {
+    if (!online || !supabase) {
       setRemote(null);
       return;
     }
+    const client = supabase;
     load();
     const onChange = (event: Event) => (event as CustomEvent<string>).detail === project.id && load();
     const onShow = () => document.visibilityState === 'visible' && load();
     window.addEventListener(TASKS_CHANGED, onChange);
     document.addEventListener('visibilitychange', onShow);
+    const live = client
+      .channel(`tasks-${project.id}-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => load())
+      .subscribe();
     return () => {
       window.removeEventListener(TASKS_CHANGED, onChange);
       document.removeEventListener('visibilitychange', onShow);
+      client.removeChannel(live);
     };
   }, [online, load, project.id]);
 

@@ -434,3 +434,6 @@ verify_jwt = false
 
 [functions.access]
 verify_jwt = false
+
+[functions.push]
+verify_jwt = false

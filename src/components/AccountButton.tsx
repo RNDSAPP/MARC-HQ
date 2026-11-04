@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ChangeEvent } from 'react';
+import { disablePush, enablePush, testPush, usePushState } from '../lib/push';
 import { useSession } from '../lib/session';
 import { supabase } from '../lib/supabase';
 import './AccountButton.css';
@@ -31,6 +32,17 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
   const picker = useRef<HTMLInputElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const photo = session?.user.user_metadata?.avatar_url as string | undefined;
+  const [push, setPush] = usePushState();
+  const [pushNote, setPushNote] = useState('');
+
+  async function pushAction(run: () => Promise<unknown>) {
+    setPushNote('');
+    try {
+      await run();
+    } catch {
+      setPushNote('Ça n’a pas marché, réessaie dans un moment.');
+    }
+  }
 
   // Close the menu with a tap elsewhere or Escape
   useEffect(() => {
@@ -120,6 +132,35 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
             </form>
           )}
           {saved && <p className="account-email">{saved}</p>}
+          {/* Notifications on this device: an agent waits for Marc, finishes, or completes a request */}
+          {session && push === 'off' && (
+            <button type="button" role="menuitem" className="account-item" onClick={() => pushAction(async () => setPush(await enablePush()))}>
+              Activer les notifications
+            </button>
+          )}
+          {session && push === 'on' && (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                className="account-item"
+                onClick={() =>
+                  pushAction(async () => {
+                    const sent = await testPush();
+                    setPushNote(sent > 0 ? 'Notification envoyée.' : 'Aucun appareil n’a reçu le test.');
+                  })
+                }
+              >
+                Tester les notifications
+              </button>
+              <button type="button" role="menuitem" className="account-item" onClick={() => pushAction(async () => setPush(await disablePush()))}>
+                Couper les notifications ici
+              </button>
+            </>
+          )}
+          {push === 'install' && <p className="account-email">Pour les notifications sur iPhone : Partager › Sur l’écran d’accueil, puis ouvre Marc HQ depuis l’icône.</p>}
+          {push === 'blocked' && <p className="account-email">Notifications bloquées : autorise-les pour Marc HQ dans les réglages du navigateur.</p>}
+          {pushNote && <p className="account-email">{pushNote}</p>}
           <button
             type="button"
             role="menuitem"
