@@ -173,3 +173,18 @@
 .activity-box:checked::after {
   transform: rotate(-45deg) scale(1);
 }
+
+/* Just ticked: it fades, then leaves the card (useSettling, 0.9 s) */
+.activity-card--leaving {
+  animation: activity-leave 0.9s ease-in forwards;
+}
+
+@keyframes activity-leave {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useSettling } from '../data/tools';
 import type { Task } from '../data/types';
 import { dayLabel, daysFromToday, dueLabel, fromIsoDate, weekDays } from '../lib/dates';
 import './Activity.css';
@@ -21,8 +22,10 @@ export default function Activity({ tasks, onToggle, allHref }: Props) {
       .filter((task) => task.due && Math.abs(daysFromToday(task.due)) < 7)
       .map((task) => (fromIsoDate(task.due as string).getDay() + 6) % 7),
   );
-  // Undated tasks last, then by date; done ones stay visible (struck through) until the page is left.
-  const sorted = [...tasks].sort((a, b) => Number(a.done) - Number(b.done) || (a.due ?? '9999').localeCompare(b.due ?? '9999'));
+  // Only what is left to do, by date, undated last. A task just ticked stays a moment, struck
+  // through, then disappears (it is in "Faites" on the To do page).
+  const { settling, tick } = useSettling(onToggle, tasks);
+  const sorted = tasks.filter((task) => !task.done || settling.has(task.id)).sort((a, b) => (a.due ?? '9999').localeCompare(b.due ?? '9999'));
   const shown = sorted.slice(0, SHOWN);
   const next = sorted.find((task) => !task.done);
 
@@ -56,8 +59,8 @@ export default function Activity({ tasks, onToggle, allHref }: Props) {
           {shown.map((task) => (
             <li key={task.id} className="activity-row">
               <span className="activity-when">{task.due ? dueLabel(task.due) : '—'}</span>
-              <label className={`activity-card${task === next ? ' activity-card--next' : ''}${task.done ? ' activity-card--done' : ''}`}>
-                <input type="checkbox" className="activity-box" checked={task.done} onChange={() => onToggle(task.id)} />
+              <label className={`activity-card${task === next ? ' activity-card--next' : ''}${task.done ? ' activity-card--done' : ''}${settling.has(task.id) ? ' activity-card--leaving' : ''}`}>
+                <input type="checkbox" className="activity-box" checked={task.done} onChange={() => tick(task.id)} />
                 <span className="activity-text">{task.text}</span>
               </label>
             </li>

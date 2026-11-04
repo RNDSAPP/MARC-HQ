@@ -16,6 +16,29 @@ const VIEWS = [
 /** The longest description each network takes. */
 const LIMITS: Record<string, number> = { Instagram: 2200, TikTok: 4000, YouTube: 5000 };
 
+/** Two kinds of templates: the description under the post, and the title shown on the video. */
+const TYPES = [
+  { key: 'description', label: 'Descriptions' },
+  { key: 'titre', label: 'Titres vidéo' },
+] as const;
+type TemplateType = (typeof TYPES)[number]['key'];
+export const typeOf = (record: RecordRow): TemplateType => (record.data.type === 'titre' ? 'titre' : 'description');
+
+/** A title on screen reads in about two seconds: past this, it gets long. */
+const TITLE_LIMIT = 70;
+/** The usual looks of a text on a TikTok or a Reel. */
+const STYLES = ['Contour', 'Fond blanc', 'Fond noir'] as const;
+
+/** The title as it will look in the middle of the video (9:16, white bold text). */
+export function TitlePreview({ text, look, small = false }: { text: string; look?: string; small?: boolean }) {
+  const style = look === 'Fond blanc' ? 'white' : look === 'Fond noir' ? 'black' : 'outline';
+  return (
+    <div className={`title-preview${small ? ' title-preview--small' : ''}`} aria-hidden="true">
+      <span className={`title-preview-text title-preview-text--${style}`}>{text || 'Ton texte ici'}</span>
+    </div>
+  );
+}
+
 /** Copies a template's text; true when it went through. */
 export async function copyText(text: string) {
   try {
@@ -34,7 +57,8 @@ export function useTemplates(projectId: string) {
 }
 
 /**
- * Modèles: the project's ready-made descriptions (captions, hashtags, calls to action) for
+ * Modèles: the project's ready-made descriptions (captions, hashtags, calls to action) and video
+ * titles (the text put in the middle of a TikTok or a Reel, previewed as it will look) for
  * Instagram, TikTok or YouTube. One tap copies one, ready to paste in the app. Kept in Supabase,
  * the same on the phone and the computer.
  */
@@ -49,22 +73,27 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
   const [copied, setCopied] = useState('');
   const [busy, setBusy] = useState(false);
   const [view, setView] = useView('modeles', VIEWS);
+  const [type, setType] = useView('modeles-type', TYPES);
+  const [look, setLook] = useState<string>('Contour');
+  const isTitle = type === 'titre';
 
-  const visible = templates.filter((record) => (filter === 'Tous' || record.data.network === filter || record.data.network === 'Tous') && query(`${record.data.name} ${record.data.text ?? ''}`));
-  const limit = LIMITS[network];
+  const ofType = templates.filter((record) => typeOf(record) === type);
+  const visible = ofType.filter((record) => (filter === 'Tous' || record.data.network === filter || record.data.network === 'Tous') && query(`${record.data.name} ${record.data.text ?? ''}`));
+  const limit = isTitle ? TITLE_LIMIT : LIMITS[network];
 
   function reset() {
     setEditing(null);
     setName('');
     setNetwork('Tous');
     setText('');
+    setLook('Contour');
   }
 
   async function save(event: FormEvent) {
     event.preventDefault();
     if (!name.trim() || !text.trim()) return;
     setBusy(true);
-    const failed = await saveRecord(project.id, 'modele', { name: name.trim(), network, text: text.trim() }, editing?.id);
+    const failed = await saveRecord(project.id, 'modele', { name: name.trim(), network, text: text.trim(), type, ...(isTitle ? { look } : {}) }, editing?.id);
     setBusy(false);
     setMessage(failed || (editing ? `Modèle modifié : ${name.trim()}.` : `Modèle ajouté : ${name.trim()}.`));
     if (!failed) reset();
@@ -82,6 +111,8 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
     setName(record.data.name ?? '');
     setNetwork(record.data.network ?? 'Tous');
     setText(record.data.text ?? '');
+    setLook(record.data.look ?? 'Contour');
+    setType(typeOf(record));
     setMessage('');
     document.getElementById('template-name')?.focus();
   };
@@ -90,12 +121,13 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
     setMessage(failed || `Modèle supprimé : ${record.data.name}.`);
   };
   const card = (record: RecordRow) => (
-    <li key={record.id} className="tool-card template">
+    <li key={record.id} className={`tool-card template${typeOf(record) === 'titre' ? ' template--title' : ''}`}>
+      {typeOf(record) === 'titre' && <TitlePreview text={record.data.text ?? ''} look={record.data.look} />}
       <div className="template-head">
         <span className="template-name">{record.data.name}</span>
         {record.data.network && record.data.network !== 'Tous' && <span className="veille-network">{record.data.network}</span>}
       </div>
-      <p className="template-body">{record.data.text}</p>
+      {typeOf(record) === 'description' && <p className="template-body">{record.data.text}</p>}
       <div className="template-foot">
         <span className="template-count">{(record.data.text ?? '').length} caractères</span>
         <span className="template-form-actions">
@@ -119,6 +151,21 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
         <h1 id="tool-title" className="tool-title">
           <span className="tool-title-light">Modèles</span> <span className="tool-title-bold">{templates.length}</span>
         </h1>
+        <div className="tool-segment" role="group" aria-label="Sorte de modèle">
+          {TYPES.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              aria-pressed={type === item.key}
+              onClick={() => {
+                setType(item.key);
+                if (editing && typeOf(editing) !== item.key) reset();
+              }}
+            >
+              {item.label} <span className="tool-segment-count">{templates.filter((record) => typeOf(record) === item.key).length || ''}</span>
+            </button>
+          ))}
+        </div>
         <div className="tool-head-actions">
           <ViewSwitch views={VIEWS} value={view} onChange={setView} />
           {view !== 'colonnes' && (
@@ -138,7 +185,7 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
           <label className="visually-hidden" htmlFor="template-name">
             Nom du modèle
           </label>
-          <input id="template-name" className="tool-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom du modèle (ex. Reel entraînement)" autoComplete="off" />
+          <input id="template-name" className="tool-input" value={name} onChange={(e) => setName(e.target.value)} placeholder={isTitle ? 'Nom (ex. Accroche erreurs)' : 'Nom du modèle (ex. Reel entraînement)'} autoComplete="off" />
           <label className="visually-hidden" htmlFor="template-network">
             Réseau
           </label>
@@ -149,22 +196,37 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
               </option>
             ))}
           </select>
+          {isTitle && (
+            <>
+              <label className="visually-hidden" htmlFor="template-look">
+                Style du texte
+              </label>
+              <select id="template-look" className="tool-input template-network" value={look} onChange={(e) => setLook(e.target.value)}>
+                {STYLES.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
         <label className="visually-hidden" htmlFor="template-text">
-          Texte de la description
+          {isTitle ? 'Texte à l’écran' : 'Texte de la description'}
         </label>
         <textarea
           id="template-text"
-          className="tool-input template-text"
+          className={`tool-input template-text${isTitle ? ' template-text--short' : ''}`}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={'Ta description : accroche, texte, appel à l’action, hashtags…'}
-          rows={5}
+          placeholder={isTitle ? 'Le texte au milieu de la vidéo (ex. 3 erreurs qui ruinent ton jab)' : 'Ta description : accroche, texte, appel à l’action, hashtags…'}
+          rows={isTitle ? 2 : 5}
         />
+        {isTitle && <TitlePreview text={text} look={look} small />}
         <div className="template-form-foot">
           <span className={`template-count${limit && text.length > limit ? ' template-count--over' : ''}`}>
             {text.length}
-            {limit ? ` / ${limit}` : ''} caractères
+            {limit ? ` / ${limit}` : ''} caractères{isTitle ? ' · court = lisible en 2 secondes' : ''}
           </span>
           <span className="template-form-actions">
             {editing && (
@@ -187,7 +249,11 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
 
       {visible.length === 0 ? (
         <p className="tool-empty">
-          {templates.length === 0 ? 'Pas encore de modèle. Ajoute tes descriptions types juste au-dessus : tu les copieras en un appui au moment de publier.' : 'Aucun modèle pour ce réseau.'}
+          {ofType.length === 0
+            ? isTitle
+              ? 'Pas encore de titre. Ajoute tes textes d’accroche juste au-dessus : tu vois comment ils rendent au milieu de la vidéo, et tu les copies en un appui.'
+              : 'Pas encore de modèle. Ajoute tes descriptions types juste au-dessus : tu les copieras en un appui au moment de publier.'
+            : 'Aucun modèle pour ce réseau.'}
         </p>
       ) : view === 'liste' ? (
         <ul className="tool-card template-rows">
@@ -238,14 +304,14 @@ export function TemplatesWidget({ project }: { project: Project }) {
     <section className="templates-widget" aria-labelledby="templates-widget-title">
       <div className="templates-widget-head">
         <h2 id="templates-widget-title" className="templates-widget-title">
-          Modèles de description
+          Modèles de description et de titres
         </h2>
         <Link className="templates-widget-all" to={`/${project.id}/modeles`}>
           {templates.length ? 'Tous les modèles' : 'Ajouter un modèle'} →
         </Link>
       </div>
       {templates.length === 0 ? (
-        <p className="templates-widget-empty">Range ici tes descriptions types (accroche, hashtags, appel à l’action) pour les copier en un appui.</p>
+        <p className="templates-widget-empty">Range ici tes descriptions types et tes titres à mettre au milieu des vidéos, pour les copier en un appui.</p>
       ) : (
         <ul className="templates-widget-list">
           {templates.map((record) => (
@@ -260,7 +326,10 @@ export function TemplatesWidget({ project }: { project: Project }) {
                   }
                 }}
               >
-                <span className="templates-widget-name">{record.data.name}</span>
+                <span className="templates-widget-name">
+                  {record.data.name}
+                  {typeOf(record) === 'titre' && <span className="veille-network">Titre</span>}
+                </span>
                 <span className="templates-widget-text">{record.data.text}</span>
                 <span className="templates-widget-copy">{copied === record.id ? 'Copié ✓' : 'Copier'}</span>
               </button>
