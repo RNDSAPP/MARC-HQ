@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { Project, ProjectId } from '../data/types';
 import { agentStatusLabel, compact, projectStatus } from '../lib/format';
+import grain from '../assets/grain.png';
 import MapViewport from './MapViewport';
 import ModuleIcon from './ModuleIcon';
 import { useStored } from '../hooks/useStored';
@@ -346,7 +347,7 @@ export function Tree({ s, t, size = 1, base = 6, origin = SITE_GROUND }: { s: nu
   const k = size;
   return (
     <g>
-      <ellipse cx={x + 8 * k} cy={y + 2} rx={16 * k} ry={6 * k} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <ellipse cx={x + 8 * k} cy={y + 2} rx={16 * k} ry={6 * k} fill="url(#bld-soft-2E3470)" fillOpacity="0.16" />
       <rect x={x - 1.6 * k} y={y - 18 * k} width={3.2 * k} height={18 * k} rx={1.6 * k} fill="#D2CABF" />
       {/* Crowns in a light, soft green */}
       {vinyl((f) => <circle cx={x - 6 * k} cy={y - 22 * k} r={8 * k} fill={f} />, '#CFE3C3')}
@@ -362,7 +363,7 @@ export function Lamp({ s, t, origin = SITE_GROUND }: { s: number; t: number; ori
   const y = y0 - 6;
   return (
     <g>
-      <ellipse cx={x + 3} cy={y + 1} rx="5" ry="2" fill="#2E3470" fillOpacity="0.15" filter="url(#bld-blur-s)" />
+      <ellipse cx={x + 3} cy={y + 1} rx="5" ry="2" fill="url(#bld-soft-2E3470)" fillOpacity="0.15" />
       <rect x={x - 1} y={y - 44} width="2" height="44" rx="1" fill="#BBC0D6" />
       <path d={`M${x},${y - 43} q -7,-3 -12,2`} fill="none" stroke="#BBC0D6" strokeWidth="2" strokeLinecap="round" />
       <ellipse cx={x - 12} cy={y - 40} rx="4.5" ry="1.8" fill="#E7E9F3" stroke="#C6CADF" strokeWidth="0.6" />
@@ -562,14 +563,14 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
     <g className={`fig${kind}${action}${nap ? ' fig--nap' : ''}`} style={motion}>
     {nap && (
       <g>
-        <ellipse cx={x + 2} cy={y + 1} rx="11" ry="3.4" fill="#2E3470" fillOpacity="0.18" filter="url(#bld-blur-s)" />
+        <ellipse cx={x + 2} cy={y + 1} rx="11" ry="3.4" fill="url(#bld-soft-2E3470)" fillOpacity="0.18" />
         <rect x={x - 9} y={y - 9} width="18" height="9" rx="2" fill="#D8DBEC" />
         <rect x={x - 9} y={y - 11} width="18" height="3" rx="1.5" fill="#F4F4F4" />
       </g>
     )}
     <g className="fig-body">
     <g transform={`translate(${x.toFixed(1)} ${(y - (nap ? 6 : 0)).toFixed(1)}) scale(0.92${nap ? ' 0.86' : ''}) rotate(${nap ? -6 : 0})`}>
-      <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="#2E3470" fillOpacity="0.2" filter="url(#bld-blur-s)" />
+      <ellipse cx="2.5" cy="0" rx="10" ry="3.2" fill="url(#bld-soft-2E3470)" fillOpacity="0.2" />
       <g>
 
       {look.head === 'long' && vinyl((f) => <rect x="-9.6" y="-40" width="19.2" height="25" rx="8" fill={f} />, look.headColor)}
@@ -664,7 +665,7 @@ export function Person({ origin, s, t, look, walk, fight, rope, cheer, pose, run
       )}
 
       {/* Shadow of the head on the shoulders */}
-      <ellipse cx="0.8" cy="-24.6" rx="7" ry="2.2" fill="#2E3470" fillOpacity="0.22" filter="url(#bld-blur-s)" />
+      <ellipse cx="0.8" cy="-24.6" rx="7" ry="2.2" fill="url(#bld-soft-2E3470)" fillOpacity="0.22" />
 
       {/* Head: ears, face, hair or hat */}
       {vinyl((f) => <circle cx="-9" cy="-32.5" r="3.5" fill={f} />, shade(look.skin, 0.04))}
@@ -858,7 +859,7 @@ function Ring({ origin, back = false }: { origin: Point; back?: boolean }) {
       {/* Canvas */}
       <polygon points={solid(o, [[s0, t0, h], [s1, t0, h], [s1, t1, h], [s0, t1, h]])} fill="url(#bld-canvas)" />
       <polygon points={solid(o, [[s0 + 7, t0 + 7, h], [s1 - 7, t0 + 7, h], [s1 - 7, t1 - 7, h], [s0 + 7, t1 - 7, h]])} fill="none" stroke="#3C3C3E" strokeWidth="0.8" />
-      <ellipse cx={cx} cy={cy - h} rx="74" ry="40" fill="#FFE477" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <ellipse cx={cx} cy={cy - h} rx="74" ry="40" fill="url(#bld-soft-FFE477)" fillOpacity="0.16" />
       {/* The RNDS "R" painted in the middle of the canvas */}
       <g transform={`matrix(0.866 0.5 -0.866 0.5 ${cx} ${cy - h})`}>
         <g transform="scale(0.042) translate(-471 -471)" opacity="0.92">
@@ -911,7 +912,7 @@ function DiceTable({ cx, cy, rx, ry, rolling = false }: { cx: number; cy: number
   const felt = 0.74;
   return (
     <g>
-      <ellipse cx={cx + 4} cy={cy + 28} rx={rx * 0.7} ry={ry * 0.45} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <ellipse cx={cx + 4} cy={cy + 28} rx={rx * 0.7} ry={ry * 0.45} fill="url(#bld-soft-2E3470)" fillOpacity="0.16" />
       <ellipse cx={cx} cy={cy + 26} rx={rx * 0.32} ry={ry * 0.22} fill="#C7CBE0" />
       <rect x={cx - 2.6} y={cy + 4} width="5.2" height="22" rx="2.6" fill="url(#bld-post)" />
       {/* Thickness of the top, then the white rim and the felt */}
@@ -1005,7 +1006,7 @@ function DjBooth({ origin: C }: { origin: Point }) {
   return (
     <g>
       {/* Speaker */}
-      <ellipse cx={iso(C, 312, 196)[0]} cy={iso(C, 312, 196)[1]} rx="16" ry="6" fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+      <ellipse cx={iso(C, 312, 196)[0]} cy={iso(C, 312, 196)[1]} rx="16" ry="6" fill="url(#bld-soft-2E3470)" fillOpacity="0.16" />
       <Crate o={C} s0={302} s1={316} t0={186} t1={198} h={32} top="#3A3A3D" front="#2B2B2E" side="#1F1F21" />
       {[9, 23].map((h) => {
         const [x, y] = iso(C, 309, 198);
@@ -1206,16 +1207,16 @@ function NightLights({ only }: { only?: ProjectId }) {
         <>
           <Neon origin={R} color={RNDS} />
           <polygon points="612,98 640,98 742,255 626,322 510,255" fill="url(#bld-lamp-night)" />
-          <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="#FFCF5C" fillOpacity="0.28" filter="url(#bld-blur-m)" />
-          <ellipse cx="626" cy="98" rx="12" ry="4" fill="#FFF3B0" filter="url(#bld-blur-s)" />
+          <ellipse cx={ringX} cy={ringY - 16} rx="74" ry="40" fill="url(#bld-soft-FFCF5C)" fillOpacity="0.28" />
+          <ellipse cx="626" cy="98" rx="12" ry="4" fill="url(#bld-soft-FFF3B0)" />
         </>
       )}
       {only !== 'rnds' && (
         <>
           <Neon origin={C} color={CLUB} />
           <polygon points="378,362 406,362 456,400 392,438 328,400" fill="url(#bld-lamp-night)" />
-          <ellipse cx="392" cy="400" rx="70" ry="38" fill="#FFCF5C" fillOpacity="0.25" filter="url(#bld-blur-m)" />
-          <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="#FFF3B0" filter="url(#bld-blur-s)" />
+          <ellipse cx="392" cy="400" rx="70" ry="38" fill="url(#bld-soft-FFCF5C)" fillOpacity="0.25" />
+          <ellipse cx="392" cy="362" rx="10" ry="3.5" fill="url(#bld-soft-FFF3B0)" />
           {/* The bottles on the bar shelf catch the light */}
           <polygon points={solid(C, [[10, 48, 50], [14, 48, 50], [14, 160, 50], [10, 160, 50]])} fill="#FFE7A0" fillOpacity="0.5" filter="url(#bld-blur-s)" />
         </>
@@ -1294,6 +1295,9 @@ function Runners() {
     </g>
   );
 }
+
+/** The colours of the soft shadows and light pools (one radial fade each, in SceneDefs). */
+const SOFT_COLORS = ['#2E3470', '#9DB4FF', '#FFCF5C', '#FFE1A0', '#FFE477', '#FFF1CC', '#FFF3B0', '#FFF4CC', '#FFFFFF'];
 
 /** Gradients, filters and clips shared by the scenes. */
 export function SceneDefs() {
@@ -1407,11 +1411,20 @@ export function SceneDefs() {
           <stop offset="0" stopColor="#F1F2F8" />
           <stop offset="1" stopColor="#DEE1EE" />
         </radialGradient>
-        {/* Fine grain over the whole scene, like a render */}
-        <filter id="bld-grain" x="0" y="0" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
-          <feColorMatrix type="matrix" values="0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0 0.07" />
-        </filter>
+        {/* Fine grain over the whole scene, like a render: a ready-made tile (src/assets/grain.png),
+            not a noise filter, which the browser recomputed under every moving figure */}
+        <pattern id="bld-grain" width="128" height="128" patternUnits="userSpaceOnUse">
+          <image href={grain} width="128" height="128" />
+        </pattern>
+        {/* Soft shadows and light pools: a radial fade per colour instead of a live blur, so a
+            figure that moves does not make the browser blur its shadow again at every frame */}
+        {SOFT_COLORS.map((color) => (
+          <radialGradient key={color} id={`bld-soft-${color.slice(1)}`}>
+            <stop offset="0" stopColor={color} />
+            <stop offset="0.55" stopColor={color} stopOpacity="0.8" />
+            <stop offset="1" stopColor={color} stopOpacity="0" />
+          </radialGradient>
+        ))}
         <filter id="bld-blur-l" x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="14" />
         </filter>
@@ -1479,8 +1492,8 @@ function RndsFloorArt() {
 
 
       {/* Punching bags */}
-      <ellipse cx="812" cy="276" rx="9" ry="3.5" fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-s)" />
-      <ellipse cx="846" cy="296" rx="9" ry="3.5" fill="#2E3470" fillOpacity="0.12" filter="url(#bld-blur-s)" />
+      <ellipse cx="812" cy="276" rx="9" ry="3.5" fill="url(#bld-soft-2E3470)" fillOpacity="0.12" />
+      <ellipse cx="846" cy="296" rx="9" ry="3.5" fill="url(#bld-soft-2E3470)" fillOpacity="0.12" />
       {/* This one swings each time the boxer beside it lands a punch */}
       <g className="bag-swing">
         <line x1="808" y1="192" x2="808" y2="228" stroke="#B3B8CF" strokeWidth="2" />
@@ -1661,7 +1674,7 @@ function BuildingArt() {
         <Runners />
       </g>
       <NightLights />
-      <rect x="-80" y="-40" width="1170" height="730" filter="url(#bld-grain)" />
+      <rect x="-80" y="-40" width="1170" height="730" fill="url(#bld-grain)" />
     </svg>
   );
 }
@@ -1886,7 +1899,7 @@ function EmptyLot({ project }: { project: Project }) {
           <Tree origin={o} s={-4} t={20} size={0.8} base={0} />
           <Tree origin={o} s={310} t={-6} size={0.7} base={0} />
           <SkyTint box={box} lit={[plate]} />
-          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} filter="url(#bld-grain)" />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="url(#bld-grain)" />
         </svg>
       </MapViewport>
       <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
@@ -1915,7 +1928,7 @@ function FloorScene({ project, current }: { project: Project; current: string })
         <g className="night-lights">
           <Neighbourhood ground={[ox, oy + 30]} part="lights" />
         </g>
-        <rect x={vx} y={vy} width={vw} height={vh} filter="url(#bld-grain)" />
+        <rect x={vx} y={vy} width={vw} height={vh} fill="url(#bld-grain)" />
       </svg>
       <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
       <ul className="scene-spots" aria-label={`Rubriques de ${project.name} sur la maquette`}>

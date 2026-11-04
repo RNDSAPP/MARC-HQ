@@ -109,7 +109,7 @@ function SceneFrame({ project, box: plateBox, art, lights, lit, items, title, on
               {lights}
               {hood && <Neighbourhood ground={hood.ground} size={hood.size} part="lights" />}
             </g>
-            <rect x={x} y={y} width={w} height={h} filter="url(#bld-grain)" />
+            <rect x={x} y={y} width={w} height={h} fill="url(#bld-grain)" />
           </svg>
         </MapViewport>
         <PhaseButton choice={choice} phase={phase} onChange={setChoice} />
@@ -884,9 +884,9 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
       lights={
         <>
           {/* The counter lamp, a light over the vault and one on this month's safe */}
-          <ellipse cx={iso(P, 130, 218)[0]} cy={iso(P, 130, 218)[1] - 30} rx="26" ry="14" fill="#FFE1A0" fillOpacity="0.45" filter="url(#bld-blur-m)" />
-          <ellipse cx={iso(o, k, 116)[0] + 10} cy={iso(o, k, 116)[1] - b - 66} rx="60" ry="56" fill="#FFF1CC" fillOpacity="0.22" filter="url(#bld-blur-m)" />
-          {now && <ellipse cx={iso(P, now.s + w / 2, now.t + d)[0]} cy={iso(P, now.s + w / 2, now.t + d)[1] - now.h / 2} rx="40" ry="44" fill="#FFF1CC" fillOpacity="0.2" filter="url(#bld-blur-m)" />}
+          <ellipse cx={iso(P, 130, 218)[0]} cy={iso(P, 130, 218)[1] - 30} rx="26" ry="14" fill="url(#bld-soft-FFE1A0)" fillOpacity="0.45" />
+          <ellipse cx={iso(o, k, 116)[0] + 10} cy={iso(o, k, 116)[1] - b - 66} rx="60" ry="56" fill="url(#bld-soft-FFF1CC)" fillOpacity="0.22" />
+          {now && <ellipse cx={iso(P, now.s + w / 2, now.t + d)[0]} cy={iso(P, now.s + w / 2, now.t + d)[1] - now.h / 2} rx="40" ry="44" fill="url(#bld-soft-FFF1CC)" fillOpacity="0.2" />}
         </>
       }
       art={
@@ -1087,7 +1087,7 @@ function Softbox({ o, s, t, b }: { o: Point; s: number; t: number; b: number }) 
   const foot = y - b;
   return (
     <g>
-      <ellipse cx={x + 3} cy={foot + 2} rx="9" ry="3.4" fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+      <ellipse cx={x + 3} cy={foot + 2} rx="9" ry="3.4" fill="url(#bld-soft-2E3470)" fillOpacity="0.14" />
       <line x1={x} y1={foot} x2={x - 7} y2={foot + 5} stroke="#8E93AB" strokeWidth="1.4" />
       <line x1={x} y1={foot} x2={x + 7} y2={foot + 5} stroke="#8E93AB" strokeWidth="1.4" />
       <line x1={x} y1={foot} x2={x} y2={foot - 58} stroke="#8E93AB" strokeWidth="1.6" />
@@ -1227,7 +1227,7 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
             const waiting = normalize(post.status).startsWith('a ');
             return (
               <g key={post.title}>
-                <ellipse cx={x} cy={y - b} rx="10" ry="4" fill="#2E3470" fillOpacity="0.14" filter="url(#bld-blur-s)" />
+                <ellipse cx={x} cy={y - b} rx="10" ry="4" fill="url(#bld-soft-2E3470)" fillOpacity="0.14" />
                 <line x1={x} y1={y - b} x2={x} y2={y - b - 26} stroke="#CDD1E5" strokeWidth="1.5" />
                 <rect x={x - w / 2} y={y - b - 26 - h} width={w} height={h} rx="6" fill="#1C1C1E" stroke={waiting ? '#D97757' : '#E1E3F0'} strokeWidth="1.6" />
                 <rect x={x - w / 2 + 3} y={y - b - 23 - h} width={w - 6} height={h - 14} rx="4" className="lot-cap" opacity="0.85" />
@@ -1243,9 +1243,9 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
       lights={
         <>
           {/* The softboxes and the iMac screen glow a little at night */}
-          <ellipse cx={iso(o, 70, 96)[0]} cy={iso(o, 70, 96)[1] - b - 64} rx="22" ry="18" fill="#FFFFFF" fillOpacity="0.45" filter="url(#bld-blur-m)" />
-          <ellipse cx={iso(o, 176, 250)[0]} cy={iso(o, 176, 250)[1] - b - 64} rx="22" ry="18" fill="#FFFFFF" fillOpacity="0.45" filter="url(#bld-blur-m)" />
-          <ellipse cx={mx + 18} cy={my - b - 64} rx="26" ry="14" fill="#9DB4FF" fillOpacity="0.35" filter="url(#bld-blur-m)" />
+          <ellipse cx={iso(o, 70, 96)[0]} cy={iso(o, 70, 96)[1] - b - 64} rx="22" ry="18" fill="url(#bld-soft-FFFFFF)" fillOpacity="0.45" />
+          <ellipse cx={iso(o, 176, 250)[0]} cy={iso(o, 176, 250)[1] - b - 64} rx="22" ry="18" fill="url(#bld-soft-FFFFFF)" fillOpacity="0.45" />
+          <ellipse cx={mx + 18} cy={my - b - 64} rx="26" ry="14" fill="url(#bld-soft-9DB4FF)" fillOpacity="0.35" />
         </>
       }
     />
@@ -1357,7 +1357,7 @@ export function FollowersScene({ project, module, onSelect }: { project: Project
         <>
           {stadiums.map((st) => {
             const pitch = oval(st.at, st.r * 0.56, 4);
-            return <ellipse key={st.name} {...pitch} fill="#FFF4CC" fillOpacity="0.35" filter="url(#bld-blur-m)" />;
+            return <ellipse key={st.name} {...pitch} fill="url(#bld-soft-FFF4CC)" fillOpacity="0.35" />;
           })}
         </>
       }
@@ -1387,7 +1387,7 @@ export function FollowersScene({ project, module, onSelect }: { project: Project
             const [bx, by] = iso(P, cs - r * 0.62, ct - r * 0.62);
             return (
               <g key={st.name}>
-                <ellipse cx={base.cx + 8} cy={base.cy + 6} rx={base.rx} ry={base.ry} fill="#2E3470" fillOpacity="0.16" filter="url(#bld-blur-m)" />
+                <ellipse cx={base.cx + 8} cy={base.cy + 6} rx={base.rx} ry={base.ry} fill="url(#bld-soft-2E3470)" fillOpacity="0.16" />
                 {/* Back floodlights, the scoreboard, then the bowl */}
                 {[200, 250].map(mast)}
                 <line x1={bx - 16} y1={by - H + 4} x2={bx - 16} y2={by - H - 18} stroke="#B9BED3" strokeWidth="1.6" />
