@@ -437,3 +437,9 @@ verify_jwt = false
 
 [functions.push]
 verify_jwt = false
+
+[functions.tick]
+verify_jwt = false
+
+[functions.appstore-events]
+verify_jwt = false

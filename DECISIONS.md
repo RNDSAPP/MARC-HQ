@@ -292,3 +292,10 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - en-têtes de protection sur Vercel (le site ne peut pas être affiché dans un autre site, les scripts et connexions sont limités à Marc HQ, Supabase et Google Fonts) ;
     - les fichiers de clés locaux (.env.supabase, .env.local) ne sont plus lisibles que par ton compte Mac.
 182. **Notifications branchées** : les trois clés (paire Web Push et clé du déclencheur) sont dans le coffre (Vault) de Supabase ; la copie de travail sur le Mac a été effacée. La fonction `push` refuse tout appel sans session ou sans la bonne clé.
+183. **Nouvelles notifications** (fonction `tick`, appelée chaque heure par pg_cron) :
+    - **8 h** : les tâches du jour de chaque projet (avec celles en retard) ;
+    - **à partir de 18 h** : chaque soirée prévue le lendemain (nom, BDE, statut) ;
+    - **nouvel avis App Store** dès qu'il apparaît, avec ses étoiles (les avis déjà là au branchement ne sont pas renvoyés) ;
+    - **ventes de la veille** dès qu'Apple publie son rapport (en général l'après-midi) : téléchargements, achats et revenus de chaque app, avec le total du mois ; le 1er du mois, le CA du mois terminé. Il faut le numéro de fournisseur (vendor number) d'App Store Connect, rangé dans le coffre Supabase ;
+    - rien n'est envoyé deux fois (journal `push_log`).
+184. **Paiements en direct** (fonction `appstore-events`) : Apple prévient Marc HQ à chaque achat, abonnement, renouvellement ou remboursement (App Store Server Notifications v2). Chaque message est vérifié avec la bibliothèque officielle d'Apple contre son certificat racine (Apple Root CA G3, inclus dans le code) ; un faux message est refusé. À brancher dans App Store Connect, pour chaque app : adresse https://gxmjgtcylwfdyyspaegt.supabase.co/functions/v1/appstore-events, version 2, en production et en sandbox.

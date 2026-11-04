@@ -1,26 +1,8 @@
 // App Store Connect for Marc HQ: the app's latest versions and its written reviews (overview), and
 // answering a review (reply). The API key stays in the Supabase secrets; each project is tied to
 // its app by ASC_APPS ("rnds:123,club421:456").
+import { API, appOf, token } from '../_shared/asc.ts';
 import { cors, json, safe, signedIn } from '../_shared/common.ts';
-
-const API = 'https://api.appstoreconnect.apple.com/v1';
-
-const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const text64 = (value: object) => b64url(new TextEncoder().encode(JSON.stringify(value)));
-
-/** A 15-minute App Store Connect token, signed with the .p8 key (ES256). */
-async function token() {
-  const pem = atob(Deno.env.get('ASC_PRIVATE_KEY_B64') ?? '');
-  const der = Uint8Array.from(atob(pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '')), (c) => c.charCodeAt(0));
-  const key = await crypto.subtle.importKey('pkcs8', der, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
-  const now = Math.floor(Date.now() / 1000);
-  const unsigned = `${text64({ alg: 'ES256', kid: Deno.env.get('ASC_KEY_ID'), typ: 'JWT' })}.${text64({ iss: Deno.env.get('ASC_ISSUER_ID'), iat: now, exp: now + 900, aud: 'appstoreconnect-v1' })}`;
-  const signature = new Uint8Array(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(unsigned)));
-  return `${unsigned}.${b64url(signature)}`;
-}
-
-const appOf = (project: string) =>
-  Object.fromEntries((Deno.env.get('ASC_APPS') ?? '').split(',').map((pair) => pair.split(':').map((part) => part.trim())))[project] as string | undefined;
 
 type Resource = { id: string; type: string; attributes: Record<string, unknown>; relationships?: Record<string, { data?: { id: string } | null }> };
 
