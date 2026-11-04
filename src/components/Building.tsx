@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import type { Project, ProjectId } from '../data/types';
 import { agentStatusLabel, compact, projectStatus } from '../lib/format';
 import grain from '../assets/grain.png';
+import { whenMoving } from '../lib/motion';
 import MapViewport from './MapViewport';
 import ModuleIcon from './ModuleIcon';
 import { useStored } from '../hooks/useStored';
@@ -1046,10 +1047,10 @@ function Bartender({ origin }: { origin: Point }) {
   const [leg, setLeg] = useState(0);
   const [mode, setMode] = useState<'shake' | 'walk' | 'serve'>('shake');
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let cancelled = false;
     let last = -1;
-    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    // Each step waits for the map to be moving (lib/motion.ts): asleep, the round stops where it is
+    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms)).then(whenMoving);
     const walk = async (path: Point[]) => {
       let from = path[0];
       for (const to of path.slice(1)) {
