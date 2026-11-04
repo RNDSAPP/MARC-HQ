@@ -2,7 +2,7 @@
 // answering a review (reply). The API key stays in the Supabase secrets; each project is tied to
 // its app by ASC_APPS ("rnds:123,club421:456").
 import { API, appOf, token } from '../_shared/asc.ts';
-import { cors, json, safe, signedIn } from '../_shared/common.ts';
+import { admin, cors, json, safe, signedIn } from '../_shared/common.ts';
 
 type Resource = { id: string; type: string; attributes: Record<string, unknown>; relationships?: Record<string, { data?: { id: string } | null }> };
 
@@ -48,7 +48,23 @@ Deno.serve(safe(async (req) => {
   const failed = info.errors ?? versions.errors ?? reviews.errors;
   if (failed) return json({ error: failed[0]?.detail ?? 'App Store Connect ne répond pas.' }, 502);
   const answers = new Map<string, Resource>(((reviews.included ?? []) as Resource[]).map((r) => [r.id, r]));
+
+  // Sales, as the hourly round (tick) keeps them from Apple's daily reports: the last 12 months
+  const since = new Date();
+  since.setUTCMonth(since.getUTCMonth() - 11, 1);
+  const { data: days } = await admin.from('app_sales').select('day, downloads, purchases, proceeds').eq('project_id', project).gte('day', since.toISOString().slice(0, 10)).order('day');
+  const months = new Map<string, { month: string; downloads: number; purchases: number; proceeds: Record<string, number> }>();
+  for (const day of days ?? []) {
+    const key = String(day.day).slice(0, 7);
+    const month = months.get(key) ?? { month: key, downloads: 0, purchases: 0, proceeds: {} };
+    month.downloads += day.downloads;
+    month.purchases += day.purchases;
+    for (const [currency, value] of Object.entries((day.proceeds ?? {}) as Record<string, number>)) month.proceeds[currency] = Math.round(((month.proceeds[currency] ?? 0) + value) * 100) / 100;
+    months.set(key, month);
+  }
+
   return json({
+    sales: { through: days?.length ? days[days.length - 1].day : null, months: [...months.values()] },
     app: { name: info.data.attributes.name, bundleId: info.data.attributes.bundleId },
     versions: ((versions.data ?? []) as Resource[]).map((v) => ({
       version: v.attributes.versionString,

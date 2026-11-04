@@ -38,7 +38,7 @@ export const club421: Project = {
       heroDelta: 'pas encore',
       series: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       kpis: [
-        { label: 'Téléchargements', value: '–', delta: 'à brancher' },
+        { label: 'Téléchargements', value: '–', delta: 'App Store' },
         { label: 'CA du mois', value: '0 €', delta: '' },
         { label: 'BDE partenaires', value: '0', delta: '' },
         { label: 'Note App Store', value: '–', delta: '' },

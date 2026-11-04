@@ -41,7 +41,7 @@ export const rnds: Project = {
         { label: 'Clubs affiliés', value: '0', delta: '' },
         { label: 'Ambassadeurs', value: '0', delta: '' },
         { label: 'Inscriptions générées', value: '0', delta: '' },
-        { label: 'Abonnés', value: '0', delta: 'à brancher' },
+        { label: 'Téléchargements', value: '–', delta: 'App Store' },
       ],
       view: { kind: 'pipeline' },
     },

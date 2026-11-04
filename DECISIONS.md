@@ -300,3 +300,9 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - rien n'est envoyé deux fois (journal `push_log`).
 184. **Paiements en direct** (fonction `appstore-events`) : Apple prévient Marc HQ à chaque achat, abonnement, renouvellement ou remboursement (App Store Server Notifications v2). Chaque message est vérifié avec la bibliothèque officielle d'Apple contre son certificat racine (Apple Root CA G3, inclus dans le code) ; un faux message est refusé. À brancher dans App Store Connect, pour chaque app : adresse https://gxmjgtcylwfdyyspaegt.supabase.co/functions/v1/appstore-events, version 2, en production et en sandbox.
 185. **Ventes branchées** : le numéro de fournisseur (94946399) est écrit dans la fonction `tick` : ce n'est pas un secret, il ne sert à rien sans la clé API. Les revenus sont comptés par monnaie (€, $, $ CA…) sans jamais les additionner entre elles. Novembre a été rempli : RNDS 2 téléchargements le 1er et 4 le 2 ; Club 421 2 le 1er et 1 le 2 ; pas encore de revenu.
+186. **Téléchargements et CA dans l'app** (d'après les rapports de ventes d'Apple, gardés par la ronde horaire) :
+    - Vue d'ensemble : « Téléchargements » du mois pour RNDS et Club 421 (à la place de « Abonnés, à brancher » chez RNDS, qui a sa propre rubrique) ; « CA du mois » pour Club 421 ;
+    - page App Store de chaque app : téléchargements et CA du mois en tête, puis la version en ligne et les avis à répondre ;
+    - Revenus (Club 421) : le CA du mois en grand, la courbe des 12 derniers mois, les achats, le panier moyen et le tableau mois par mois ;
+    - carte de l'accueil : le CA du mois, et la version en ligne devant le nombre de clubs ou de BDE (qui ne disparaît plus).
+    Les monnaies restent séparées (« 2,10 € + 0,69 $US »). Les chiffres ont un jour de retard : Apple publie chaque rapport le lendemain.
