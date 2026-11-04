@@ -5,6 +5,7 @@ import NewProjectDialog from './components/NewProjectDialog';
 import PhaseTheme from './components/PhaseTheme';
 import ProjectStyles from './components/ProjectStyles';
 import UpdateBanner from './components/UpdateBanner';
+import { useMotionGate } from './lib/motion';
 import Home from './pages/Home';
 import Workspace from './pages/Workspace';
 
@@ -20,6 +21,7 @@ function ProjectHome() {
 }
 
 export default function App() {
+  useMotionGate();
   return (
     <>
       <UpdateBanner />

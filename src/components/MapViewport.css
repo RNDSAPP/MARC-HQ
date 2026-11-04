@@ -30,7 +30,11 @@
   will-change: transform;
 }
 
-/* Out of sight (scrolled away), or when the phone asks for less motion: the figures rest */
+/* Out of sight (scrolled away), Marc HQ not the window in use or set to "still" (lib/motion.ts),
+   or the phone asking for less motion: the figures rest, and the processor with them */
+:root.motion-off .map-pan *,
+:root.motion-off .map-pan *::before,
+:root.motion-off .map-pan *::after,
 .map--away .map-pan *,
 .map--away .map-pan *::before,
 .map--away .map-pan *::after {
