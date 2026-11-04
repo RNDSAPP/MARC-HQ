@@ -1,0 +1,73 @@
+/* Home: the last 7 days of each project, a row of short figures */
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.week-title {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.week-title-light {
+  font-weight: 300;
+}
+
+.week-title-bold {
+  font-weight: 600;
+}
+
+.week-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.week-row + .week-row {
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.week-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.week-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.week-figures {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.week-figure {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--fill);
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.week-value {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}

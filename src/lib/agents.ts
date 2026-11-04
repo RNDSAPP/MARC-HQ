@@ -3,7 +3,8 @@ import type { Agent, AgentStatus } from '../data/types';
 import { useSession } from './session';
 import { supabase } from './supabase';
 
-export type AgentRequest = { id: string; project_id: string; text: string; status: 'ouverte' | 'prise' | 'faite'; agent: string | null; answer: string | null; created_at: string };
+/** A request to the agents; review_id set when it asks for a draft reply to an App Store review. */
+export type AgentRequest = { id: string; project_id: string; text: string; status: 'ouverte' | 'prise' | 'faite'; agent: string | null; answer: string | null; created_at: string; review_id: string | null };
 type AgentRow = { project_id: string; name: string; status: AgentStatus; task: string; action: string; updated_at: string };
 
 /** "il y a 5 min", "il y a 2 h", "hier"… from a date. */
@@ -27,7 +28,7 @@ async function load() {
   if (!supabase) return;
   const [agents, requests] = await Promise.all([
     supabase.from('agents').select('project_id, name, status, task, action, updated_at').order('updated_at', { ascending: false }),
-    supabase.from('agent_requests').select('id, project_id, text, status, agent, answer, created_at').order('created_at', { ascending: false }).limit(50),
+    supabase.from('agent_requests').select('id, project_id, text, status, agent, answer, created_at, review_id').order('created_at', { ascending: false }).limit(50),
   ]);
   // A failed reload (no network) keeps what is on screen
   if (agents.error || requests.error) return;
@@ -71,9 +72,9 @@ export function useLiveAgents() {
 }
 
 /** Hand a request to the project's agents ("Confier à l'agent"). */
-export async function handToAgent(projectId: string, text: string) {
+export async function handToAgent(projectId: string, text: string, reviewId?: string) {
   if (!supabase) return 'Supabase n’est pas réglé.';
-  const { error } = await supabase.from('agent_requests').insert({ project_id: projectId, text });
+  const { error } = await supabase.from('agent_requests').insert({ project_id: projectId, text, review_id: reviewId ?? null });
   if (error) return 'La demande n’a pas pu partir.';
   await load();
   return '';

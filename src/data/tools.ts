@@ -29,8 +29,8 @@ function seedTasks(project: Project): Task[] {
 }
 
 
-type TaskRow = { id: string; project_id: string; text: string; due: string | null; done: boolean; created_at: string };
-const fromRow = (row: TaskRow): Task => ({ id: row.id, text: row.text, due: row.due, done: row.done, createdAt: new Date(row.created_at).getTime() });
+type TaskRow = { id: string; project_id: string; text: string; due: string | null; done: boolean; created_at: string; done_at: string | null };
+const fromRow = (row: TaskRow): Task => ({ id: row.id, text: row.text, due: row.due, done: row.done, createdAt: new Date(row.created_at).getTime(), doneAt: row.done_at ? new Date(row.done_at).getTime() : undefined });
 const TASKS_CHANGED = 'marc-hq:tasks-changed';
 
 /**
@@ -76,7 +76,7 @@ export function useTasks(project: Project) {
 
   const load = useCallback(async () => {
     if (!supabase || !session) return;
-    const { data, error } = await supabase.from('tasks').select('id, project_id, text, due, done, created_at').eq('project_id', project.id).order('created_at');
+    const { data, error } = await supabase.from('tasks').select('id, project_id, text, due, done, created_at, done_at').eq('project_id', project.id).order('created_at');
     if (error) return;
     // The old example tasks (ids "rnds-1", "club421-2"…) that a browser may still hold are left behind
     const own = local.filter((task) => !/^(rnds|club421)-\d+$/.test(task.id));
@@ -163,7 +163,7 @@ export function useTasks(project: Project) {
       if (!current) return;
       const done = !current.done;
       change(
-        (prev) => prev.map((task) => (task.id === id ? { ...task, done } : task)),
+        (prev) => prev.map((task) => (task.id === id ? { ...task, done, doneAt: done ? Date.now() : undefined } : task)),
         () => supabase!.from('tasks').update({ done }).eq('id', id),
       );
     },

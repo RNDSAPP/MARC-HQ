@@ -122,6 +122,8 @@ export type Task = {
   due: string | null;
   done: boolean;
   createdAt: number;
+  /** When it was ticked (ms), for the week's summary. */
+  doneAt?: number;
 };
 
 export type Note = {

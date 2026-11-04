@@ -64,7 +64,8 @@ Deno.serve(safe(async (req) => {
   }
 
   return json({
-    sales: { through: days?.length ? days[days.length - 1].day : null, months: [...months.values()] },
+    // ...and the last 14 days one by one (the home's "7 derniers jours")
+    sales: { through: days?.length ? days[days.length - 1].day : null, months: [...months.values()], days: (days ?? []).slice(-14) },
     app: { name: info.data.attributes.name, bundleId: info.data.attributes.bundleId },
     versions: ((versions.data ?? []) as Resource[]).map((v) => ({
       version: v.attributes.versionString,

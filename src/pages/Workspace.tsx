@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Activity from '../components/Activity';
 import AgentCard from '../components/AgentCard';
 import AppRail from '../components/AppRail';
@@ -27,7 +27,7 @@ import AgentDialog from '../components/AgentDialog';
 import RecordDialog from '../components/RecordDialog';
 import { kindOf, nameOf, recordsReady, saveRecord, useRecords } from '../lib/records';
 import type { RecordKind, RecordRow } from '../lib/records';
-import { ago, useLiveAgents } from '../lib/agents';
+import { ago, handToAgent, useLiveAgents } from '../lib/agents';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
 import type { PipelineColumn, Project, ProjectId, TableRow } from '../data/types';
 import { dayLabel, isoDate } from '../lib/dates';
@@ -83,8 +83,14 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   const [search, setSearch] = useState('');
   const [notice, setNotice] = useState('');
 
-  // A new page starts with an empty search and no message.
+  // A new page starts with an empty search and no message (not on the first one, which may come
+  // with its own message, from a notification)
+  const firstPage = useRef(true);
   useEffect(() => {
+    if (firstPage.current) {
+      firstPage.current = false;
+      return;
+    }
     setSearch('');
     setNotice('');
   }, [slug]);
@@ -94,6 +100,21 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
     const timer = window.setTimeout(() => setNotice(''), 4000);
     return () => window.clearTimeout(timer);
   }, [notice]);
+
+  // From the "à relancer" notification (/rnds/todo?relancer=Club A|Club B): a "Relancer …" task
+  // for today for each, unless one is already open; then the address is cleaned
+  const [params, setParams] = useSearchParams();
+  const chase = params.get('relancer');
+  const chased = useRef('');
+  useEffect(() => {
+    if (!chase || !tasks.loaded || chased.current === chase) return;
+    chased.current = chase;
+    const names = chase.split('|').map((name) => name.trim()).filter(Boolean);
+    const added = names.filter((name) => !tasks.tasks.some((task) => !task.done && task.text === `Relancer ${name}`));
+    added.forEach((name) => tasks.add(`Relancer ${name}`, isoDate()));
+    setNotice(added.length ? `${added.length} tâche${added.length > 1 ? 's' : ''} « Relancer » ajoutée${added.length > 1 ? 's' : ''} pour aujourd’hui.` : 'Les relances sont déjà dans tes tâches.');
+    setParams({}, { replace: true });
+  }, [chase, tasks, setParams]);
 
   const tool = TOOLS.find((item) => item.slug === slug);
   const module = project.modules.find((m) => m.slug === slug);
@@ -388,7 +409,18 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           </span>
         </div>
         {module.slug === 'app-store' && store.data ? (
-          <LiveReviewCards reviews={store.data.reviews.filter((r) => !query || normalize(`${r.title} ${r.body} ${r.nickname}`).includes(query))} onReply={store.reply} />
+          <LiveReviewCards
+            reviews={store.data.reviews.filter((r) => !query || normalize(`${r.title} ${r.body} ${r.nickname}`).includes(query))}
+            onReply={store.reply}
+            drafts={Object.fromEntries(live.requests.filter((r) => r.review_id && r.project_id === project.id).map((r) => [r.review_id as string, { status: r.status, answer: r.answer }]))}
+            onAskDraft={(review) =>
+              handToAgent(
+                project.id,
+                `Brouillon de réponse à un avis App Store ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)} de ${review.nickname || 'un utilisateur'} : « ${[review.title, review.body].filter(Boolean).join(' — ')} ». Réponds dans la langue de l'avis, court et chaleureux, signé de l'équipe ${project.name}. Mets seulement le texte de la réponse dans « fini » : Marc l'envoie tel quel en un appui.`,
+                review.id,
+              )
+            }
+          />
         ) : module.slug === 'app-store' ? (
           <ReviewCards rows={rows} onOpen={open} onAction={act} />
         ) : module.slug === 'revenus' ? (

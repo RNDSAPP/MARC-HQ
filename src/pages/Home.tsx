@@ -6,6 +6,7 @@ import Building from '../components/Building';
 import ProjectCard from '../components/ProjectCard';
 import { HomeTabBar } from '../components/TabBar';
 import TodayTasks from '../components/TodayTasks';
+import WeekCard from '../components/WeekCard';
 import { openNewProject } from '../components/NewProjectDialog';
 import { useProjects } from '../data/customProjects';
 import { dayLabel, greeting, timeLabel } from '../lib/dates';
@@ -107,6 +108,8 @@ export default function Home() {
           </button>
 
           <TodayTasks projects={projects} />
+
+          <WeekCard projects={projects} />
         </div>
       </main>
       <HomeTabBar projects={projects} />

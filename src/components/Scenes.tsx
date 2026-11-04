@@ -626,15 +626,32 @@ export function AppStorePanel({ project, module, rating, icon, live }: { project
   );
 }
 
-/** The real written reviews, newest first: stars, title, text, who and when, the answer or a box to answer. */
-export function LiveReviewCards({ reviews, onReply }: { reviews: StoreReview[]; onReply: (id: string, text: string) => Promise<string> }) {
+/** What the agents did with a review: a draft being written, or ready to send. */
+export type ReviewDraft = { status: 'ouverte' | 'prise' | 'faite'; answer: string | null };
+
+/**
+ * The real written reviews, newest first: stars, title, text, who and when, the answer or a box to
+ * answer. A review waiting for an answer shows the agent's draft when there is one (sent in a tap,
+ * or edited first), or a button to ask the agents for one.
+ */
+export function LiveReviewCards({
+  reviews,
+  onReply,
+  drafts = {},
+  onAskDraft,
+}: {
+  reviews: StoreReview[];
+  onReply: (id: string, text: string) => Promise<string>;
+  drafts?: Record<string, ReviewDraft>;
+  onAskDraft?: (review: StoreReview) => Promise<string>;
+}) {
   const [open, setOpen] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  async function send(id: string) {
+  async function send(id: string, text = draft) {
     setBusy(true);
-    const error = await onReply(id, draft);
+    const error = await onReply(id, text);
     setBusy(false);
     setMessage(error || 'Réponse envoyée. Apple la publie après vérification.');
     if (!error) {
@@ -679,20 +696,56 @@ export function LiveReviewCards({ reviews, onReply }: { reviews: StoreReview[]; 
                   </button>
                 </div>
               </div>
+            ) : drafts[review.id]?.status === 'faite' && drafts[review.id]?.answer ? (
+              <div className="review-draft">
+                <p className="review-draft-label">Brouillon de l’agent</p>
+                <p className="review-draft-text">{drafts[review.id].answer}</p>
+                <div className="review-foot">
+                  <button
+                    type="button"
+                    className="tool-ghost"
+                    onClick={() => {
+                      setOpen(review.id);
+                      setDraft(drafts[review.id].answer ?? '');
+                      setMessage('');
+                    }}
+                  >
+                    Modifier
+                  </button>
+                  <button type="button" className="review-answer" onClick={() => send(review.id, drafts[review.id].answer ?? '')} disabled={busy}>
+                    {busy ? 'Envoi…' : 'Envoyer'}
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="review-foot">
-                <span className="review-status review-status--waiting">À répondre</span>
-                <button
-                  type="button"
-                  className="review-answer"
-                  onClick={() => {
-                    setOpen(review.id);
-                    setDraft('');
-                    setMessage('');
-                  }}
-                >
-                  Répondre
-                </button>
+                <span className="review-status review-status--waiting">{drafts[review.id] ? 'Brouillon en préparation' : 'À répondre'}</span>
+                <span className="review-actions">
+                  {onAskDraft && !drafts[review.id] && (
+                    <button
+                      type="button"
+                      className="tool-ghost"
+                      onClick={async () => {
+                        setMessage('');
+                        const error = await onAskDraft(review);
+                        setMessage(error || 'Demandé aux agents : dis « regarde Marc HQ » dans Claude Code.');
+                      }}
+                    >
+                      Brouillon par l’agent
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="review-answer"
+                    onClick={() => {
+                      setOpen(review.id);
+                      setDraft('');
+                      setMessage('');
+                    }}
+                  >
+                    Répondre
+                  </button>
+                </span>
               </div>
             )}
           </li>

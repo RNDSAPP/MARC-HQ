@@ -23,7 +23,7 @@ export type StoreData = {
   app: { name: string; bundleId: string };
   versions: StoreVersion[];
   reviews: StoreReview[];
-  sales?: { through: string | null; months: StoreMonth[] };
+  sales?: { through: string | null; months: StoreMonth[]; days?: { day: string; downloads: number; purchases: number; proceeds: Record<string, number> }[] };
 };
 
 const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];

@@ -6,7 +6,7 @@ import { isoDate } from './dates';
 
 /** What Marc adds in Marc HQ, one kind per module. */
 export type RecordKind = 'club' | 'ambassadeur' | 'bde' | 'soiree' | 'post' | 'veille';
-export type RecordRow = { id: string; project_id: string; kind: RecordKind; data: Record<string, string>; created_at: string };
+export type RecordRow = { id: string; project_id: string; kind: RecordKind; data: Record<string, string>; created_at: string; updated_at?: string };
 
 /** A field of the add / edit sheet. */
 export type Field = { key: string; label: string; type: 'text' | 'number' | 'date' | 'select'; options?: string[]; required?: boolean; placeholder?: string };
@@ -106,7 +106,7 @@ let started: string | null = null;
 
 async function load() {
   if (!supabase) return;
-  const { data, error } = await supabase.from('records').select('id, project_id, kind, data, created_at').order('created_at');
+  const { data, error } = await supabase.from('records').select('id, project_id, kind, data, created_at, updated_at').order('created_at');
   // A failed reload (no network) keeps what is on screen instead of emptying everything
   if (error || !data) return;
   rows = data as RecordRow[];
