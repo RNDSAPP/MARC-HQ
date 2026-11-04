@@ -757,3 +757,35 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* The answer box: a soft rectangle, its own height (the shared pill input would turn it into an oval) */
+.review-form .review-input {
+  flex: none;
+  height: auto;
+  min-height: 96px;
+  border-radius: 14px;
+}
+
+/* The foot of a review: the status on one line, the buttons together on the right, wrapping as a
+   group when the card is narrow */
+.review-foot {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.review-status,
+.review-answer,
+.review-actions .tool-ghost {
+  white-space: nowrap;
+}
+
+.review-actions {
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 420px) {
+  .review-actions {
+    flex-wrap: wrap;
+  }
+}
