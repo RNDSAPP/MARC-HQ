@@ -12,6 +12,7 @@ import KpiStrip from '../components/KpiStrip';
 import Pipeline from '../components/Pipeline';
 import { AmbassadorsPlaza, AppStorePanel, LiveReviewCards, FollowerCards, FollowersScene, PipelineCity, PostCards, RevenueCards, RevenueScene, ReviewCards, StudioScene } from '../components/Scenes';
 import logo421 from '../assets/logo-421-blanc.svg';
+import logo421Violet from '../assets/logo-421-violet.svg';
 import logoRnds from '../assets/logo-rnds.svg';
 import StatPanel from '../components/StatPanel';
 import TabBar from '../components/TabBar';
@@ -340,7 +341,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             <FollowersScene project={project} module={module} onSelect={open} />
           ) : module.slug === 'publications' ? (
             <>
-              <StudioScene project={project} module={module} icon={logoRnds} onSelect={open} />
+              <StudioScene project={project} module={module} icon={project.id === 'club421' ? logo421Violet : logoRnds} onSelect={open} />
               <TemplatesWidget project={project} />
             </>
           ) : module.slug === 'app-store' ? (

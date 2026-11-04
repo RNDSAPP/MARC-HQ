@@ -88,6 +88,30 @@ export const club421: Project = {
         rows: [],
       },
     },
+    {
+      slug: 'publications',
+      label: 'Publications',
+      count: '0',
+      headline: 'Pas encore de publication prévue',
+      sub: 'Planifie ton premier contenu Club 421 : il apparaîtra dans le studio, avec son format et sa date. Tes descriptions et titres types sont juste en dessous.',
+      cta: 'Planifier un post',
+      heroLabel: 'Vues moyennes par vidéo',
+      heroNum: '0',
+      heroDelta: 'pas encore',
+      series: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      kpis: [
+        { label: 'Prévues', value: '0', delta: '' },
+        { label: 'Publiées', value: '0', delta: '' },
+        { label: 'Engagement', value: '–', delta: '' },
+        { label: 'Meilleur format', value: '–', delta: '' },
+      ],
+      view: {
+        kind: 'table',
+        title: 'Cette semaine',
+        columns: ['Contenu', 'Format', 'Date', 'Statut'],
+        rows: [],
+      },
+    },
     // App Store: filled live from App Store Connect once signed in (lib/appstore.ts, withStore)
     {
       slug: 'app-store',

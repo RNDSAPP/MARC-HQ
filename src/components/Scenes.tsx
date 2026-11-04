@@ -1174,9 +1174,18 @@ export function StudioScene({ project, module, icon, onSelect }: { project: Proj
             )}
           </g>
 
-          {/* Low platform with the boxer posing */}
+          {/* Low platform with the boxer posing (RNDS), or a player in the club's violet (Club 421) */}
           <Box3 o={o} s0={70} s1={150} t0={140} t1={220} h0={b} h1={b + 8} top="#FFFFFF" />
-          <Person origin={[o[0], o[1] - b - 8]} s={110} t={180} look={{ skin: SKIN.tan, top: '#1F1F1F', bottom: '#FF0A3C', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: '#FF0A3C' }} />
+          <Person
+            origin={[o[0], o[1] - b - 8]}
+            s={110}
+            t={180}
+            look={
+              project.id === 'rnds'
+                ? { skin: SKIN.tan, top: '#1F1F1F', bottom: '#FF0A3C', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A', shorts: true, gloves: '#FF0A3C' }
+                : { skin: SKIN.tan, top: '#7C3AED', bottom: '#1F1F1F', shoes: '#F4F4F4', head: 'buzz', headColor: '#2A2A2A' }
+            }
+          />
 
           {/* Softboxes on each side of the subject */}
           <Softbox o={o} s={70} t={96} b={b} />

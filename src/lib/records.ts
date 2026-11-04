@@ -100,6 +100,7 @@ export function kindOf(project: Project, moduleSlug: string): RecordKind | null 
   if (moduleSlug === 'vue-d-ensemble') return project.id === 'rnds' ? 'club' : project.id === 'club421' ? 'bde' : null;
   const found = (Object.keys(KINDS) as RecordKind[]).find((kind) => KINDS[kind].module === moduleSlug);
   if (found === 'veille' || found === 'modele') return found;
+  if (found === 'post') return project.id === 'rnds' || project.id === 'club421' ? found : null;
   return found && (found === 'bde' || found === 'soiree' ? project.id === 'club421' : project.id === 'rnds') ? found : null;
 }
 
@@ -186,6 +187,27 @@ function patch(project: Project, slug: string, change: (module: Module) => Parti
   return { ...project, modules: project.modules.map((module) => (module.slug === slug ? { ...module, ...change(module) } : module)) };
 }
 
+/** The Publications module from the posts Marc planned (RNDS and Club 421 alike). */
+function withPosts(project: Project, posts: RecordRow[]): Project {
+  if (!posts.length) return project;
+  const planned = posts.filter((p) => p.data.status !== 'Publié' && (isToday(p.data.date) || !p.data.date));
+  const toValidate = posts.find((p) => p.data.status === 'À valider');
+  const formats = posts.reduce<Record<string, number>>((acc, p) => ({ ...acc, [p.data.format || 'Reel']: (acc[p.data.format || 'Reel'] ?? 0) + 1 }), {});
+  const topFormat = Object.entries(formats).sort((a, b) => b[1] - a[1])[0];
+  return patch(project, 'publications', (m) => ({
+    count: String(planned.length),
+    headline: toValidate ? `« ${toValidate.data.title} » attend ton feu vert` : `${plural(planned.length, 'contenu prévu', 'contenus prévus')}`,
+    sub: `${plural(posts.filter((p) => p.data.status === 'Publié').length, 'publié')}, ${plural(posts.filter((p) => p.data.status === 'Prêt').length, 'prêt')}.`,
+    kpis: [
+      { label: 'Prévues', value: String(planned.length), delta: '' },
+      { label: 'Publiées', value: String(posts.filter((p) => p.data.status === 'Publié').length), delta: '' },
+      { label: 'Engagement', value: '–', delta: '' },
+      { label: 'Meilleur format', value: topFormat?.[0] ?? '–', delta: '' },
+    ],
+    view: m.view.kind === 'table' ? { ...m.view, rows: [...posts].sort((a, b) => (a.data.date ?? '').localeCompare(b.data.date ?? '')).map((p) => [p.data.title, p.data.format || 'Reel', dayMonth(p.data.date) || 'Sans date', p.data.status || 'Idée']) } : m.view,
+  }));
+}
+
 /** Cards of a pipeline from the records of one kind, in their stage. */
 function pipelineFrom(project: Project, list: RecordRow[], meta: (r: RecordRow) => string, done: string) {
   return {
@@ -218,10 +240,6 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
     const members = affiliated.reduce((sum, c) => sum + num(c.data.members), 0);
     const signups = ambassadors.reduce((sum, a) => sum + num(a.data.signups), 0);
     const ranked = [...ambassadors].sort((a, b) => num(b.data.signups) - num(a.data.signups));
-    const planned = posts.filter((p) => p.data.status !== 'Publié' && (isToday(p.data.date) || !p.data.date));
-    const toValidate = posts.find((p) => p.data.status === 'À valider');
-    const formats = posts.reduce<Record<string, number>>((acc, p) => ({ ...acc, [p.data.format || 'Reel']: (acc[p.data.format || 'Reel'] ?? 0) + 1 }), {});
-    const topFormat = Object.entries(formats).sort((a, b) => b[1] - a[1])[0];
 
     let next: Project = { ...project, pipeline: pipelineFrom(project, clubs, (c) => [c.data.city, c.data.members && `${c.data.members} membres`].filter(Boolean).join(' · '), 'Affiliés') };
     next = patch(next, 'vue-d-ensemble', (m) =>
@@ -268,20 +286,7 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
         view: m.view.kind === 'table' ? { ...m.view, rows: ranked.map((a) => [a.data.name, a.data.club || '–', String(num(a.data.signups)), a.data.status || 'Actif']) } : m.view,
       }));
     }
-    if (posts.length) {
-      next = patch(next, 'publications', (m) => ({
-        count: String(planned.length),
-        headline: toValidate ? `« ${toValidate.data.title} » attend ton feu vert` : `${plural(planned.length, 'contenu prévu', 'contenus prévus')}`,
-        sub: `${plural(posts.filter((p) => p.data.status === 'Publié').length, 'publié')}, ${plural(posts.filter((p) => p.data.status === 'Prêt').length, 'prêt')}.`,
-        kpis: [
-          { label: 'Prévues', value: String(planned.length), delta: '' },
-          { label: 'Publiées', value: String(posts.filter((p) => p.data.status === 'Publié').length), delta: '' },
-          { label: 'Engagement', value: '–', delta: '' },
-          { label: 'Meilleur format', value: topFormat?.[0] ?? '–', delta: '' },
-        ],
-        view: m.view.kind === 'table' ? { ...m.view, rows: [...posts].sort((a, b) => (a.data.date ?? '').localeCompare(b.data.date ?? '')).map((p) => [p.data.title, p.data.format || 'Reel', dayMonth(p.data.date) || 'Sans date', p.data.status || 'Idée']) } : m.view,
-      }));
-    }
+    next = withPosts(next, posts);
     return {
       ...next,
       home: {
@@ -305,6 +310,7 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
     const done = soirees.filter((s) => s.data.status === 'Faite');
 
     let next: Project = { ...project, pipeline: pipelineFrom(project, bdes, (b) => [b.data.school, b.data.students && `${b.data.students} étudiants`].filter(Boolean).join(' · '), 'Partenaires') };
+    next = withPosts(next, of('post'));
     if (bdes.length) {
       next = patch(next, 'vue-d-ensemble', (m) => ({
         headline: upcoming[0] ? `Prochaine soirée : ${upcoming[0].data.name}, le ${dayMonth(upcoming[0].data.date)}` : `${plural(partners.length, 'BDE partenaire', 'BDE partenaires')}`,
