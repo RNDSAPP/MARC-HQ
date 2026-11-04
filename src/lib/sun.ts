@@ -41,8 +41,14 @@ export function phaseAt(date = new Date()): Phase {
 export function usePhase(choice: PhaseChoice): Phase {
   const [phase, setPhase] = useState(() => phaseAt());
   useEffect(() => {
-    const timer = window.setInterval(() => setPhase(phaseAt()), 60000);
-    return () => window.clearInterval(timer);
+    // Once a minute while the page is on screen, and at once on coming back to it
+    const refresh = () => document.visibilityState === 'visible' && setPhase(phaseAt());
+    const timer = window.setInterval(refresh, 60000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
   }, []);
   return choice === 'auto' ? phase : choice;
 }
