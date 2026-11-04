@@ -117,18 +117,38 @@ export function useTasks(project: Project) {
     };
   }, [online, load, project.id]);
 
-  /** Apply a change on screen at once, then in Supabase, then tell the other views. */
-  const change = (next: (prev: Task[]) => Task[], write: () => PromiseLike<unknown>) => {
+  // The list as it is right now, even between two renders (a quick double tap reads the right state)
+  const latest = useRef<Task[]>([]);
+  latest.current = online && remote ? remote : local;
+  const [failed, setFailed] = useState('');
+
+  /** Apply a change on screen at once, then in Supabase, then tell the other views. If Supabase
+   *  refuses (no network), the list goes back to what is really saved and says so. */
+  const change = (next: (prev: Task[]) => Task[], write: () => PromiseLike<{ error: unknown }>) => {
+    latest.current = next(latest.current);
     if (!online) {
       setLocal(next);
       return;
     }
     setRemote((prev) => next(prev ?? []));
-    Promise.resolve(write()).then(() => window.dispatchEvent(new CustomEvent(TASKS_CHANGED, { detail: project.id })));
+    setFailed('');
+    Promise.resolve(write())
+      .then(({ error }) => {
+        if (error) throw error;
+        window.dispatchEvent(new CustomEvent(TASKS_CHANGED, { detail: project.id }));
+      })
+      .catch(() => {
+        setFailed('Pas enregistré : vérifie la connexion et réessaie.');
+        load();
+      });
   };
 
   return {
     tasks: online && remote ? remote : local,
+    /** Why the last change did not go through, '' when all is saved. */
+    failed,
+    /** Whether the list shown is the saved one (false while it loads from Supabase). */
+    loaded: !online || remote !== null,
     /** Whether the list is shared through Supabase (signed in) or kept in this browser. */
     shared: online,
     add: (text: string, due: string | null) => {
@@ -139,10 +159,12 @@ export function useTasks(project: Project) {
       );
     },
     toggle: (id: string) => {
-      const current = (online && remote ? remote : local).find((task) => task.id === id);
+      const current = latest.current.find((task) => task.id === id);
+      if (!current) return;
+      const done = !current.done;
       change(
-        (prev) => prev.map((task) => (task.id === id ? { ...task, done: !task.done } : task)),
-        () => supabase!.from('tasks').update({ done: !current?.done }).eq('id', id),
+        (prev) => prev.map((task) => (task.id === id ? { ...task, done } : task)),
+        () => supabase!.from('tasks').update({ done }).eq('id', id),
       );
     },
     remove: (id: string) =>

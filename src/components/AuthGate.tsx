@@ -20,13 +20,32 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, []);
 
+  // Asked once per person (not at each token refresh). A failed call (no network yet, on coming
+  // back to the app) is not a refusal: it keeps the last answer, or tries again a little later.
+  const userId = session?.user.id;
   useEffect(() => {
-    if (!supabase || !session) {
+    if (!supabase || !userId) {
       setAllowed(undefined);
       return;
     }
-    supabase.functions.invoke('access', { body: {} }).then(({ data }) => setAllowed(Boolean(data?.allowed)));
-  }, [session]);
+    const client = supabase;
+    let alive = true;
+    let timer = 0;
+    const ask = () =>
+      client.functions
+        .invoke('access', { body: {} })
+        .then(({ data, error }) => {
+          if (!alive) return;
+          if (error || typeof data?.allowed !== 'boolean') timer = window.setTimeout(ask, 3000);
+          else setAllowed(data.allowed);
+        })
+        .catch(() => alive && (timer = window.setTimeout(ask, 3000)));
+    ask();
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [userId]);
 
   if (!supabase) return <>{children}</>;
   if (session === undefined || (session && allowed === undefined)) return <main className="login" aria-busy="true" />;

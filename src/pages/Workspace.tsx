@@ -25,7 +25,7 @@ import { useCalendarSync } from '../lib/calendar';
 import AccountGate from '../components/AccountGate';
 import AgentDialog from '../components/AgentDialog';
 import RecordDialog from '../components/RecordDialog';
-import { kindOf, nameOf, saveRecord, useRecords } from '../lib/records';
+import { kindOf, nameOf, recordsReady, saveRecord, useRecords } from '../lib/records';
 import type { RecordKind, RecordRow } from '../lib/records';
 import { ago, useLiveAgents } from '../lib/agents';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
@@ -77,7 +77,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   const goals = useGoals(project);
   const links = useLinks(project);
   // The project's Google calendar, kept in step with its dated tasks, soirées and meetings
-  const calendar = useCalendarSync(project, tasks.tasks);
+  const calendar = useCalendarSync(project, tasks.tasks, tasks.loaded && recordsReady());
   const { remove: removeProject } = useCustomProjects();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -148,7 +148,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
         <ModuleStrip project={project} />
 
         <main className="workspace-body" id="contenu" tabIndex={-1}>
-          {tool?.slug === 'todo' && <TodoPage tasks={tasks.tasks} query={matches} onAdd={tasks.add} onToggle={tasks.toggle} onRemove={tasks.remove} />}
+          {tool?.slug === 'todo' && <TodoPage tasks={tasks.tasks} failed={tasks.failed} query={matches} onAdd={tasks.add} onToggle={tasks.toggle} onRemove={tasks.remove} />}
           {tool?.slug === 'todo' && calendar.session === null && (
             <AccountGate
               title="Retrouve tes tâches partout"
@@ -272,11 +272,11 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
     const name = rest.join(' : ');
     const record = name ? recordNamed(name) : undefined;
     if (record && verb === 'Signer') {
-      saveRecord(project.id, record.kind, { ...record.data, stage: project.id === 'club421' ? 'Partenaires' : 'Affiliés' }, record.id).then(() => onAction(`Signé : ${name}`));
+      saveRecord(project.id, record.kind, { ...record.data, stage: project.id === 'club421' ? 'Partenaires' : 'Affiliés' }, record.id).then((failed) => onAction(failed || `Signé : ${name}`));
       return;
     }
     if (record && verb === 'Valider') {
-      saveRecord(project.id, record.kind, { ...record.data, status: 'Prêt' }, record.id).then(() => onAction(`Validé : ${name}`));
+      saveRecord(project.id, record.kind, { ...record.data, status: 'Prêt' }, record.id).then((failed) => onAction(failed || `Validé : ${name}`));
       return;
     }
     if (name && verb === 'Relancer') return onAddTask(`Relancer ${name}`);
@@ -470,10 +470,16 @@ function exportTable(project: Project, module: Project['modules'][number], onAct
   const lines = [module.view.columns, ...module.view.rows].map((row) => row.map(cell).join(';'));
   const file = new Blob([`\ufeff${lines.join('\n')}`], { type: 'text/csv;charset=utf-8' });
   const link = document.createElement('a');
-  const name = `${project.name} ${module.label} ${new Date().toISOString().slice(0, 7)}.csv`;
+  const name = `${project.name} ${module.label} ${isoDate().slice(0, 7)}.csv`;
   link.href = URL.createObjectURL(file);
   link.download = name;
+  // Safari only downloads from a link that is in the page, and needs the file a moment longer
+  link.style.display = 'none';
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(link.href);
+  window.setTimeout(() => {
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  }, 1000);
   onAction(`Exporté : ${name}`);
 }

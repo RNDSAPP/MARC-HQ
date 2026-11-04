@@ -151,16 +151,59 @@
   color: var(--text-2);
 }
 
-/* Phones: modules two by two, compact; tools one per row */
+.pmap-chevron {
+  display: none;
+}
+
+/* Phones: the modules as one grouped list (icon, name, figure, chevron), like iPhone Settings;
+   the tools as a grid of app icons, four a row, with a badge when they hold something */
 @media (max-width: 600px) {
+  .pmap {
+    gap: 8px;
+  }
+
   .pmap-grid:not(.pmap-grid--tools) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .pmap-grid:not(.pmap-grid--tools) li + li {
+    border-top: 1px solid var(--hairline);
   }
 
   .pmap-tile--module {
-    gap: 6px;
-    padding: 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .pmap-tile--module:hover {
+    transform: none;
+  }
+
+  .pmap-tile--module:active {
+    background: var(--fill);
+  }
+
+  .pmap-tile--module .pmap-icon {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+
+  .pmap-tile--module .pmap-name {
+    flex: 1;
+    min-width: 0;
   }
 
   .pmap-tile--module .pmap-line,
@@ -168,11 +211,92 @@
     display: none;
   }
 
-  .pmap-num {
-    font-size: 22px;
+  .pmap-tile--module .pmap-num {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+
+  .pmap-chevron {
+    display: block;
+    flex: none;
+    color: var(--text-muted);
+    opacity: 0.6;
   }
 
   .pmap-grid--tools {
-    gap: 8px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px 4px;
+    padding: 4px 0;
+  }
+
+  .pmap-tile--tool {
+    position: relative;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .pmap-tile--tool:hover {
+    transform: none;
+  }
+
+  .pmap-tile--tool .pmap-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    color: var(--accent);
+    transition: transform 0.15s var(--ease);
+  }
+
+  .pmap-tile--tool .pmap-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .pmap-tile--tool:active .pmap-icon {
+    transform: scale(0.92);
+  }
+
+  .pmap-tool-text {
+    align-items: center;
+    width: 100%;
+  }
+
+  .pmap-tile--tool .pmap-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .pmap-tile--tool .pmap-line {
+    display: none;
+  }
+
+  .pmap-count {
+    position: absolute;
+    top: -5px;
+    right: calc(50% - 35px);
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+
+  .pmap-count--zero {
+    display: none;
   }
 }

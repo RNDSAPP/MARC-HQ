@@ -51,6 +51,9 @@ export default function ProjectMap({ project, counts }: { project: Project; coun
                 <span className="pmap-label">{module.heroLabel}</span>
               </span>
               <span className="pmap-line">{module.headline}</span>
+              <svg className="pmap-chevron" width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M1.5 1.5 6.5 6.5 1.5 11.5" />
+              </svg>
             </Link>
           </li>
         ))}
@@ -68,7 +71,7 @@ export default function ProjectMap({ project, counts }: { project: Project; coun
                 <span className="pmap-name">{tool.label}</span>
                 <span className="pmap-line">{TOOL_HINTS[tool.slug]}</span>
               </span>
-              {counts[tool.slug] && <span className="pmap-count">{counts[tool.slug]}</span>}
+              {counts[tool.slug] && <span className={`pmap-count${counts[tool.slug] === '0' ? ' pmap-count--zero' : ''}`}>{counts[tool.slug]}</span>}
             </Link>
           </li>
         ))}

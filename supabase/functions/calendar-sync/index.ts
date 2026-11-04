@@ -1,7 +1,7 @@
 // Brings a project's Google calendar in line with Marc HQ: the app sends the full list of what
 // should be there (dated tasks, soirées, meetings); events are created, changed or removed so
 // the calendar matches. Each event carries its Marc HQ key, so nothing else is ever touched.
-import { admin, cors, googleAccess, json, signedIn } from '../_shared/common.ts';
+import { admin, cors, googleAccess, json, safe, signedIn } from '../_shared/common.ts';
 
 type Wanted = { key: string; title: string; date: string; description: string };
 type GoogleEvent = { id: string; summary?: string; description?: string; start?: { date?: string }; extendedProperties?: { private?: Record<string, string> } };
@@ -13,7 +13,7 @@ const nextDay = (date: string) => {
   return d.toISOString().slice(0, 10);
 };
 
-Deno.serve(async (req) => {
+Deno.serve(safe(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   const who = await signedIn(req);
   if ('error' in who) return json({ error: who.error }, 401);
@@ -39,7 +39,10 @@ Deno.serve(async (req) => {
   const base = `${CALENDAR}/calendars/${encodeURIComponent(calendarId)}/events`;
 
   // What Marc HQ already put there
-  const listed = await (await fetch(`${base}?privateExtendedProperty=${encodeURIComponent('marchq=1')}&maxResults=2500&showDeleted=false`, { headers })).json();
+  const listing = await fetch(`${base}?privateExtendedProperty=${encodeURIComponent('marchq=1')}&maxResults=2500&showDeleted=false`, { headers });
+  // Without the list, everything would be created again: stop instead
+  if (!listing.ok) return json({ error: 'Google n’a pas donné la liste des événements, réessaie.' }, 502);
+  const listed = await listing.json();
   const existing = new Map<string, GoogleEvent>();
   for (const event of (listed.items ?? []) as GoogleEvent[]) {
     const key = event.extendedProperties?.private?.key;
@@ -71,4 +74,4 @@ Deno.serve(async (req) => {
     if ((await fetch(`${base}/${stale.id}`, { method: 'DELETE', headers })).ok) removed++;
   }
   return json({ created, changed, removed, total: events.length });
-});
+}));

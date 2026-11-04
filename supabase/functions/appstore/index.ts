@@ -1,7 +1,7 @@
 // App Store Connect for Marc HQ: the app's latest versions and its written reviews (overview), and
 // answering a review (reply). The API key stays in the Supabase secrets; each project is tied to
 // its app by ASC_APPS ("rnds:123,club421:456").
-import { cors, json, signedIn } from '../_shared/common.ts';
+import { cors, json, safe, signedIn } from '../_shared/common.ts';
 
 const API = 'https://api.appstoreconnect.apple.com/v1';
 
@@ -24,11 +24,11 @@ const appOf = (project: string) =>
 
 type Resource = { id: string; type: string; attributes: Record<string, unknown>; relationships?: Record<string, { data?: { id: string } | null }> };
 
-Deno.serve(async (req) => {
+Deno.serve(safe(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   const who = await signedIn(req);
   if ('error' in who) return json({ error: who.error }, 401);
-  const { action, project_id: project, review_id: reviewId, text } = await req.json();
+  const { action, project_id: project, review_id: reviewId, text } = await req.json().catch(() => ({}));
   const app = appOf(project);
   if (!app) return json({ error: 'Aucune app App Store reliée à ce projet.' }, 404);
   const headers = { Authorization: `Bearer ${await token()}`, 'Content-Type': 'application/json' };
@@ -62,7 +62,9 @@ Deno.serve(async (req) => {
       { headers },
     ).then((r) => r.json()),
   ]);
-  if (info.errors) return json({ error: info.errors[0]?.detail ?? 'App Store Connect ne répond pas.' }, 502);
+  // An error on any of the three is said as such (not shown as "no review yet")
+  const failed = info.errors ?? versions.errors ?? reviews.errors;
+  if (failed) return json({ error: failed[0]?.detail ?? 'App Store Connect ne répond pas.' }, 502);
   const answers = new Map<string, Resource>(((reviews.included ?? []) as Resource[]).map((r) => [r.id, r]));
   return json({
     app: { name: info.data.attributes.name, bundleId: info.data.attributes.bundleId },
@@ -86,4 +88,4 @@ Deno.serve(async (req) => {
       };
     }),
   });
-});
+}));

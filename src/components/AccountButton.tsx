@@ -64,7 +64,14 @@ export default function AccountButton({ initials = 'MB', placement = 'up' }: { i
     setBusy(true);
     setError('');
     const path = `${session.user.id}/photo.jpg`;
-    const upload = await supabase.storage.from('avatars').upload(path, await square(file), { upsert: true, contentType: 'image/jpeg' });
+    // A photo the phone cannot read (HEIC on some browsers) must not leave the button stuck
+    const image = await square(file).catch(() => null);
+    if (!image) {
+      setBusy(false);
+      setError('Cette photo ne peut pas être lue : essaie en JPEG ou PNG.');
+      return;
+    }
+    const upload = await supabase.storage.from('avatars').upload(path, image, { upsert: true, contentType: 'image/jpeg' });
     if (upload.error) {
       setBusy(false);
       setError('La photo n’a pas pu être enregistrée.');

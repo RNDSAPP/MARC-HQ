@@ -7,6 +7,7 @@ import './Tools.css';
 
 type Props = {
   tasks: Task[];
+  failed?: string;
   query: (text: string) => boolean;
   onAdd: (text: string, due: string | null) => void;
   onToggle: (id: string) => void;
@@ -25,7 +26,7 @@ const GROUPS: { key: string; label: string; test: (task: Task) => boolean }[] = 
 ];
 
 /** The project's full task list: add, tick, delete, grouped by due date. */
-export default function TodoPage({ tasks, query, onAdd, onToggle, onRemove }: Props) {
+export default function TodoPage({ tasks, failed, query, onAdd, onToggle, onRemove }: Props) {
   const [text, setText] = useState('');
   const [due, setDue] = useState(isoDate());
   const [filter, setFilter] = useState<Filter>('open');
@@ -91,6 +92,12 @@ export default function TodoPage({ tasks, query, onAdd, onToggle, onRemove }: Pr
           Ajouter
         </button>
       </form>
+
+      {failed && (
+        <p className="tool-failed" role="alert">
+          {failed}
+        </p>
+      )}
 
       {filter === 'open' ? (
         open.length === 0 ? (

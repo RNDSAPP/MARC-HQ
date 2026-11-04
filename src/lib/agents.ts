@@ -29,6 +29,8 @@ async function load() {
     supabase.from('agents').select('project_id, name, status, task, action, updated_at').order('updated_at', { ascending: false }),
     supabase.from('agent_requests').select('id, project_id, text, status, agent, answer, created_at').order('created_at', { ascending: false }).limit(50),
   ]);
+  // A failed reload (no network) keeps what is on screen
+  if (agents.error || requests.error) return;
   const grouped: Record<string, Agent[]> = {};
   for (const row of (agents.data ?? []) as AgentRow[]) {
     (grouped[row.project_id] ??= []).push({ name: row.name, task: row.task, status: row.status, when: ago(row.updated_at), action: row.action });
@@ -46,6 +48,8 @@ function start(userId: string) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'agents' }, load)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'agent_requests' }, load)
     .subscribe();
+  // The phone drops the live link in the background: catch up on coming back
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && load());
 }
 
 /**

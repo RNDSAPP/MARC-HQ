@@ -7,7 +7,8 @@ import './Login.css';
 /** Where to come back after an e-mail link: the page Marc asked for. */
 const back = () => window.location.href.split('#')[0];
 
-type Mode = 'login' | 'signup' | 'forgot';
+// No sign-up here: the accounts are made in Supabase, nobody can create one from the site
+type Mode = 'login' | 'forgot';
 
 /** Supabase's refusals, in Marc's words. */
 function explain(message: string) {
@@ -55,20 +56,13 @@ export default function Login({ refused, recovering, onSignOut, onPasswordSet }:
       if (error) setMessage(explain(error.message));
       return;
     }
-    if (mode === 'signup') {
-      const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: back() } });
-      setBusy(false);
-      if (error) setMessage(explain(error.message));
-      else if (!data.session) setMessage(`Presque fini : ouvre le lien envoyé à ${email.trim()} pour confirmer ton adresse.`);
-      return;
-    }
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: back() });
     setBusy(false);
     setMessage(error ? explain(error.message) : `Lien envoyé à ${email.trim()} : ouvre-le sur cet appareil pour choisir ton mot de passe.`);
   }
 
-  const title = recovering ? 'Choisis ton mot de passe' : mode === 'signup' ? 'Créer ton accès' : mode === 'forgot' ? 'Mot de passe oublié' : 'Connexion';
-  const action = recovering ? 'Enregistrer' : mode === 'signup' ? 'Créer mon accès' : mode === 'forgot' ? 'Recevoir le lien' : 'Se connecter';
+  const title = recovering ? 'Choisis ton mot de passe' : mode === 'forgot' ? 'Mot de passe oublié' : 'Connexion';
+  const action = recovering ? 'Enregistrer' : mode === 'forgot' ? 'Recevoir le lien' : 'Se connecter';
 
   return (
     <main className="login">
@@ -108,8 +102,8 @@ export default function Login({ refused, recovering, onSignOut, onPasswordSet }:
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={recovering || mode === 'signup' ? 'Nouveau mot de passe (6 caractères min.)' : 'Mot de passe'}
-                  autoComplete={recovering || mode === 'signup' ? 'new-password' : 'current-password'}
+                  placeholder={recovering ? 'Nouveau mot de passe (6 caractères min.)' : 'Mot de passe'}
+                  autoComplete={recovering ? 'new-password' : 'current-password'}
                   minLength={6}
                   required
                 />
@@ -141,11 +135,6 @@ export default function Login({ refused, recovering, onSignOut, onPasswordSet }:
             {mode !== 'forgot' && (
               <button type="button" className="login-other" onClick={() => { setMode('forgot'); setMessage(''); }}>
                 Mot de passe oublié ou première fois
-              </button>
-            )}
-            {mode !== 'signup' && (
-              <button type="button" className="login-other" onClick={() => { setMode('signup'); setMessage(''); }}>
-                Créer un accès
               </button>
             )}
           </div>

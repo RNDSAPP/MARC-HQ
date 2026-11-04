@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Module, PipelineCard, Project } from '../data/types';
 import { useSession } from './session';
 import { supabase } from './supabase';
+import { isoDate } from './dates';
 
 /** What Marc adds in Marc HQ, one kind per module. */
 export type RecordKind = 'club' | 'ambassadeur' | 'bde' | 'soiree' | 'post' | 'veille';
@@ -97,13 +98,19 @@ export const nameOf = (record: RecordRow) => record.data.name ?? record.data.tit
 
 // One shared copy for the whole app, kept live by Supabase Realtime
 let rows: RecordRow[] = [];
+let ready = false;
+/** Whether the records were loaded from Supabase at least once (the calendar waits for it). */
+export const recordsReady = () => ready || !supabase;
 const listeners = new Set<() => void>();
 let started: string | null = null;
 
 async function load() {
   if (!supabase) return;
-  const { data } = await supabase.from('records').select('id, project_id, kind, data, created_at').order('created_at');
-  rows = (data ?? []) as RecordRow[];
+  const { data, error } = await supabase.from('records').select('id, project_id, kind, data, created_at').order('created_at');
+  // A failed reload (no network) keeps what is on screen instead of emptying everything
+  if (error || !data) return;
+  rows = data as RecordRow[];
+  ready = true;
   listeners.forEach((listener) => listener());
 }
 
@@ -118,6 +125,8 @@ export function useRecords() {
       started = session.user.id;
       load();
       supabase.channel('records-live').on('postgres_changes', { event: '*', schema: 'public', table: 'records' }, load).subscribe();
+      // The phone drops the live link in the background: catch up on coming back
+      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && load());
     }
     return () => {
       listeners.delete(listener);
@@ -137,10 +146,13 @@ export async function saveRecord(projectId: string, kind: RecordKind, data: Reco
   return '';
 }
 
+/** Remove a record; '' when it went through, else what went wrong. */
 export async function removeRecord(id: string) {
-  if (!supabase) return;
-  await supabase.from('records').delete().eq('id', id);
+  if (!supabase) return 'Supabase n’est pas réglé.';
+  const { error } = await supabase.from('records').delete().eq('id', id);
+  if (error) return 'La suppression n’a pas marché. Réessaie.';
   await load();
+  return '';
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -151,13 +163,14 @@ const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aoû
 const dayMonth = (iso?: string) => {
   if (!iso) return '';
   const [y, m, d] = iso.split('-').map(Number);
-  return y && m && d ? `${d} ${MONTHS[m - 1]}` : '';
+  if (!y || !m || !d) return '';
+  return y === new Date().getFullYear() ? `${d} ${MONTHS[m - 1]}` : `${d} ${MONTHS[m - 1]} ${y}`;
 };
 const num = (value?: string) => Number(String(value ?? '').replace(/\s/g, '').replace(',', '.')) || 0;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n > 1 ? many : one}`;
 const spaced = (n: number) => n.toLocaleString('fr-FR');
 const since = (iso: string) => `Depuis ${MONTHS[new Date(iso).getMonth()]}`;
-const isToday = (iso?: string) => !!iso && iso >= new Date().toISOString().slice(0, 10);
+const isToday = (iso?: string) => !!iso && iso >= isoDate();
 
 function patch(project: Project, slug: string, change: (module: Module) => Partial<Module>): Project {
   return { ...project, modules: project.modules.map((module) => (module.slug === slug ? { ...module, ...change(module) } : module)) };

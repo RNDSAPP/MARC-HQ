@@ -276,3 +276,18 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
 176. **Nouveau logo Marc HQ** : le X de quatre branches biseautées, partout : barre de gauche, accueil, connexion, onglet du navigateur (favicon) et icône sur l'écran d'accueil de l'iPhone.
 177. **Tâches cochées → « Faites », en direct** : une tâche cochée reste un instant barrée puis passe dans « Faites » (sur l'accueil aussi, où le lien indique combien sont faites). Une tâche cochée sur le téléphone apparaît cochée sur l'ordinateur sans recharger, et inversement (direct Supabase sur la table des tâches).
 178. **Notifications sur ordinateur et téléphone** : dans le menu de ton rond, « Activer les notifications », puis « Tester » ou « Couper ici ». Tu es prévenu quand un agent attend ta réponse, quand il a terminé, et quand une demande confiée est faite. Sur iPhone, il faut d'abord mettre Marc HQ sur l'écran d'accueil (Partager › Sur l'écran d'accueil) et l'ouvrir depuis l'icône : c'est la règle d'Apple. Les clés d'envoi restent dans le coffre de Supabase, jamais dans le code.
+179. **Bas de « Vue d'ensemble » sur téléphone** : les rubriques forment une seule liste groupée (icône, nom, chiffre, flèche), comme les Réglages de l'iPhone ; les outils sont une grille d'icônes, quatre par ligne, avec une pastille quand ils contiennent quelque chose. Le menu « Plus » de la barre du bas suit la même grille d'icônes.
+180. **Corrections après relecture du code** :
+    - plus d'écran « adresse non autorisée » par erreur quand le réseau se réveille en revenant sur l'app (la vérification se fait une fois par personne, et un échec de réseau n'est plus pris pour un refus) ;
+    - une coupure de réseau ne vide plus les tableaux et les agents : on garde ce qui était affiché, et tout se remet à jour en revenant sur l'app ;
+    - une tâche qui n'a pas pu être enregistrée revient en arrière et un message le dit ; un double appui rapide ne mélange plus coché et décoché ;
+    - l'agenda Google n'est synchronisé qu'une fois les tâches et fiches chargées (plus d'événements effacés puis recréés), ne recrée plus tout quand Google ne répond pas, et ne repousse plus d'un an les dates passées ;
+    - les messages « Signé », « Validé », « supprimé » n'apparaissent que si c'est vraiment enregistré ;
+    - le curseur ne saute plus hors du champ pendant la saisie dans les fiches ;
+    - « Exporter le mois » marche sur Safari ;
+    - les fonctions serveur répondent un message clair au lieu de « pas de réponse » quand Google ou Apple ont un souci.
+181. **Sécurité** :
+    - plus de « Créer un accès » sur la page de connexion : personne ne peut se créer un compte depuis le site ;
+    - l'encart TikTok tourne dans une page isolée (public/tiktok.html) : son code ne peut pas toucher la connexion ni les données de Marc HQ ;
+    - en-têtes de protection sur Vercel (le site ne peut pas être affiché dans un autre site, les scripts et connexions sont limités à Marc HQ, Supabase et Google Fonts) ;
+    - les fichiers de clés locaux (.env.supabase, .env.local) ne sont plus lisibles que par ton compte Mac.

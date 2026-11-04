@@ -178,35 +178,77 @@
     padding: 0;
   }
 
+  /* Like an iPhone home screen: four icons a row, the name under each */
   .sheet-list--grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 4px;
+    padding: 0 4px 10px;
   }
 
   .sheet-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
-    min-height: 52px;
-    padding: 0 12px;
+    gap: 6px;
+    padding: 4px 0;
     border-radius: 14px;
-    font-size: 16px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text);
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .sheet-item svg {
-    color: var(--accent);
+  .sheet-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: var(--fill);
+    color: var(--text-2);
+    transition: transform 0.15s var(--ease);
   }
 
-  .sheet-item.active {
-    background: var(--accent-tint);
+  /* The project's modules in its colour, the tools in grey */
+  .sheet-icon--module {
+    background: var(--accent);
+    color: #ffffff;
+  }
+
+  .sheet-item:active .sheet-icon {
+    transform: scale(0.92);
+  }
+
+  .sheet-item.active .sheet-icon {
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+  }
+
+  .sheet-label {
+    font-size: 11.5px;
+    letter-spacing: -0.015em;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .sheet-count {
-    margin-left: auto;
-    font-size: 14px;
-    color: var(--text-muted);
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
   }
 }
 

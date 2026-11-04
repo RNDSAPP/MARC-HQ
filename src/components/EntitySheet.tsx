@@ -52,12 +52,15 @@ export default function EntitySheet({ project, entity, onClose, onAction, onAddT
   const closeRef = useRef<HTMLButtonElement>(null);
   const set = (key: keyof Details, value: string) => setDetails((prev) => ({ ...prev, [key]: value }));
 
+  // Focus once (not at every re-render, which pulled the cursor out of the fields)
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && close.current();
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, []);
 
   const tel = details.phone.replace(/[^\d+]/g, '');
   const maps = details.address ? `https://maps.apple.com/?q=${encodeURIComponent(details.address)}` : '';

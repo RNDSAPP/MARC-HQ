@@ -1,9 +1,9 @@
 // The latest mails of a project's box: who, subject, date, a snippet, and whether it is unread.
-import { admin, cors, googleAccess, json, signedIn } from '../_shared/common.ts';
+import { admin, cors, googleAccess, json, safe, signedIn } from '../_shared/common.ts';
 
 const header = (headers: { name: string; value: string }[], name: string) => headers.find((h) => h.name.toLowerCase() === name)?.value ?? '';
 
-Deno.serve(async (req) => {
+Deno.serve(safe(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   const who = await signedIn(req);
   if ('error' in who) return json({ error: who.error }, 401);
@@ -34,4 +34,4 @@ Deno.serve(async (req) => {
     }),
   );
   return json({ messages });
-});
+}));

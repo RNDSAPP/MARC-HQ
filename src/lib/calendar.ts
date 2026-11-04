@@ -12,13 +12,11 @@ export type CalendarEvent = { key: string; title: string; date: string; descript
 const MONTHS: Record<string, number> = { janv: 0, févr: 1, fevr: 1, mars: 2, avr: 3, mai: 4, juin: 5, juil: 6, août: 7, aout: 7, sept: 8, oct: 9, nov: 10, déc: 11, dec: 11 };
 const DAYS: Record<string, number> = { dim: 0, lun: 1, mar: 2, mer: 3, jeu: 4, ven: 5, sam: 6 };
 
-/** "14 nov." → this year's date (next year's when it is long past); anything vaguer → null. */
+/** "14 nov." → that day this year, "14 nov. 2027" → that year; anything vaguer → null. */
 function dayMonth(text: string, today: Date) {
-  const match = text.trim().toLowerCase().match(/^(\d{1,2})\s+([a-zéû]+)\.?$/);
+  const match = text.trim().toLowerCase().match(/^(\d{1,2})\s+([a-zéû]+)\.?(?:\s+(\d{4}))?$/);
   if (!match || MONTHS[match[2]] === undefined) return null;
-  const date = new Date(today.getFullYear(), MONTHS[match[2]], Number(match[1]));
-  if (today.getTime() - date.getTime() > 60 * 86400000) date.setFullYear(date.getFullYear() + 1);
-  return isoDate(date);
+  return isoDate(new Date(match[3] ? Number(match[3]) : today.getFullYear(), MONTHS[match[2]], Number(match[1])));
 }
 
 /** "Auj." → today, "Appel jeu." / "Ven." → the next such day (today included); else null. */
@@ -66,7 +64,7 @@ export type SyncStatus = { at: number; created: number; changed: number; removed
  * The project's Google calendar: whether Google Calendar is linked for the person signed in, the
  * last sync, and an automatic sync a moment after anything dated changes.
  */
-export function useCalendarSync(project: Project, tasks: Task[]) {
+export function useCalendarSync(project: Project, tasks: Task[], ready = true) {
   const session = useSession();
   const [email, setEmail] = useState<string | null | undefined>(undefined);
   const [status, setStatus] = useStored<SyncStatus | null>(`marc-hq:${project.id}:agenda`, () => null);
@@ -104,12 +102,14 @@ export function useCalendarSync(project: Project, tasks: Task[]) {
     setStatus(() => ({ at: Date.now(), ...(data as Omit<SyncStatus, 'at'>) }));
   }, [project.id, project.name, signature, setStatus]);
 
-  // Automatic: once linked, a moment after the dated things change
+  // Automatic: once linked, a moment after the dated things change, and only once the tasks and
+  // records are really loaded (a half-loaded list would remove events from Google). A project
+  // added from the app gets its calendar on demand only.
   useEffect(() => {
-    if (!email || signature === lastSent.current) return;
+    if (!email || !ready || project.custom || signature === lastSent.current) return;
     const timer = window.setTimeout(sync, 1500);
     return () => window.clearTimeout(timer);
-  }, [email, signature, sync]);
+  }, [email, ready, project.custom, signature, sync]);
 
   return { session, email, status, busy, events, sync, reload };
 }

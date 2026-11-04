@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Project } from '../../data/types';
 import { removeRecord, saveRecord, useRecords } from '../../lib/records';
@@ -18,26 +18,22 @@ export function readAccount(text: string): Account | null {
   return /^[A-Za-z0-9._]{2,30}$/.test(bare) ? { network: 'tiktok', handle: bare } : null;
 }
 
-/** TikTok's official profile embed: their script turns the quote into a live profile with videos. */
+/**
+ * TikTok's official profile embed: their script turns the quote into a live profile with videos.
+ * It runs in a sealed frame (public/tiktok.html, sandbox without same-origin): TikTok's code cannot
+ * reach Marc HQ's page, its sign-in or its data.
+ */
 function TikTokProfile({ handle }: { handle: string }) {
-  useEffect(() => {
-    // The script only reads the page once: load it again for every new profile shown
-    document.querySelectorAll('script[data-tiktok-embed]').forEach((s) => s.remove());
-    const script = document.createElement('script');
-    script.src = 'https://www.tiktok.com/embed.js';
-    script.async = true;
-    script.dataset.tiktokEmbed = '';
-    document.body.appendChild(script);
-  }, [handle]);
   return (
     <div className="veille-embed">
-      <blockquote className="tiktok-embed" cite={`https://www.tiktok.com/@${handle}`} data-unique-id={handle} data-embed-type="creator" style={{ maxWidth: 780, minWidth: 288, margin: 0 }}>
-        <section>
-          <a target="_blank" rel="noreferrer" href={`https://www.tiktok.com/@${handle}`}>
-            @{handle}
-          </a>
-        </section>
-      </blockquote>
+      <iframe
+        className="veille-frame"
+        title={`Profil TikTok @${handle}`}
+        src={`/tiktok.html?u=${encodeURIComponent(handle)}`}
+        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+        referrerPolicy="strict-origin-when-cross-origin"
+        loading="lazy"
+      />
     </div>
   );
 }

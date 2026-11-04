@@ -41,13 +41,15 @@ export default function TabBar({ project }: Props) {
           <div className="sheet-panel">
             <span className="sheet-grabber" aria-hidden="true" />
             <p className="sheet-title">Rubriques</p>
-            <ul className="sheet-list">
+            <ul className="sheet-list sheet-list--grid">
               {others.map((module) => (
                 <li key={module.slug}>
                   <NavLink to={`/${project.id}/${module.slug}`} className="sheet-item">
-                    <ModuleIcon slug={module.slug} size={22} />
-                    <span>{module.label}</span>
-                    {module.count && <span className="sheet-count">{module.count}</span>}
+                    <span className="sheet-icon sheet-icon--module">
+                      <ModuleIcon slug={module.slug} size={22} />
+                      {module.count && module.count !== '0' && <span className="sheet-count">{module.count}</span>}
+                    </span>
+                    <span className="sheet-label">{module.label}</span>
                   </NavLink>
                 </li>
               ))}
@@ -57,8 +59,10 @@ export default function TabBar({ project }: Props) {
               {moreTools.map((tool) => (
                 <li key={tool.slug}>
                   <NavLink to={`/${project.id}/${tool.slug}`} className="sheet-item">
-                    <ModuleIcon slug={tool.slug} size={22} />
-                    <span>{tool.label}</span>
+                    <span className="sheet-icon">
+                      <ModuleIcon slug={tool.slug} size={22} />
+                    </span>
+                    <span className="sheet-label">{tool.label}</span>
                   </NavLink>
                 </li>
               ))}

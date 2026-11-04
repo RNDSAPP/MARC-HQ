@@ -12,6 +12,17 @@ export const cors = {
 export const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
+/** Wraps a handler: anything unexpected (bad input, Google or Apple down) answers a clear error
+ *  with the CORS headers, instead of a bare 500 the app would read as "no network". */
+export const safe = (handler: (req: Request) => Promise<Response>) => async (req: Request) => {
+  try {
+    return await handler(req);
+  } catch (error) {
+    console.error(error);
+    return json({ error: 'Le serveur a eu un souci, réessaie dans un moment.' }, 500);
+  }
+};
+
 const url = Deno.env.get('SUPABASE_URL')!;
 // New projects expose their secret keys as JSON; older ones as SUPABASE_SERVICE_ROLE_KEY
 export const serviceKey =

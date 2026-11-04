@@ -27,12 +27,15 @@ export default function RecordDialog({ projectId, kind, record, onClose, onDone 
   const [confirming, setConfirming] = useState(false);
   const first = useRef<HTMLInputElement>(null);
 
+  // Focus the first field once (not at every re-render, which made the cursor jump while typing)
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     first.current?.focus();
-    const key = (event: KeyboardEvent) => event.key === 'Escape' && onClose();
+    const key = (event: KeyboardEvent) => event.key === 'Escape' && close.current();
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [onClose]);
+  }, []);
 
   const name = values.name ?? values.title ?? '';
 
@@ -54,8 +57,10 @@ export default function RecordDialog({ projectId, kind, record, onClose, onDone 
       return;
     }
     setBusy(true);
-    await removeRecord(record.id);
-    onDone(`${spec.title} supprimé : ${name}.`);
+    const failed = await removeRecord(record.id);
+    setBusy(false);
+    if (failed) setError(failed);
+    else onDone(`${spec.title} supprimé : ${name}.`);
   }
 
   return (
