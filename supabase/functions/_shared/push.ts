@@ -39,10 +39,23 @@ export async function sendPush(userId: string, message: Message, keys: PushKeys)
   return sent;
 }
 
-/** The people who turned notifications on somewhere. */
+/**
+ * The people who turned notifications on somewhere AND whose address is on the allowed list
+ * (ALLOWED_EMAILS): App Store figures, reviews and payments never go to anyone else, even an
+ * account created behind the app's back.
+ */
 export async function subscribers() {
   const { data } = await admin.from('push_subscriptions').select('user_id');
-  return [...new Set((data ?? []).map((row) => row.user_id as string))];
+  const allowed = (Deno.env.get('ALLOWED_EMAILS') ?? '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  const people: string[] = [];
+  for (const id of new Set((data ?? []).map((row) => row.user_id as string))) {
+    const { data: found } = await admin.auth.admin.getUserById(id);
+    if (allowed.includes((found?.user?.email ?? '').toLowerCase())) people.push(id);
+  }
+  return people;
 }
 
 /** True the first time a key is seen (then it is logged): the guard against sending twice. */
