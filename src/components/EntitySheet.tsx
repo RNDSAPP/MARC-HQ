@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { PipelineTone, Project } from '../data/types';
-import { useStored } from '../hooks/useStored';
+import { useSynced } from '../hooks/useSynced';
 import { initials } from '../lib/format';
 import './EntitySheet.css';
 
@@ -48,7 +48,7 @@ type Props = {
  * what we know, then fields Marc fills in (saved in this browser, per project), and quick actions.
  */
 export default function EntitySheet({ project, entity, onClose, onAction, onAddTask }: Props) {
-  const [details, setDetails] = useStored<Details>(`marc-hq:${project.id}:fiche:${slug(entity.name)}`, () => EMPTY);
+  const [details, setDetails] = useSynced<Details>(`marc-hq:${project.id}:fiche:${slug(entity.name)}`, () => EMPTY);
   const closeRef = useRef<HTMLButtonElement>(null);
   const set = (key: keyof Details, value: string) => setDetails((prev) => ({ ...prev, [key]: value }));
 
@@ -127,7 +127,7 @@ export default function EntitySheet({ project, entity, onClose, onAction, onAddT
             <span>Notes</span>
             <textarea value={details.notes} placeholder="Ce qui s'est dit, la prochaine étape…" onChange={(event) => set('notes', event.target.value)} />
           </label>
-          <p className="esheet-saved">Enregistré dans ce navigateur, à chaque frappe.</p>
+          <p className="esheet-saved">Enregistré à chaque frappe, sur ton téléphone comme sur ton ordinateur.</p>
         </div>
       </aside>
     </div>

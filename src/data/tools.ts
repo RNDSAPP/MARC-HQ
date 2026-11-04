@@ -2,6 +2,7 @@
 // is signed in to Marc HQ; the other tools are still kept in this browser's local storage.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { newId, useStored } from '../hooks/useStored';
+import { useSynced } from '../hooks/useSynced';
 import { useSession } from '../lib/session';
 import { supabase } from '../lib/supabase';
 import { dateOfWeekDay, dueDayIndex } from '../lib/dates';
@@ -181,7 +182,7 @@ export function useTasks(project: Project) {
 }
 
 export function useNotes(project: Project) {
-  const [notes, setNotes] = useStored<Note[]>(`marc-hq:${project.id}:notes`, () => []);
+  const [notes, setNotes] = useSynced<Note[]>(`marc-hq:${project.id}:notes`, () => []);
   return {
     notes,
     add: () => {
@@ -196,7 +197,7 @@ export function useNotes(project: Project) {
 }
 
 export function useIdeas(project: Project) {
-  const [ideasStored, setIdeas] = useStored<Idea[]>(`marc-hq:${project.id}:ideas`, () => []);
+  const [ideasStored, setIdeas] = useSynced<Idea[]>(`marc-hq:${project.id}:ideas`, () => []);
   const ideas = useWithoutDemo(ideasStored, setIdeas);
   return {
     ideas,
@@ -210,7 +211,7 @@ export function useIdeas(project: Project) {
 
 
 export function useVersions(project: Project) {
-  const [versionsStored, setVersions] = useStored<Version[]>(`marc-hq:${project.id}:versions`, () => []);
+  const [versionsStored, setVersions] = useSynced<Version[]>(`marc-hq:${project.id}:versions`, () => []);
   const versions = useWithoutDemo(versionsStored, setVersions);
   const patch = (id: string, change: (v: Version) => Version) => setVersions((prev) => prev.map((v) => (v.id === id ? change(v) : v)));
   return {
@@ -226,7 +227,7 @@ export function useVersions(project: Project) {
 
 
 export function useFeedback(project: Project) {
-  const [itemsStored, setItems] = useStored<Feedback[]>(`marc-hq:${project.id}:feedback`, () => []);
+  const [itemsStored, setItems] = useSynced<Feedback[]>(`marc-hq:${project.id}:feedback`, () => []);
   const items = useWithoutDemo(itemsStored, setItems);
   return {
     items,
@@ -239,7 +240,7 @@ export function useFeedback(project: Project) {
 
 
 export function useGoals(project: Project) {
-  const [goalsStored, setGoals] = useStored<Goal[]>(`marc-hq:${project.id}:goals`, () => []);
+  const [goalsStored, setGoals] = useSynced<Goal[]>(`marc-hq:${project.id}:goals`, () => []);
   const goals = useWithoutDemo(goalsStored, setGoals);
   return {
     goals,
@@ -250,7 +251,7 @@ export function useGoals(project: Project) {
 }
 
 export function useLinks(project: Project) {
-  const [links, setLinks] = useStored<ToolLink[]>(`marc-hq:${project.id}:links`, () => []);
+  const [links, setLinks] = useSynced<ToolLink[]>(`marc-hq:${project.id}:links`, () => []);
   return {
     links,
     add: (label: string, url: string) => setLinks((prev) => [...prev, { id: newId('lien'), label, url }]),

@@ -5,7 +5,7 @@ import { useLiveAgents } from '../lib/agents';
 import { useStoreOverviews, withStore } from '../lib/appstore';
 import { useRecords, withRecords } from '../lib/records';
 import { useData } from './useData';
-import { useStored } from '../hooks/useStored';
+import { useSynced } from '../hooks/useSynced';
 import type { Project } from './types';
 
 export type CustomProject = {
@@ -84,7 +84,7 @@ export function buildProject(c: CustomProject): Project {
 }
 
 export function useCustomProjects() {
-  const [list, setList] = useStored<CustomProject[]>('marc-hq:projects', () => []);
+  const [list, setList] = useSynced<CustomProject[]>('marc-hq:projects', () => []);
   return {
     list,
     add: (draft: Omit<CustomProject, 'id' | 'createdAt'>) => {

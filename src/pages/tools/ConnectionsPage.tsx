@@ -3,7 +3,7 @@ import AccountGate, { here } from '../../components/AccountGate';
 import BrandIcon from '../../components/BrandIcon';
 import type { Brand } from '../../components/BrandIcon';
 import type { Project } from '../../data/types';
-import { useStored } from '../../hooks/useStored';
+import { useSynced } from '../../hooks/useSynced';
 import type { useCalendarSync } from '../../lib/calendar';
 import { supabase } from '../../lib/supabase';
 import './Tools.css';
@@ -50,7 +50,7 @@ export default function ConnectionsPage({ project, calendar, query, onRemoveProj
   /** Only for projects added from the app. */
   onRemoveProject?: () => void;
 }) {
-  const [addresses, setAddresses] = useStored<Addresses>(`marc-hq:${project.id}:services`, () => ({}));
+  const [addresses, setAddresses] = useSynced<Addresses>(`marc-hq:${project.id}:services`, () => ({}));
   const [editing, setEditing] = useState<Brand | null>(null);
   const [draft, setDraft] = useState('');
   const [confirm, setConfirm] = useState(false);
@@ -135,7 +135,7 @@ export default function ConnectionsPage({ project, calendar, query, onRemoveProj
         <div className="conn-danger">
           <div>
             <h2 className="tool-group-title">Supprimer {project.name}</h2>
-            <p className="conn-gives">Le projet disparaît de Marc HQ. Ses tâches, notes et idées restent dans ce navigateur si tu le recrées avec le même nom.</p>
+            <p className="conn-gives">Le projet disparaît de Marc HQ. Ses tâches, notes et idées restent enregistrées : elles reviennent si tu le recrées avec le même nom.</p>
           </div>
           {confirm ? (
             <div className="conn-actions">
