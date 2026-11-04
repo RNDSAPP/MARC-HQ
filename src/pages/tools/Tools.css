@@ -2073,3 +2073,8 @@
 .template-text--short {
   min-height: 64px;
 }
+
+/* Notes · Cartes: the way back to the cards, on a computer too (the list is hidden there) */
+.notes-body--cards .note-back {
+  display: inline-flex;
+}

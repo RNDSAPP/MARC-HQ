@@ -1047,6 +1047,8 @@ function Bartender({ origin }: { origin: Point }) {
   const [leg, setLeg] = useState(0);
   const [mode, setMode] = useState<'shake' | 'walk' | 'serve'>('shake');
   useEffect(() => {
+    // Less motion asked on this Mac or phone: the barman stays at his bar (no jumps between tables)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let cancelled = false;
     let last = -1;
     // Each step waits for the map to be moving (lib/motion.ts): asleep, the round stops where it is

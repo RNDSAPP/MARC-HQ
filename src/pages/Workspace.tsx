@@ -420,7 +420,12 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           <LiveReviewCards
             reviews={store.data.reviews.filter((r) => !query || normalize(`${r.title} ${r.body} ${r.nickname}`).includes(query))}
             onReply={store.reply}
-            drafts={Object.fromEntries(live.requests.filter((r) => r.review_id && r.project_id === project.id).map((r) => [r.review_id as string, { status: r.status, answer: r.answer }]))}
+            drafts={Object.fromEntries(
+              live.requests
+                // A request finished without a reply text is no draft: the button to ask again comes back
+                .filter((r) => r.review_id && r.project_id === project.id && !(r.status === 'faite' && !r.answer?.trim()))
+                .map((r) => [r.review_id as string, { status: r.status, answer: r.answer }]),
+            )}
             onAskDraft={(review) =>
               handToAgent(
                 project.id,

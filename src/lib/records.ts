@@ -149,6 +149,11 @@ export function useRecords() {
 /** Add, change or remove a record; '' when it went through, else what went wrong. */
 export async function saveRecord(projectId: string, kind: RecordKind, data: Record<string, string>, id?: string) {
   if (!supabase) return 'Supabase n’est pas réglé.';
+  // The day a club becomes affiliated or a BDE a partner (the week's summary counts on it, not on
+  // any later edit of the card); back to an earlier stage, the date goes
+  const won = (kind === 'club' && data.stage === 'Affiliés') || (kind === 'bde' && data.stage === 'Partenaires');
+  if (won && !data.signed_at) data = { ...data, signed_at: isoDate() };
+  if (!won && data.signed_at) data = Object.fromEntries(Object.entries(data).filter(([key]) => key !== 'signed_at'));
   const { error } = id
     ? await supabase.from('records').update({ data, updated_at: new Date().toISOString() }).eq('id', id)
     : await supabase.from('records').insert({ project_id: projectId, kind, data });

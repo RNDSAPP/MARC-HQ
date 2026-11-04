@@ -43,7 +43,7 @@ function WeekRow({ project }: { project: Project }) {
   for (const day of days) for (const [currency, value] of Object.entries(day.proceeds)) proceeds[currency] = (proceeds[currency] ?? 0) + value;
   const done = tasks.filter((task) => task.done && (task.doneAt ?? 0) >= since).length;
   const [kind, stage] = project.id === 'rnds' ? ['club', 'Affiliés'] : ['bde', 'Partenaires'];
-  const won = records.filter((record) => record.kind === kind && record.data.stage === stage && new Date(record.updated_at ?? record.created_at).getTime() >= since).length;
+  const won = records.filter((record) => record.kind === kind && record.data.stage === stage && (record.data.signed_at ?? '') >= sevenAgo).length;
   const soon = records.filter((record) => record.kind === 'soiree' && record.data.status !== 'Faite' && (record.data.date ?? '') >= today && (record.data.date ?? '') <= inSoon).length;
 
   const figures = [

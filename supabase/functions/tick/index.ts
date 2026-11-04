@@ -334,7 +334,7 @@ async function weekly(today: string, keys: PushKeys) {
       const proceeds = (days ?? []).reduce((sum, day) => addMoney(sum, day.proceeds as Money), {} as Money);
       const { count: tasks } = await admin.from('tasks').select('id', { count: 'exact', head: true }).eq('user_id', user).eq('project_id', project).eq('done', true).gte('done_at', sinceIso);
       const won = project === 'rnds' ? ['club', 'Affiliés'] : ['bde', 'Partenaires'];
-      const { count: signed } = await admin.from('records').select('id', { count: 'exact', head: true }).eq('user_id', user).eq('project_id', project).eq('kind', won[0]).eq('data->>stage', won[1]).gte('updated_at', sinceIso);
+      const { count: signed } = await admin.from('records').select('id', { count: 'exact', head: true }).eq('user_id', user).eq('project_id', project).eq('kind', won[0]).eq('data->>stage', won[1]).gte('data->>signed_at', since);
       const { count: soirees } = await admin.from('records').select('id', { count: 'exact', head: true }).eq('user_id', user).eq('project_id', project).eq('kind', 'soiree').gte('data->>date', today).lte('data->>date', shift(today, 7));
       const parts = [
         plural(downloads, 'téléchargement'),

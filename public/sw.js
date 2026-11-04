@@ -29,7 +29,8 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       const open = windows.find((client) => client.url.startsWith(self.location.origin));
-      if (open) return open.navigate(url).then((client) => (client || open).focus());
+      // A window this worker does not control refuses navigate(): a new window then, never nothing
+      if (open) return open.navigate(url).then((client) => (client || open).focus()).catch(() => self.clients.openWindow(url));
       return self.clients.openWindow(url);
     }),
   );

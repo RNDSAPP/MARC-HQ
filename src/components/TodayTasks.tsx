@@ -29,7 +29,9 @@ function ProjectToday({ project }: { project: Project }) {
     .filter((task) => task.due !== null && daysFromToday(task.due) <= 0 && (!task.done || settling.has(task.id)))
     .sort((a, b) => (a.due ?? '').localeCompare(b.due ?? ''));
   const open = due.filter((task) => !task.done).length;
-  const doneToday = tasks.filter((task) => task.done && task.due !== null && daysFromToday(task.due) <= 0 && !settling.has(task.id)).length;
+  // Ticked today (not every task ever done)
+  const startOfDay = new Date().setHours(0, 0, 0, 0);
+  const doneToday = tasks.filter((task) => task.done && (task.doneAt ?? 0) >= startOfDay && !settling.has(task.id)).length;
 
   return (
     <div className="today-group" data-project={project.id}>

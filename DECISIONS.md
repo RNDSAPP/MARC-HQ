@@ -334,3 +334,11 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - Pas de canvas ni de moteur 3D dans Marc HQ : rien à régler côté devicePixelRatio ou textures.
 201. **Nouveau logo Marc HQ** (d'après l'image de Marc, redessiné en formes simples pour rester net à toutes les tailles) : un hexagone ouvert en bas avec un P dont la queue sort en dessous, en blanc sur fond noir. Partout : barre de gauche, accueil, connexion, onglet du navigateur (favicon), icône iPhone, Dock et application installée. Il remplace le X.
 202. **Cartes d'avis App Store plus propres** : la zone pour écrire une réponse est un rectangle arrondi (elle devenait un grand ovale) ; « À répondre » tient sur une ligne ; « Brouillon par l'agent » et « Répondre » restent ensemble à droite et passent dessous quand la carte est étroite.
+203. **Tour complet du 4 novembre** (relecture du code du jour par un agent, 33 pages testées sur téléphone, fenêtre moyenne et ordinateur, ronde horaire, site en ligne) et corrections :
+    - **Sécurité** : les notifications App Store (avis, versions, ventes, paiements) ne partent plus qu'aux comptes dont l'adresse est autorisée (ALLOWED_EMAILS) ; avant, n'importe quel compte qui activait les notifications les aurait reçues.
+    - Notes en vue Cartes : le bouton « ← Notes » s'affiche aussi sur ordinateur (une note ouverte ne pouvait plus être refermée).
+    - Toucher une notification ouvre toujours Marc HQ (une fenêtre que le service worker ne contrôlait pas faisait échouer le clic).
+    - Accueil : « N faites » compte les tâches cochées aujourd'hui, pas toutes celles jamais faites.
+    - Clubs signés et BDE partenaires de la semaine : comptés le jour où l'étape change (date « signed_at » sur la fiche), plus à chaque modification de la fiche.
+    - Mouvement réduit : le barman reste à son bar au lieu de sauter d'une table à l'autre.
+    - Un brouillon d'avis terminé sans texte ne bloque plus : le bouton « Brouillon par l'agent » revient.
