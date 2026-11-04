@@ -291,3 +291,4 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - l'encart TikTok tourne dans une page isolée (public/tiktok.html) : son code ne peut pas toucher la connexion ni les données de Marc HQ ;
     - en-têtes de protection sur Vercel (le site ne peut pas être affiché dans un autre site, les scripts et connexions sont limités à Marc HQ, Supabase et Google Fonts) ;
     - les fichiers de clés locaux (.env.supabase, .env.local) ne sont plus lisibles que par ton compte Mac.
+182. **Notifications branchées** : les trois clés (paire Web Push et clé du déclencheur) sont dans le coffre (Vault) de Supabase ; la copie de travail sur le Mac a été effacée. La fonction `push` refuse tout appel sans session ou sans la bonne clé.
