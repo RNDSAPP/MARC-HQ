@@ -74,13 +74,17 @@ export function useTasks(project: Project) {
   const [moved, setMoved] = useStored<boolean>(`marc-hq:${project.id}:tasks-moved`, () => false);
   const [remote, setRemote] = useState<Task[] | null>(null);
   const online = Boolean(supabase && session);
+  // Read through a ref: `load` must not change when the local copy changes (it writes that copy
+  // itself, which would reload, write again… in a loop)
+  const localRef = useRef(local);
+  localRef.current = local;
 
   const load = useCallback(async () => {
     if (!supabase || !session) return;
     const { data, error } = await supabase.from('tasks').select('id, project_id, text, due, done, created_at, done_at').eq('project_id', project.id).order('created_at');
     if (error) return;
     // The old example tasks (ids "rnds-1", "club421-2"…) that a browser may still hold are left behind
-    const own = local.filter((task) => !/^(rnds|club421)-\d+$/.test(task.id));
+    const own = localRef.current.filter((task) => !/^(rnds|club421)-\d+$/.test(task.id));
     if (data.length === 0 && !moved && own.length > 0) {
       // First time on this account: bring this browser's own tasks over, once
       const rows = own.map((task) => ({ id: task.id, project_id: project.id, text: task.text, due: task.due, done: task.done, created_at: new Date(task.createdAt || Date.now()).toISOString() }));
@@ -95,9 +99,9 @@ export function useTasks(project: Project) {
     setRemote(list);
     // The copy kept in this browser is now the saved list: offline, or for the instant before
     // Supabase answers, Marc sees his real tasks, not an old list from before the move
-    setLocal(() => list);
+    if (JSON.stringify(localRef.current) !== JSON.stringify(list)) setLocal(() => list);
     if (!moved) setMoved(() => true);
-  }, [session, project.id, moved, local, setMoved, setLocal]);
+  }, [session, project.id, moved, setMoved, setLocal]);
 
   // Load, then again when another view changed them, when coming back to the app, and live when
   // the phone or the computer changes one (Supabase realtime on the tasks table)
