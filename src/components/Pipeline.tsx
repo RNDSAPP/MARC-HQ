@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { PipelineCard, PipelineColumn } from '../data/types';
 import { initials } from '../lib/format';
 import './Pipeline.css';
@@ -8,10 +9,12 @@ type Props = {
   onAction: (label: string) => void;
   /** Open the card of a club. */
   onOpen: (name: string) => void;
+  /** Where the whole list is, when a column shows only its first cards. */
+  moreHref?: string;
 };
 
 /** Pipeline in columns (clubs for RNDS, BDE for Club 421). */
-export default function Pipeline({ columns, hotAction, onAction, onOpen }: Props) {
+export default function Pipeline({ columns, hotAction, onAction, onOpen, moreHref }: Props) {
   if (columns.every((column) => column.cards.length === 0)) {
     return (
       <p className="pipeline-none">
@@ -22,11 +25,11 @@ export default function Pipeline({ columns, hotAction, onAction, onOpen }: Props
   return (
     <div className="pipeline">
       {columns.map((column) => (
-        <section key={column.name} className="pipeline-col" aria-label={`${column.name}, ${column.cards.length}`}>
+        <section key={column.name} className="pipeline-col" aria-label={`${column.name}, ${column.total ?? column.cards.length}`}>
           <h3 className="pipeline-col-head">
             <span className={`pipeline-dot pipeline-dot--${column.tone}`} aria-hidden="true" />
             <span className="pipeline-col-name">{column.name}</span>
-            <span className="pipeline-col-count">{column.cards.length}</span>
+            <span className="pipeline-col-count">{column.total ?? column.cards.length}</span>
           </h3>
           {column.cards.length === 0 ? (
             <p className="pipeline-empty">Rien ici</p>
@@ -38,6 +41,15 @@ export default function Pipeline({ columns, hotAction, onAction, onOpen }: Props
                 </li>
               ))}
             </ul>
+          )}
+          {column.total !== undefined && column.total > column.cards.length && (
+            moreHref ? (
+              <Link className="pipeline-more" to={moreHref}>
+                + {column.total - column.cards.length} autres
+              </Link>
+            ) : (
+              <p className="pipeline-more">+ {column.total - column.cards.length} autres</p>
+            )
           )}
         </section>
       ))}

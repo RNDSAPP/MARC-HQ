@@ -218,6 +218,9 @@ function withPosts(project: Project, posts: RecordRow[]): Project {
   }));
 }
 
+/** Cards shown per step on the overview of a long pipeline (Club 421 prospecting). */
+const PIPELINE_CARDS = 8;
+
 /** Cards of a pipeline from the records of one kind, in their stage. */
 function pipelineFrom(project: Project, list: RecordRow[], meta: (r: RecordRow) => string, done: string) {
   return {
@@ -311,35 +314,49 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
   }
 
   if (project.id === 'club421') {
+    // Every target of the Prospection (BDE, BDS, assos, bars, creators) is a "bde" record
     const bdes = of('bde');
     const soirees = of('soiree');
     const stage = (name: string) => bdes.filter((b) => (b.data.stage || 'À contacter') === name);
     const partners = stage('Partenaires');
-    const students = partners.reduce((sum, b) => sum + num(b.data.students), 0);
+    const contacted = bdes.filter((b) => (b.data.stage || 'À contacter') !== 'À contacter');
+    const answered = bdes.filter((b) => ['En discussion', 'Partenaires', 'Refus'].includes(b.data.stage));
+    const today = isoDate();
+    const due = bdes.filter((b) => !!b.data.relance && b.data.relance <= today && ['Contactés', 'En discussion'].includes(b.data.stage));
     const upcoming = soirees.filter((s) => s.data.status !== 'Faite' && isToday(s.data.date)).sort((a, b) => (a.data.date ?? '').localeCompare(b.data.date ?? ''));
     const done = soirees.filter((s) => s.data.status === 'Faite');
+    const TYPE_LABEL: Record<string, string> = { bde: 'BDE', bds: 'BDS', asso: 'Asso', bar: 'Bar', influenceur: 'Créateur' };
 
-    let next: Project = { ...project, pipeline: pipelineFrom(project, bdes, (b) => [b.data.school, b.data.students && `${b.data.students} étudiants`].filter(Boolean).join(' · '), 'Partenaires') };
+    // The overview pipeline: the first cards of each step (the rest is in Prospection), never the no's
+    const pipeline = pipelineFrom(project, bdes, (b) => [TYPE_LABEL[b.data.type] ?? 'BDE', b.data.city].filter(Boolean).join(' · '), 'Partenaires');
+    let next: Project = {
+      ...project,
+      pipeline: { ...pipeline, columns: pipeline.columns.map((column) => (column.cards.length > PIPELINE_CARDS ? { ...column, total: column.cards.length, cards: column.cards.slice(0, PIPELINE_CARDS) } : column)) },
+    };
     next = withPosts(next, of('post'));
     if (bdes.length) {
       next = patch(next, 'vue-d-ensemble', (m) => ({
-        headline: upcoming[0] ? `Prochaine soirée : ${upcoming[0].data.name}, le ${dayMonth(upcoming[0].data.date)}` : `${plural(partners.length, 'BDE partenaire', 'BDE partenaires')}`,
-        sub: `${plural(bdes.length, 'BDE', 'BDE')} dans le pipeline, ${plural(upcoming.length, 'soirée prévue', 'soirées prévues')}.`,
+        headline: upcoming[0] ? `Prochaine soirée : ${upcoming[0].data.name}, le ${dayMonth(upcoming[0].data.date)}` : due.length ? `${plural(due.length, 'cible')} à relancer aujourd’hui` : `${plural(partners.length, 'partenaire')}`,
+        sub: `${plural(bdes.length, 'cible')} en prospection, ${contacted.length} contactée${contacted.length > 1 ? 's' : ''}, ${plural(upcoming.length, 'soirée prévue', 'soirées prévues')}.`,
         heroNum: String(partners.length),
         heroDelta: '',
-        kpis: m.kpis.map((k) => (k.label === 'BDE partenaires' ? { ...k, value: String(partners.length) } : k)),
+        kpis: m.kpis.map((k) => (k.label === 'Partenaires' ? { ...k, value: String(partners.length) } : k)),
       }));
       next = patch(next, 'bde', () => ({
         count: String(bdes.length),
-        headline: stage('En discussion').length ? `${plural(stage('En discussion').length, 'BDE', 'BDE')} en discussion` : `${plural(bdes.length, 'BDE', 'BDE')} dans le pipeline`,
-        sub: 'Chaque BDE est dans son étape : fais-le avancer en le modifiant.',
-        heroNum: spaced(students),
-        heroDelta: '',
+        headline: due.length
+          ? `${plural(due.length, 'cible')} à relancer aujourd’hui`
+          : stage('En discussion').length
+            ? `${plural(stage('En discussion').length, 'cible')} en discussion`
+            : `${plural(stage('À contacter').length, 'cible')} à contacter`,
+        sub: 'Ouvre une cible : son DM et son mail sont prêts à copier. Touche « Contactés » une fois envoyé, la relance se prévoit toute seule.',
+        heroNum: String(partners.length),
+        heroDelta: contacted.length ? `${Math.round((answered.length / contacted.length) * 100)} % de réponses` : '',
         kpis: [
+          { label: 'Cibles', value: spaced(bdes.length), delta: '' },
+          { label: 'Contactées', value: String(contacted.length), delta: '' },
+          { label: 'Réponses', value: String(answered.length), delta: contacted.length ? `${Math.round((answered.length / contacted.length) * 100)} %` : '' },
           { label: 'Partenaires', value: String(partners.length), delta: '' },
-          { label: 'En discussion', value: String(stage('En discussion').length), delta: '' },
-          { label: 'Contactés', value: String(stage('Contactés').length), delta: '' },
-          { label: 'À contacter', value: String(stage('À contacter').length), delta: '' },
         ],
       }));
     }
@@ -362,8 +379,8 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
       ...next,
       home: {
         ...next.home,
-        summary: `${plural(partners.length, 'BDE', 'BDE')} · ${money}`,
-        mini: next.home.mini.map((item) => (item.label === 'BDE partenaires' ? { ...item, value: String(partners.length) } : item)),
+        summary: `${plural(partners.length, 'partenaire')} · ${money}`,
+        mini: next.home.mini.map((item) => (item.label === 'Partenaires' ? { ...item, value: String(partners.length) } : item)),
       },
     };
   }

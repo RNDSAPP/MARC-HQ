@@ -42,6 +42,8 @@ export type PipelineColumn = {
   /** Cards in a "hot" column wait for Marc and show an action button. */
   hot?: boolean;
   cards: PipelineCard[];
+  /** When only the first cards are shown: how many there are in all. */
+  total?: number;
 };
 
 export type Pipeline = {
