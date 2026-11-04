@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { FormEvent } from 'react';
+import ViewSwitch, { useView } from '../../components/ViewSwitch';
 import type { Project } from '../../data/types';
 import { removeRecord, saveRecord, useRecords } from '../../lib/records';
 import type { RecordRow } from '../../lib/records';
 import './Tools.css';
 
 const NETWORKS = ['Tous', 'Instagram', 'TikTok', 'YouTube'] as const;
+const VIEWS = [
+  { key: 'cartes', label: 'Cartes' },
+  { key: 'liste', label: 'Liste' },
+  { key: 'colonnes', label: 'Par réseau' },
+] as const;
 /** The longest description each network takes. */
 const LIMITS: Record<string, number> = { Instagram: 2200, TikTok: 4000, YouTube: 5000 };
 
@@ -42,6 +48,7 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
   const [message, setMessage] = useState('');
   const [copied, setCopied] = useState('');
   const [busy, setBusy] = useState(false);
+  const [view, setView] = useView('modeles', VIEWS);
 
   const visible = templates.filter((record) => (filter === 'Tous' || record.data.network === filter || record.data.network === 'Tous') && query(`${record.data.name} ${record.data.text ?? ''}`));
   const limit = LIMITS[network];
@@ -70,18 +77,59 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
     if (ok) window.setTimeout(() => setCopied((current) => (current === record.id ? '' : current)), 2000);
   }
 
+  const edit = (record: RecordRow) => {
+    setEditing(record);
+    setName(record.data.name ?? '');
+    setNetwork(record.data.network ?? 'Tous');
+    setText(record.data.text ?? '');
+    setMessage('');
+    document.getElementById('template-name')?.focus();
+  };
+  const remove = async (record: RecordRow) => {
+    const failed = await removeRecord(record.id);
+    setMessage(failed || `Modèle supprimé : ${record.data.name}.`);
+  };
+  const card = (record: RecordRow) => (
+    <li key={record.id} className="tool-card template">
+      <div className="template-head">
+        <span className="template-name">{record.data.name}</span>
+        {record.data.network && record.data.network !== 'Tous' && <span className="veille-network">{record.data.network}</span>}
+      </div>
+      <p className="template-body">{record.data.text}</p>
+      <div className="template-foot">
+        <span className="template-count">{(record.data.text ?? '').length} caractères</span>
+        <span className="template-form-actions">
+          <button type="button" className="tool-ghost" onClick={() => edit(record)}>
+            Modifier
+          </button>
+          <button type="button" className="tool-remove" onClick={() => remove(record)} aria-label={`Supprimer le modèle ${record.data.name}`}>
+            ×
+          </button>
+          <button type="button" className="tool-primary template-copy" onClick={() => copy(record)}>
+            {copied === record.id ? 'Copié ✓' : 'Copier'}
+          </button>
+        </span>
+      </div>
+    </li>
+  );
+
   return (
     <section className="tool" aria-labelledby="tool-title">
       <div className="tool-head">
         <h1 id="tool-title" className="tool-title">
           <span className="tool-title-light">Modèles</span> <span className="tool-title-bold">{templates.length}</span>
         </h1>
-        <div className="tool-segment" role="group" aria-label="Réseau">
-          {NETWORKS.map((item) => (
-            <button key={item} type="button" aria-pressed={filter === item} onClick={() => setFilter(item)}>
-              {item}
-            </button>
-          ))}
+        <div className="tool-head-actions">
+          <ViewSwitch views={VIEWS} value={view} onChange={setView} />
+          {view !== 'colonnes' && (
+            <div className="tool-segment" role="group" aria-label="Réseau">
+              {NETWORKS.map((item) => (
+                <button key={item} type="button" aria-pressed={filter === item} onClick={() => setFilter(item)}>
+                  {item}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -141,51 +189,39 @@ export default function TemplatesPage({ project, query }: { project: Project; qu
         <p className="tool-empty">
           {templates.length === 0 ? 'Pas encore de modèle. Ajoute tes descriptions types juste au-dessus : tu les copieras en un appui au moment de publier.' : 'Aucun modèle pour ce réseau.'}
         </p>
-      ) : (
-        <ul className="templates">
+      ) : view === 'liste' ? (
+        <ul className="tool-card template-rows">
           {visible.map((record) => (
-            <li key={record.id} className="tool-card template">
-              <div className="template-head">
-                <span className="template-name">{record.data.name}</span>
-                {record.data.network && record.data.network !== 'Tous' && <span className="veille-network">{record.data.network}</span>}
-              </div>
-              <p className="template-body">{record.data.text}</p>
-              <div className="template-foot">
-                <span className="template-count">{(record.data.text ?? '').length} caractères</span>
-                <span className="template-form-actions">
-                  <button
-                    type="button"
-                    className="tool-ghost"
-                    onClick={() => {
-                      setEditing(record);
-                      setName(record.data.name ?? '');
-                      setNetwork(record.data.network ?? 'Tous');
-                      setText(record.data.text ?? '');
-                      setMessage('');
-                      document.getElementById('template-name')?.focus();
-                    }}
-                  >
-                    Modifier
-                  </button>
-                  <button
-                    type="button"
-                    className="tool-remove"
-                    onClick={async () => {
-                      const failed = await removeRecord(record.id);
-                      setMessage(failed || `Modèle supprimé : ${record.data.name}.`);
-                    }}
-                    aria-label={`Supprimer le modèle ${record.data.name}`}
-                  >
-                    ×
-                  </button>
-                  <button type="button" className="tool-primary template-copy" onClick={() => copy(record)}>
-                    {copied === record.id ? 'Copié ✓' : 'Copier'}
-                  </button>
+            <li key={record.id} className="template-row">
+              <button type="button" className="template-row-main" onClick={() => edit(record)}>
+                <span className="template-row-name">
+                  {record.data.name}
+                  {record.data.network && record.data.network !== 'Tous' && <span className="veille-network">{record.data.network}</span>}
                 </span>
-              </div>
+                <span className="template-row-text">{(record.data.text ?? '').split('\n')[0]}</span>
+              </button>
+              <button type="button" className="tool-primary template-copy" onClick={() => copy(record)}>
+                {copied === record.id ? 'Copié ✓' : 'Copier'}
+              </button>
             </li>
           ))}
         </ul>
+      ) : view === 'colonnes' ? (
+        <div className="task-columns">
+          {NETWORKS.map((item) => {
+            const items = visible.filter((record) => (record.data.network || 'Tous') === item);
+            return (
+              <section key={item} className="task-column" aria-label={item}>
+                <h2 className="task-column-title">
+                  {item === 'Tous' ? 'Tous les réseaux' : item} <span>{items.length}</span>
+                </h2>
+                {items.length === 0 ? <p className="task-column-empty">Rien ici</p> : <ul className="templates templates--column">{items.map(card)}</ul>}
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <ul className="templates">{visible.map(card)}</ul>
       )}
     </section>
   );

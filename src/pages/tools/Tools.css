@@ -1615,3 +1615,387 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* The view picker next to the filters */
+.tool-head-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* To do · Compact: tighter rows */
+.task-list--compact .task {
+  min-height: 40px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.task-list--compact .task-text {
+  font-size: 14px;
+}
+
+/* To do · Colonnes: one column per moment, side by side (sliding sideways on a phone) */
+.task-columns {
+  display: grid;
+  align-items: start;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 2px;
+}
+
+.task-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: var(--r-2xl);
+  background: var(--fill);
+  scroll-snap-align: start;
+}
+
+.task-column-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.task-column-title span {
+  margin-left: 4px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.task-column--late .task-column-title {
+  color: var(--alert);
+}
+
+.task-column-empty {
+  margin: 0;
+  padding: 10px 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* To do · Calendrier: the month, a day's tasks under it */
+.task-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.task-calendar-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-calendar-month {
+  min-width: 150px;
+  font-size: 17px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.task-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 8px;
+}
+
+.task-calendar-weekday {
+  padding: 4px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.task-day {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-height: 92px;
+  padding: 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .task-day:hover {
+    background: var(--fill);
+  }
+}
+
+.task-day--out {
+  opacity: 0.4;
+}
+
+.task-day-number {
+  align-self: flex-start;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 24px;
+  text-align: center;
+}
+
+.task-day--today .task-day-number {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.task-day--picked {
+  background: var(--fill);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.task-day--late .task-day-number {
+  color: var(--alert);
+}
+
+.task-day--today.task-day--late .task-day-number {
+  color: #ffffff;
+}
+
+.task-day-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.task-day-item {
+  overflow: hidden;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.task-day-item--done {
+  background: var(--fill-strong);
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.task-day-more {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.task-day-dots {
+  display: none;
+}
+
+/* Phones: the month gets small; each day shows dots, its tasks are listed under the month */
+@media (max-width: 600px) {
+  .task-columns {
+    grid-auto-columns: 82%;
+  }
+
+  .task-calendar-grid {
+    gap: 2px;
+    padding: 6px 4px;
+  }
+
+  .task-day {
+    align-items: center;
+    min-height: 46px;
+    padding: 4px 0;
+  }
+
+  .task-day-number {
+    align-self: center;
+  }
+
+  .task-day-items {
+    display: none;
+  }
+
+  .task-day-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .task-day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .task-day-dot--done {
+    background: var(--text-muted);
+    opacity: 0.5;
+  }
+}
+
+/* Modèles · Liste: one line each, the copy button at hand */
+.template-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.template-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 14px;
+}
+
+.template-row + .template-row {
+  border-top: 1px solid var(--hairline);
+}
+
+.template-row-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.template-row-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 650;
+}
+
+.template-row-text {
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Modèles · Par réseau: cards stacked in each column */
+.templates--column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* A list hidden by the view picker stays hidden whatever its own display */
+.ideas[hidden],
+.notes-list[hidden] {
+  display: none;
+}
+
+/* Notes · Cartes: every note as a card, the open one full width */
+.notes-body--cards {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.notes-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notes-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  padding: 14px;
+  border: 0;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notes-card-body {
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .notes-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .notes-card {
+    min-height: 120px;
+    padding: 12px;
+  }
+}
+
+/* In a narrow column, a task keeps its text on the full width and its date goes under it */
+.task-column .task {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 8px;
+  min-height: 0;
+  padding: 10px 8px 10px 12px;
+}
+
+.task-column .task-main {
+  /* With the remove button, the text fills the first line: the date drops to the next one */
+  flex: 1 1 calc(100% - 48px);
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.task-column .task-text {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.task-column .tool-remove {
+  order: 2;
+}
+
+.task-column .task-due {
+  order: 3;
+  margin-left: 34px;
+}
+
+.template-row-name .veille-network {
+  flex: none;
+  white-space: nowrap;
+}

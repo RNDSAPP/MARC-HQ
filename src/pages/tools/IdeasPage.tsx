@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { DragEvent, FormEvent } from 'react';
+import ViewSwitch, { useView } from '../../components/ViewSwitch';
 import type { Idea, IdeaStage } from '../../data/types';
 import './Tools.css';
 
@@ -17,11 +18,17 @@ const STAGES: { key: IdeaStage; label: string; hint: string }[] = [
   { key: 'validee', label: 'Validées', hint: 'On la garde' },
 ];
 
-/** The project's ideas, on three columns. Move a card with its arrows, or drag it on desktop. */
+const VIEWS = [
+  { key: 'colonnes', label: 'Colonnes' },
+  { key: 'liste', label: 'Liste' },
+] as const;
+
+/** The project's ideas, on three columns (or one list). Move a card with its arrows, or drag it on desktop. */
 export default function IdeasPage({ ideas, query, onAdd, onUpdate, onRemove }: Props) {
   const [title, setTitle] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [over, setOver] = useState<IdeaStage | null>(null);
+  const [view, setView] = useView('idees', VIEWS);
   const visible = ideas.filter((idea) => query(`${idea.title} ${idea.detail}`));
 
   function submit(event: FormEvent) {
@@ -45,6 +52,7 @@ export default function IdeasPage({ ideas, query, onAdd, onUpdate, onRemove }: P
         <h1 id="tool-title" className="tool-title">
           <span className="tool-title-light">Idées</span> <span className="tool-title-bold">{ideas.length}</span>
         </h1>
+        <ViewSwitch views={VIEWS} value={view} onChange={setView} />
       </div>
 
       <form className="tool-add" onSubmit={submit}>
@@ -57,7 +65,35 @@ export default function IdeasPage({ ideas, query, onAdd, onUpdate, onRemove }: P
         </button>
       </form>
 
-      <div className="ideas">
+      {view === 'liste' && (
+        <ul className="tool-card template-rows">
+          {visible.length === 0 && <li className="tool-empty">Aucune idée pour l’instant.</li>}
+          {visible.map((idea) => {
+            const at = STAGES.findIndex((stage) => stage.key === idea.stage);
+            return (
+              <li key={idea.id} className="template-row">
+                <span className="template-row-main">
+                  <span className="template-row-name">
+                    {idea.title}
+                    <span className="veille-network">{STAGES[at]?.label}</span>
+                  </span>
+                  {idea.detail && <span className="template-row-text">{idea.detail}</span>}
+                </span>
+                <span className="idea-move">
+                  <button type="button" className="tool-ghost" disabled={at <= 0} onClick={() => onUpdate(idea.id, { stage: STAGES[at - 1].key })} aria-label={`Ramener « ${idea.title} » d’une étape`}>
+                    ←
+                  </button>
+                  <button type="button" className="tool-ghost" disabled={at >= STAGES.length - 1} onClick={() => onUpdate(idea.id, { stage: STAGES[at + 1].key })} aria-label={`Avancer « ${idea.title} » d’une étape`}>
+                    →
+                  </button>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div className="ideas" hidden={view === 'liste'}>
         {STAGES.map((stage, stageIndex) => {
           const items = visible.filter((idea) => idea.stage === stage.key);
           return (

@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import ViewSwitch, { useView } from '../../components/ViewSwitch';
 import type { Project } from '../../data/types';
 import { removeRecord, saveRecord, useRecords } from '../../lib/records';
 import type { RecordRow } from '../../lib/records';
 import './Tools.css';
+
+const VIEWS = [
+  { key: 'cartes', label: 'Encarts' },
+  { key: 'liste', label: 'Liste' },
+] as const;
 
 type Account = { network: 'tiktok' | 'instagram'; handle: string };
 
@@ -49,6 +55,8 @@ export default function VeillePage({ project, query }: { project: Project; query
   const [note, setNote] = useState('');
   const [message, setMessage] = useState('');
   const visible = records.filter((r) => query(`${r.data.name} ${r.data.note ?? ''}`));
+  // Many accounts: the list without the TikTok frames is lighter to scroll
+  const [view, setView] = useView('veille', VIEWS);
 
   async function add(event: FormEvent) {
     event.preventDefault();
@@ -75,6 +83,7 @@ export default function VeillePage({ project, query }: { project: Project; query
         <h1 id="tool-title" className="tool-title">
           <span className="tool-title-light">Veille</span> <span className="tool-title-bold">{records.length}</span>
         </h1>
+        <ViewSwitch views={VIEWS} value={view} onChange={setView} />
       </div>
       <form className="tool-add" onSubmit={add}>
         <label className="visually-hidden" htmlFor="veille-account">
@@ -97,6 +106,28 @@ export default function VeillePage({ project, query }: { project: Project; query
 
       {visible.length === 0 ? (
         <p className="tool-empty">Aucun compte pour l’instant. Ajoute les comptes TikTok qui t’inspirent : tu verras leurs abonnés, leurs « j’aime » et leurs dernières vidéos ici.</p>
+      ) : view === 'liste' ? (
+        <ul className="tool-card template-rows">
+          {visible.map((record: RecordRow) => (
+            <li key={record.id} className="template-row">
+              <span className="template-row-main">
+                <span className="template-row-name">
+                  {record.data.name}
+                  <span className="veille-network">{record.data.network === 'instagram' ? 'Instagram' : 'TikTok'}</span>
+                </span>
+                {record.data.note && <span className="template-row-text">{record.data.note}</span>}
+              </span>
+              <a
+                className="tool-ghost"
+                href={record.data.network === 'instagram' ? `https://www.instagram.com/${record.data.handle}/` : `https://www.tiktok.com/@${record.data.handle}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ouvrir
+              </a>
+            </li>
+          ))}
+        </ul>
       ) : (
         <ul className="veille">
           {visible.map((record: RecordRow) => (
