@@ -61,15 +61,36 @@ export default function MapViewport({
     });
   }, [clamp, start]);
 
+  // Below the computer layout the map keeps the drawing's height (340 px on a phone), but in a
+  // wider window (a tablet, Marc HQ in a narrow Mac window) that left the drawing narrower than the
+  // frame, cut on the side: the map then grows taller so the drawing always fills its width.
+  const fit = useCallback(() => {
+    const el = frame.current;
+    const art = pan.current?.querySelector(':scope > svg');
+    if (!el || !art) return;
+    if (!window.matchMedia('(max-width: 860px)').matches) {
+      el.style.removeProperty('--map-h');
+      return;
+    }
+    const [, , w, h] = (art.getAttribute('viewBox') ?? '').split(/[\s,]+/).map(Number);
+    if (!w || !h) return;
+    const height = Math.round(Math.min(600, Math.max(340, el.clientWidth / (w / h))));
+    if (el.style.getPropertyValue('--map-h') !== `${height}px`) el.style.setProperty('--map-h', `${height}px`);
+  }, []);
+
   // Centre on first show and whenever the frame changes size (rotation, window resize).
   useEffect(() => {
     const el = frame.current;
     if (!el) return;
+    fit();
     setView(home());
-    const observer = new ResizeObserver(() => setView(home()));
+    const observer = new ResizeObserver(() => {
+      fit();
+      setView(home());
+    });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [home]);
+  }, [home, fit]);
 
   /** Zoom by `factor` around a point of the frame (in px from its top left). */
   const zoomAt = useCallback(

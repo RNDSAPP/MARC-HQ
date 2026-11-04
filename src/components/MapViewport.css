@@ -98,8 +98,9 @@
 /* On a phone the map keeps a comfortable height: the drawing is wider than the screen and you
    slide sideways to explore it */
 @media (max-width: 860px) {
+  /* --map-h: 340 px on a phone, taller in a wider window so the drawing fills it (MapViewport) */
   .map {
-    height: 340px;
+    height: var(--map-h, 340px);
   }
 
   .map-pan {
@@ -109,7 +110,7 @@
 
   .map-pan > svg {
     width: auto !important;
-    height: 340px !important;
+    height: var(--map-h, 340px) !important;
   }
 
   .map-controls {
