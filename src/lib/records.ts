@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 import { isoDate } from './dates';
 
 /** What Marc adds in Marc HQ, one kind per module. */
-export type RecordKind = 'club' | 'ambassadeur' | 'bde' | 'soiree' | 'post' | 'veille';
+export type RecordKind = 'club' | 'ambassadeur' | 'bde' | 'soiree' | 'post' | 'veille' | 'modele';
 export type RecordRow = { id: string; project_id: string; kind: RecordKind; data: Record<string, string>; created_at: string; updated_at?: string };
 
 /** A field of the add / edit sheet. */
@@ -72,6 +72,16 @@ export const KINDS: Record<RecordKind, { one: string; module: string; title: str
       { key: 'note', label: 'Pourquoi tu le suis', type: 'text', placeholder: 'Idées de reels, concurrent…' },
     ],
   },
+  modele: {
+    one: 'modèle',
+    module: 'modeles',
+    title: 'Modèle',
+    fields: [
+      { key: 'name', label: 'Nom du modèle', type: 'text', required: true, placeholder: 'Reel entraînement' },
+      { key: 'network', label: 'Réseau', type: 'select', options: ['Tous', 'Instagram', 'TikTok', 'YouTube'] },
+      { key: 'text', label: 'Texte', type: 'text' },
+    ],
+  },
   post: {
     one: 'publication',
     module: 'publications',
@@ -89,7 +99,7 @@ export const KINDS: Record<RecordKind, { one: string; module: string; title: str
 export function kindOf(project: Project, moduleSlug: string): RecordKind | null {
   if (moduleSlug === 'vue-d-ensemble') return project.id === 'rnds' ? 'club' : project.id === 'club421' ? 'bde' : null;
   const found = (Object.keys(KINDS) as RecordKind[]).find((kind) => KINDS[kind].module === moduleSlug);
-  if (found === 'veille') return found;
+  if (found === 'veille' || found === 'modele') return found;
   return found && (found === 'bde' || found === 'soiree' ? project.id === 'club421' : project.id === 'rnds') ? found : null;
 }
 

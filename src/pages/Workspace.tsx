@@ -39,6 +39,7 @@ import FeedbackPage from './tools/FeedbackPage';
 import GoalsPage from './tools/GoalsPage';
 import LinksPage from './tools/LinksPage';
 import VersionsPage from './tools/VersionsPage';
+import TemplatesPage, { TemplatesWidget, useTemplates } from './tools/TemplatesPage';
 import VeillePage from './tools/VeillePage';
 import ConnectionsPage from './tools/ConnectionsPage';
 import './Workspace.css';
@@ -76,6 +77,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
   const feedback = useFeedback(project);
   const goals = useGoals(project);
   const links = useLinks(project);
+  const templates = useTemplates(project.id);
   // The project's Google calendar, kept in step with its dated tasks, soirées and meetings
   const calendar = useCalendarSync(project, tasks.tasks, tasks.loaded && recordsReady());
   const { remove: removeProject } = useCustomProjects();
@@ -182,6 +184,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
           {tool?.slug === 'retours' && <FeedbackPage api={feedback} query={matches} />}
           {tool?.slug === 'objectifs' && <GoalsPage api={goals} query={matches} />}
           {tool?.slug === 'veille' && <VeillePage project={project} query={matches} />}
+          {tool?.slug === 'modeles' && <TemplatesPage project={project} query={matches} />}
           {tool?.slug === 'liens' && <LinksPage api={links} query={matches} />}
           {tool?.slug === 'connexions' && (
             <ConnectionsPage
@@ -223,6 +226,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
                 retours: `${feedback.items.length}`,
                 objectifs: `${goals.goals.length}`,
                 liens: `${links.links.length}`,
+                modeles: `${templates.length}`,
               }}
             />
           )}
@@ -335,7 +339,10 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
           ) : module.slug === 'abonnes' ? (
             <FollowersScene project={project} module={module} onSelect={open} />
           ) : module.slug === 'publications' ? (
-            <StudioScene project={project} module={module} icon={logoRnds} onSelect={open} />
+            <>
+              <StudioScene project={project} module={module} icon={logoRnds} onSelect={open} />
+              <TemplatesWidget project={project} />
+            </>
           ) : module.slug === 'app-store' ? (
             <>
               <AppStorePanel project={project} module={module} rating={module.heroNum} icon={project.id === 'rnds' ? logoRnds : logo421} live={store.data} />

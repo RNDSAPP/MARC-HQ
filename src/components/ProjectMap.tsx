@@ -16,6 +16,7 @@ const TOOL_HINTS: Record<string, string> = {
   objectifs: 'Où tu en es de tes objectifs',
   liens: 'Les adresses utiles',
   veille: 'Les comptes TikTok que tu suis',
+  modeles: 'Tes descriptions toutes prêtes',
   connexions: 'Les outils du projet, à ouvrir',
 };
 

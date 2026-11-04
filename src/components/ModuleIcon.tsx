@@ -136,6 +136,13 @@ const paths: Record<string, ReactNode> = {
       <circle cx="12" cy="12" r="3" />
     </>
   ),
+  // Templates: a page with a bracket of lines, ready to copy
+  modeles: (
+    <>
+      <rect x="5.5" y="3.5" width="13" height="17" rx="2.5" />
+      <path d="M9 8.5h6M9 12h6M9 15.5h3.5" />
+    </>
+  ),
   // Connections: a plug
   connexions: (
     <>
