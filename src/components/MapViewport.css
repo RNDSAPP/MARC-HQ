@@ -30,21 +30,12 @@
   will-change: transform;
 }
 
-/* Out of sight (scrolled away), Marc HQ not the window in use or set to "still" (lib/motion.ts),
-   or the phone asking for less motion: the figures rest, and the processor with them */
-:root.motion-off .map-pan *,
-:root.motion-off .map-pan *::before,
-:root.motion-off .map-pan *::after,
-.map--away .map-pan *,
-.map--away .map-pan *::before,
-.map--away .map-pan *::after {
+/* The figures never play on their own: lib/motion.ts moves them, at 30 images a second at most,
+   only while Marc HQ is in use and the map on screen. When it sleeps, nothing of the map is drawn. */
+.map-pan *,
+.map-pan *::before,
+.map-pan *::after {
   animation-play-state: paused !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .map-pan * {
-    animation-play-state: paused !important;
-  }
 }
 
 .map-controls {
