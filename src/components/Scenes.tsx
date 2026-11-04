@@ -585,7 +585,7 @@ export function AppStorePanel({ project, module, rating, icon, live }: { project
         <div className="store-title">
           <h3 className="store-name">{live ? live.app.name : project.name}</h3>
           <p className="store-tag">{live ? live.app.bundleId : project.tag}</p>
-          <p className="store-note">{live ? 'En direct d’App Store Connect.' : 'Avis d’exemple : connecte-toi à Marc HQ pour voir les vrais.'}</p>
+          <p className="store-note">{live ? 'En direct d’App Store Connect.' : 'Chargement depuis App Store Connect…'}</p>
         </div>
       </header>
 
@@ -819,7 +819,7 @@ export function RevenueScene({ project, module, onSelect }: { project: Project; 
   const safes = months.map((m, i) => ({ ...m, s: 30 + i * (w + gap), t: k + 8, h: 42 + (m.value / max) * 64, now: i === months.length - 1 }));
   const items: SceneItem[] = [...safes].reverse().map((safe) => {
     const [x, y] = iso(o, safe.s + w / 2, safe.t + d / 2);
-    return { id: safe.month, x, y: y - b - safe.h - 4, label: safe.month, sub: `${safe.buys} achats · ${safe.trend}`, tone: safe.now ? 'accent' : 'muted', value: safe.ca };
+    return { id: safe.month, x, y: y - b - safe.h - 4, label: safe.month, sub: `${safe.buys} achat${Number(safe.buys) > 1 ? 's' : ''} · ${safe.trend}`, tone: safe.now ? 'accent' : 'muted', value: safe.ca };
   });
   // Golden dice: one per 10 % of sales, in a small heap
   const dice = Math.max(1, Math.round(share / 10));
@@ -1054,7 +1054,9 @@ export function RevenueCards({ rows, onOpen }: { rows: string[][]; onOpen: (name
               <span style={{ width: `${(euros(ca) / max) * 100}%` }} />
             </span>
             <span className="revenue-foot">
-              <span>{buys} achats</span>
+              <span>
+                {buys} achat{Number(buys) > 1 ? 's' : ''}
+              </span>
               <span className={`revenue-trend revenue-trend--${normalize(trend)}`}>{trend}</span>
             </span>
           </button>

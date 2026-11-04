@@ -74,8 +74,10 @@ export type Module = {
   heroLabel: string;
   heroNum: string;
   heroDelta: string;
-  /** 12 weekly values, oldest first. */
+  /** 12 weekly values, oldest first (12 monthly ones when seriesMonthly). */
   series: number[];
+  /** The series is per month (Revenus, from Apple's reports), not per week. */
+  seriesMonthly?: boolean;
   kpis: Kpi[];
   view: ModuleView;
 };

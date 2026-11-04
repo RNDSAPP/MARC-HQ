@@ -141,7 +141,7 @@ export const club421: Project = {
       label: 'Revenus',
       headline: '0 € pour l’instant',
       sub: 'Pas encore de vente. Les revenus apparaîtront ici, mois par mois, dès le premier achat.',
-      cta: 'Exporter le mois',
+      cta: 'Exporter en CSV',
       heroLabel: 'Chiffre d’affaires du mois',
       heroNum: '0 €',
       heroDelta: 'pas encore',

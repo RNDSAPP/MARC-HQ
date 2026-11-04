@@ -186,6 +186,11 @@ const num = (value?: string) => Number(String(value ?? '').replace(/\s/g, '').re
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n > 1 ? many : one}`;
 const spaced = (n: number) => n.toLocaleString('fr-FR');
 const since = (iso: string) => `Depuis ${MONTHS[new Date(iso).getMonth()]}`;
+/** How long a card has not moved: "Aujourd’hui", "Hier", "Il y a 12 j". */
+const quiet = (iso: string) => {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  return days <= 0 ? 'Aujourd’hui' : days === 1 ? 'Hier' : `Il y a ${days} j`;
+};
 const isToday = (iso?: string) => !!iso && iso >= isoDate();
 
 function patch(project: Project, slug: string, change: (module: Module) => Partial<Module>): Project {
@@ -202,7 +207,7 @@ function withPosts(project: Project, posts: RecordRow[]): Project {
   return patch(project, 'publications', (m) => ({
     count: String(planned.length),
     headline: toValidate ? `« ${toValidate.data.title} » attend ton feu vert` : `${plural(planned.length, 'contenu prévu', 'contenus prévus')}`,
-    sub: `${plural(posts.filter((p) => p.data.status === 'Publié').length, 'publié')}, ${plural(posts.filter((p) => p.data.status === 'Prêt').length, 'prêt')}.`,
+    sub: `${plural(posts.filter((p) => p.data.status === 'Publié').length, 'publiée')}, ${plural(posts.filter((p) => p.data.status === 'Prêt').length, 'prête')}.`,
     kpis: [
       { label: 'Prévues', value: String(planned.length), delta: '' },
       { label: 'Publiées', value: String(posts.filter((p) => p.data.status === 'Publié').length), delta: '' },
@@ -221,7 +226,7 @@ function pipelineFrom(project: Project, list: RecordRow[], meta: (r: RecordRow) 
       ...column,
       cards: list
         .filter((r) => (r.data.stage || project.pipeline.columns[0].name) === column.name)
-        .map((r): PipelineCard => ({ name: nameOf(r), meta: meta(r), when: column.name === done ? since(r.created_at) : 'Nouveau' })),
+        .map((r): PipelineCard => ({ name: nameOf(r), meta: meta(r), when: column.name === done ? since(r.data.signed_at || r.created_at) : quiet(r.updated_at ?? r.created_at) })),
     })),
   };
 }
@@ -319,14 +324,14 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
     if (bdes.length) {
       next = patch(next, 'vue-d-ensemble', (m) => ({
         headline: upcoming[0] ? `Prochaine soirée : ${upcoming[0].data.name}, le ${dayMonth(upcoming[0].data.date)}` : `${plural(partners.length, 'BDE partenaire', 'BDE partenaires')}`,
-        sub: `${plural(bdes.length, 'BDE')} dans le pipeline, ${plural(upcoming.length, 'soirée prévue', 'soirées prévues')}.`,
+        sub: `${plural(bdes.length, 'BDE', 'BDE')} dans le pipeline, ${plural(upcoming.length, 'soirée prévue', 'soirées prévues')}.`,
         heroNum: String(partners.length),
         heroDelta: '',
         kpis: m.kpis.map((k) => (k.label === 'BDE partenaires' ? { ...k, value: String(partners.length) } : k)),
       }));
       next = patch(next, 'bde', () => ({
         count: String(bdes.length),
-        headline: stage('En discussion').length ? `${plural(stage('En discussion').length, 'BDE')} en discussion` : `${plural(bdes.length, 'BDE')} dans le pipeline`,
+        headline: stage('En discussion').length ? `${plural(stage('En discussion').length, 'BDE', 'BDE')} en discussion` : `${plural(bdes.length, 'BDE', 'BDE')} dans le pipeline`,
         sub: 'Chaque BDE est dans son étape : fais-le avancer en le modifiant.',
         heroNum: spaced(students),
         heroDelta: '',
@@ -357,7 +362,7 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
       ...next,
       home: {
         ...next.home,
-        summary: `${plural(partners.length, 'BDE')} · ${money}`,
+        summary: `${plural(partners.length, 'BDE', 'BDE')} · ${money}`,
         mini: next.home.mini.map((item) => (item.label === 'BDE partenaires' ? { ...item, value: String(partners.length) } : item)),
       },
     };

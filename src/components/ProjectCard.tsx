@@ -35,7 +35,7 @@ export default function ProjectCard({ project }: Props) {
         <span className="pcard-num">{compact(home.big)}</span>
         <span className="pcard-label">{home.bigLabel}</span>
       </div>
-      <WeeklySteps series={trend.series} label={trend.heroLabel} compact />
+      <WeeklySteps series={trend.series} label={trend.heroLabel} monthly={trend.seriesMonthly} compact />
 
       <dl className="pcard-minis">
         {home.mini.map((item) => (
@@ -47,7 +47,7 @@ export default function ProjectCard({ project }: Props) {
       </dl>
 
       <Link to={`/${project.id}/vue-d-ensemble`} className="pcard-open">
-        Ouvrir l'espace {project.name}
+        Ouvrir l’espace {project.name}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>

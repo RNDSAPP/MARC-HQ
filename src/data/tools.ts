@@ -90,8 +90,13 @@ export function useTasks(project: Project) {
       }
       return;
     }
-    setRemote((data as TaskRow[]).map(fromRow));
-  }, [session, project.id, moved, local, setMoved]);
+    const list = (data as TaskRow[]).map(fromRow);
+    setRemote(list);
+    // The copy kept in this browser is now the saved list: offline, or for the instant before
+    // Supabase answers, Marc sees his real tasks, not an old list from before the move
+    setLocal(() => list);
+    if (!moved) setMoved(() => true);
+  }, [session, project.id, moved, local, setMoved, setLocal]);
 
   // Load, then again when another view changed them, when coming back to the app, and live when
   // the phone or the computer changes one (Supabase realtime on the tasks table)
@@ -148,7 +153,7 @@ export function useTasks(project: Project) {
     /** Why the last change did not go through, '' when all is saved. */
     failed,
     /** Whether the list shown is the saved one (false while it loads from Supabase). */
-    loaded: !online || remote !== null,
+    loaded: supabase ? session !== undefined && (!online || remote !== null) : true,
     /** Whether the list is shared through Supabase (signed in) or kept in this browser. */
     shared: online,
     add: (text: string, due: string | null) => {

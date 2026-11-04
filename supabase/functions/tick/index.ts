@@ -294,10 +294,14 @@ function week(date: string) {
 async function followUps(today: string, keys: PushKeys) {
   const before = new Date(Date.now() - 7 * 86400000).toISOString();
   const { data } = await admin.from('records').select('id, user_id, project_id, kind, data, updated_at').in('kind', Object.keys(CHASE)).lt('updated_at', before);
+  // Already chased this week: a "Relancer …" task added or ticked in the last 7 days
+  const { data: chased } = await admin.from('tasks').select('user_id, project_id, text, created_at, done_at').ilike('text', 'Relancer %').or(`created_at.gte.${before},done_at.gte.${before}`);
+  const recently = new Set((chased ?? []).map((task) => `${task.user_id}:${task.project_id}:${String(task.text).slice('Relancer '.length).trim().toLowerCase()}`));
   const groups = new Map<string, { user: string; project: string; kind: string; items: { name: string; stage: string; days: number }[] }>();
   for (const record of data ?? []) {
     const stage = String(record.data?.stage ?? '');
     if (!CHASE[record.kind]?.includes(stage)) continue;
+    if (recently.has(`${record.user_id}:${record.project_id}:${String(record.data?.name ?? '').trim().toLowerCase()}`)) continue;
     if (!(await firstTime(`relance:${record.id}:${week(today)}`))) continue;
     const key = `${record.user_id}:${record.project_id}`;
     const group = groups.get(key) ?? { user: record.user_id, project: record.project_id, kind: record.kind, items: [] as { name: string; stage: string; days: number }[] };
@@ -324,7 +328,7 @@ async function followUps(today: string, keys: PushKeys) {
 
 async function weekly(today: string, keys: PushKeys) {
   const since = shift(today, -7);
-  const sinceIso = new Date(`${since}T00:00:00+01:00`).toISOString();
+  const sinceIso = new Date(Date.now() - 7 * 86400000).toISOString();
   for (const user of await subscribers()) {
     if (!(await firstTime(`weekly:${user}:${today}`))) continue;
     const lines: string[] = [];

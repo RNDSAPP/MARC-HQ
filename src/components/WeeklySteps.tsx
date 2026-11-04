@@ -7,6 +7,17 @@ type Props = {
   label: string;
   /** Smaller chart without the week axis, for the home cards. */
   compact?: boolean;
+  /** One value per month instead of per week. */
+  monthly?: boolean;
+};
+
+const SHORT_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+/** The month `back` months ago, short ("août"). */
+const monthAgo = (back: number) => {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - back);
+  return SHORT_MONTHS[d.getMonth()];
 };
 
 // Drawing units. The SVG stretches to the card, so lines keep their width with non-scaling strokes.
@@ -20,7 +31,7 @@ const FLAT = 0.6;
  * that fades out downwards. Past weeks are grey, the current week is in the project colour,
  * marked by a dot and a dashed leader.
  */
-export default function WeeklySteps({ series, label, compact = false }: Props) {
+export default function WeeklySteps({ series, label, compact = false, monthly = false }: Props) {
   const id = useId();
   const span = weekSpan(series.length);
   const max = Math.max(...series);
@@ -48,7 +59,7 @@ export default function WeeklySteps({ series, label, compact = false }: Props) {
 
   return (
     <div className={compact ? 'steps steps--compact' : 'steps'}>
-      <div className="steps-chart" role="img" aria-label={`${label} sur les ${series.length} dernières semaines`}>
+      <div className="steps-chart" role="img" aria-label={`${label} sur les ${series.length} ${monthly ? 'derniers mois' : 'dernières semaines'}`}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <linearGradient id={`${id}-past`} x1="0" y1="0" x2="0" y2="1">
@@ -84,9 +95,11 @@ export default function WeeklySteps({ series, label, compact = false }: Props) {
       </div>
       {!compact && (
         <div className="steps-axis">
-          <span>{span.first}</span>
-          <span>{series.length} dernières semaines</span>
-          <span>{span.last}</span>
+          <span>{monthly ? monthAgo(series.length - 1) : span.first}</span>
+          <span>
+            {series.length} {monthly ? 'derniers mois' : 'dernières semaines'}
+          </span>
+          <span>{monthly ? monthAgo(0) : span.last}</span>
         </div>
       )}
     </div>

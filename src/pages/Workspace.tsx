@@ -240,7 +240,7 @@ function ProjectWorkspace({ project, projects, slug }: { project: Project; proje
             <span className="workspace-panel-light">{project.space}</span>
             <span className="workspace-panel-bold">{module.label}</span>
           </p>
-          <StatPanel label={module.heroLabel} value={module.heroNum} delta={module.heroDelta} series={module.series} />
+          <StatPanel label={module.heroLabel} value={module.heroNum} delta={module.heroDelta} series={module.series} monthly={module.seriesMonthly} />
           <Activity tasks={tasks.tasks} onToggle={tasks.toggle} allHref={`/${project.id}/todo`} />
         </aside>
       )}
@@ -281,7 +281,8 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
   const open = (name: string) => {
     const record = recordNamed(name);
     if (record) setEditing({ kind: record.kind, record });
-    else setOpen(name);
+    // A month (Revenus) or a platform (Abonnés) is not a contact: no call / write / task sheet
+    else if (module.slug !== 'revenus' && module.slug !== 'abonnes' && module.slug !== 'app-store') setOpen(name);
   };
   const entity = opened ? findEntity(project, module, opened) : null;
 
@@ -305,7 +306,11 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
       saveRecord(project.id, record.kind, { ...record.data, status: 'Prêt' }, record.id).then((failed) => onAction(failed || `Validé : ${name}`));
       return;
     }
-    if (name && verb === 'Relancer') return onAddTask(`Relancer ${name}`);
+    if (name && verb === 'Relancer') {
+      // The card notes the day it was chased: no "à relancer" reminder about it for a week
+      if (record) saveRecord(project.id, record.kind, { ...record.data, relance_at: isoDate() }, record.id);
+      return onAddTask(`Relancer ${name}`);
+    }
     if (project.agents.some((agent) => agent.name === name)) return setHanding(`Pour ${name} : `);
     onAction(label);
   };
@@ -329,7 +334,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
             headline={module.headline}
             sub={module.sub}
             cta={module.cta}
-            onAction={(label) => (label === 'Confier à l’agent' && live.ready ? setHanding(module.headline) : project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : act(label))}
+            onAction={(label) => (label === 'Confier à l’agent' ? setHanding(module.headline) : project.custom && label === module.cta ? navigate(`/${project.id}/connexions`) : act(label))}
           />
           {module.view.kind === 'pipeline' && module.slug !== 'vue-d-ensemble' ? (
             <PipelineCity project={project} module={module} onSelect={open} />
@@ -508,7 +513,7 @@ function findEntity(project: Project, module: Project['modules'][number], name: 
   return null;
 }
 
-/** "Exporter le mois": the module's table as a CSV file (opens in Numbers or Excel). */
+/** "Exporter en CSV": the module's table as a CSV file (opens in Numbers or Excel). */
 function exportTable(project: Project, module: Project['modules'][number], onAction: (label: string) => void) {
   if (module.view.kind !== 'table') return;
   const cell = (value: string) => `"${value.replace(/"/g, '""')}"`;

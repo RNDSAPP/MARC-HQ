@@ -7,10 +7,11 @@ type Props = {
   value: string;
   delta: string;
   series: number[];
+  monthly?: boolean;
 };
 
 /** The module's main figure, big and thin, over its 12-week step chart. */
-export default function StatPanel({ label, value, delta, series }: Props) {
+export default function StatPanel({ label, value, delta, series, monthly }: Props) {
   return (
     <section className="stat" aria-labelledby="stat-label">
       <h2 id="stat-label" className="stat-label">
@@ -20,7 +21,7 @@ export default function StatPanel({ label, value, delta, series }: Props) {
         <span className="stat-value">{compact(value)}</span>
         <span className="stat-delta">{delta}</span>
       </div>
-      <WeeklySteps series={series} label={label} />
+      <WeeklySteps series={series} label={label} monthly={monthly} />
     </section>
   );
 }

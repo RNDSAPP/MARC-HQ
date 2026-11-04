@@ -342,3 +342,13 @@ Marc a montré une image de référence : une maquette 3D toute blanche, posée 
     - Clubs signés et BDE partenaires de la semaine : comptés le jour où l'étape change (date « signed_at » sur la fiche), plus à chaque modification de la fiche.
     - Mouvement réduit : le barman reste à son bar au lieu de sauter d'une table à l'autre.
     - Un brouillon d'avis terminé sans texte ne bloque plus : le bouton « Brouillon par l'agent » revient.
+204. **Audit de logique et d'usage du 4 novembre** : corrections faites sans toucher à la base :
+    - Tâches : le To do gardé dans le navigateur est désormais la dernière liste de Supabase (plus d'ancienne liste qui apparaissait hors ligne ou au lancement) ; les tâches « Relancer » ajoutées depuis une notification attendent que la connexion soit lue (elles pouvaient disparaître).
+    - Relances : un club ou un BDE « relancé » (bouton Relancer, ou tâche « Relancer … » ajoutée ou cochée dans la semaine) ne déclenche plus de rappel pendant 7 jours.
+    - App Store : les chiffres (téléchargements, CA, avis, versions) se rechargent quand tu reviens sur l'app après 30 minutes.
+    - Carte RNDS de l'accueil : les vrais téléchargements du mois au lieu de « 0 abonnés, à brancher ». Courbes par mois (Revenus) : l'axe dit « 12 derniers mois » avec les noms des mois.
+    - Un mois (Revenus) ou un réseau (Abonnés) n'ouvre plus une fiche de contact (Appeler, Écrire, « Relancer Novembre »).
+    - Cartes du pipeline : « Il y a 12 j » (depuis la dernière modification) au lieu de « Nouveau » pour toujours ; « Depuis nov. » compte depuis la signature.
+    - Messages : « Chargement depuis App Store Connect… » au lieu de « Avis d'exemple : connecte-toi » ; « Confier à l'agent » s'ouvre même si les agents ne sont pas encore chargés.
+    - Français : « 2 avis » (et non « aviss »), « 3 BDE », « 1 achat », « 2 publiées, 1 prête », « Ouvrir l’espace » ; « Exporter le mois » devient « Exporter en CSV » (il exporte tous les mois).
+    - Résumé du lundi : les 7 derniers jours sont comptés juste toute l'année (l'heure d'été décalait d'une heure).

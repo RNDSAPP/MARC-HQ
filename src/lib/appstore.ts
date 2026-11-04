@@ -69,6 +69,17 @@ const cache: Record<string, StoreData> = {};
 const errors: Record<string, string> = {};
 const listeners = new Set<() => void>();
 let loadedFor: string | null = null;
+let loadedAt = 0;
+
+// Marc HQ stays open all day in the Dock: coming back to it after 30 minutes or more, the App
+// Store figures (downloads, revenue, reviews, versions) are fetched again
+const STALE_AFTER = 30 * 60 * 1000;
+function refreshWhenBack() {
+  if (document.visibilityState === 'visible' && loadedFor && Date.now() - loadedAt > STALE_AFTER) {
+    loadedAt = Date.now();
+    STORE_PROJECTS.forEach(fetchOverview);
+  }
+}
 
 async function fetchOverview(projectId: string) {
   if (!supabase) return;
@@ -89,7 +100,12 @@ export function useStoreOverviews() {
     const listener = () => refresh((n) => n + 1);
     listeners.add(listener);
     if (session && loadedFor !== session.user.id) {
+      if (!loadedFor) {
+        document.addEventListener('visibilitychange', refreshWhenBack);
+        window.addEventListener('focus', refreshWhenBack);
+      }
       loadedFor = session.user.id;
+      loadedAt = Date.now();
       STORE_PROJECTS.forEach(fetchOverview);
     }
     return () => {
@@ -121,7 +137,8 @@ export function useAppStore(projectId: string, enabled: boolean) {
   return { session, data: enabled ? (all[projectId] ?? null) : null, error: enabled ? (errors[projectId] ?? '') : '', reload, reply };
 }
 
-const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
+// "avis" does not take an s; the other words do
+const plural = (n: number, word: string) => `${n} ${word}${n > 1 && !word.endsWith('s') ? 's' : ''}`;
 
 /** A version in words: "1.7 en attente de review". */
 export const versionLine = (version: StoreVersion | undefined) => (version ? `${version.version} ${(VERSION_STATE[version.state] ?? version.state).toLowerCase()}` : '');
@@ -164,7 +181,9 @@ function withSales(project: Project, store: StoreData): Project {
       ...project.home,
       // Revenue on the card when the app sells (Club 421 always shows it, at 0 € too)
       summary: (project.home.mini.some((item) => item.label === 'CA du mois') || Object.keys(now.proceeds).length ? [...segments, `${ca} ce mois`] : segments).join(' · '),
-      big: project.home.bigLabel.includes('chiffre') ? ca : project.home.big,
+      // Club 421 shows its revenue; RNDS (free) its downloads, real, instead of followers "to plug in"
+      big: project.home.bigLabel.includes('chiffre') ? ca : project.home.bigLabel.includes('abonnés') ? downloads.value : project.home.big,
+      bigLabel: project.home.bigLabel.includes('abonnés') ? `téléchargement${now.downloads > 1 ? 's' : ''} en ${monthName(key)}` : project.home.bigLabel,
       mini: project.home.mini.map((item) => (item.label === 'CA du mois' ? { ...item, value: ca } : item.label === 'Téléchargements' ? { ...item, value: downloads.value } : item)),
     },
     modules: project.modules.map((module) => {
@@ -180,6 +199,7 @@ function withSales(project: Project, store: StoreData): Project {
         heroNum: ca,
         heroDelta: `${now.downloads} téléchargement${now.downloads > 1 ? 's' : ''}`,
         series: last12.map(euros),
+        seriesMonthly: true,
         kpis: kpis.map((kpi) => (kpi.label === 'CA' ? { ...kpi, value: ca } : kpi.label === 'Achats' ? { ...kpi, value: String(now.purchases) } : kpi.label === 'Panier moyen' ? { ...kpi, value: basket } : kpi)),
         view:
           module.view.kind === 'table'
