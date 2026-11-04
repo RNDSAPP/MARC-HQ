@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 declare const __BUILD__: string;
 
 // Marc HQ updates itself: the app knows its build id, and checks the one online (/version.json,
-// never cached) when it comes back to the screen and every 10 minutes. A new version found while
-// Marc was away loads at once; one found while he is using it waits for a tap on "Mettre à jour".
+// never cached) when it comes back to the screen and every 5 minutes. A new version found while
+// Marc was away, or while the window is open but not the one he uses (the Dock window beside his
+// work), loads at once; one found while he is using it waits for a tap on "Mettre à jour".
 
 const mine = typeof __BUILD__ === 'string' ? __BUILD__ : 'dev';
 
@@ -27,7 +28,7 @@ export function useUpdate() {
     const check = async (comingBack: boolean) => {
       const build = await online();
       if (!build || build === mine) return;
-      if (comingBack) window.location.reload();
+      if (comingBack || !document.hasFocus()) window.location.reload();
       else setReady(true);
     };
     const onVisibility = () => {
@@ -38,7 +39,7 @@ export function useUpdate() {
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
-    const timer = window.setInterval(() => document.visibilityState === 'visible' && check(false), 10 * 60 * 1000);
+    const timer = window.setInterval(() => check(false), 5 * 60 * 1000);
     check(false);
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
