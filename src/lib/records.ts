@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 import { isoDate } from './dates';
 
 /** What Marc adds in Marc HQ, one kind per module. */
-export type RecordKind = 'club' | 'ambassadeur' | 'bde' | 'soiree' | 'post' | 'veille' | 'modele';
+export type RecordKind = 'club' | 'ambassadeur' | 'bde' | 'soiree' | 'post' | 'veille' | 'modele' | 'prospect';
 export type RecordRow = { id: string; project_id: string; kind: RecordKind; data: Record<string, string>; created_at: string; updated_at?: string };
 
 /** A field of the add / edit sheet. */
@@ -93,6 +93,16 @@ export const KINDS: Record<RecordKind, { one: string; module: string; title: str
       { key: 'status', label: 'Statut', type: 'select', options: ['Idée', 'À valider', 'Prêt', 'Publié'] },
     ],
   },
+  // RNDS prospecting (clubs, coaches, fighters to invite): edited in its own sheet (components/Prospection)
+  prospect: {
+    one: 'profil',
+    module: 'prospection',
+    title: 'Profil',
+    fields: [
+      { key: 'name', label: 'Nom', type: 'text', required: true, placeholder: 'Boxing Club Lyon ou @boxeur' },
+      { key: 'instagram', label: 'Instagram', type: 'text', placeholder: 'boxeur_lyon' },
+    ],
+  },
 };
 
 /** The kind a module adds ("clubs" → club…), the overview adding the project's main kind. */
@@ -100,6 +110,7 @@ export function kindOf(project: Project, moduleSlug: string): RecordKind | null 
   if (moduleSlug === 'vue-d-ensemble') return project.id === 'rnds' ? 'club' : project.id === 'club421' ? 'bde' : null;
   const found = (Object.keys(KINDS) as RecordKind[]).find((kind) => KINDS[kind].module === moduleSlug);
   if (found === 'veille' || found === 'modele') return found;
+  if (found === 'prospect') return project.id === 'rnds' ? found : null;
   if (found === 'post') return project.id === 'rnds' || project.id === 'club421' ? found : null;
   return found && (found === 'bde' || found === 'soiree' ? project.id === 'club421' : project.id === 'rnds') ? found : null;
 }
@@ -151,13 +162,23 @@ export async function saveRecord(projectId: string, kind: RecordKind, data: Reco
   if (!supabase) return 'Supabase n’est pas réglé.';
   // The day a club becomes affiliated or a BDE a partner (the week's summary counts on it, not on
   // any later edit of the card); back to an earlier stage, the date goes
-  const won = (kind === 'club' && data.stage === 'Affiliés') || (kind === 'bde' && data.stage === 'Partenaires');
+  const won = (kind === 'club' && data.stage === 'Affiliés') || (kind === 'bde' && data.stage === 'Partenaires') || (kind === 'prospect' && data.stage === 'Inscrits');
   if (won && !data.signed_at) data = { ...data, signed_at: isoDate() };
   if (!won && data.signed_at) data = Object.fromEntries(Object.entries(data).filter(([key]) => key !== 'signed_at'));
   const { error } = id
     ? await supabase.from('records').update({ data, updated_at: new Date().toISOString() }).eq('id', id)
     : await supabase.from('records').insert({ project_id: projectId, kind, data });
   if (error) return 'L’enregistrement n’a pas marché. Réessaie.';
+  await load();
+  return '';
+}
+
+/** Add many records of one kind at once (the bulk add of the prospecting); '' when it went through. */
+export async function addRecords(projectId: string, kind: RecordKind, list: Record<string, string>[]) {
+  if (!supabase) return 'Supabase n’est pas réglé.';
+  if (!list.length) return '';
+  const { error } = await supabase.from('records').insert(list.map((data) => ({ project_id: projectId, kind, data })));
+  if (error) return 'L’ajout n’a pas marché. Réessaie.';
   await load();
   return '';
 }
@@ -297,6 +318,35 @@ export function withRecords(project: Project, all: RecordRow[]): Project {
           { label: 'Conversion', value: '–', delta: '' },
         ],
         view: m.view.kind === 'table' ? { ...m.view, rows: ranked.map((a) => [a.data.name, a.data.club || '–', String(num(a.data.signups)), a.data.status || 'Actif']) } : m.view,
+      }));
+    }
+    // Prospecting: the clubs, coaches and fighters invited to try the app ("prospect" records)
+    const prospects = of('prospect');
+    if (prospects.length) {
+      const today = isoDate();
+      const pstage = (name: string) => prospects.filter((p) => (p.data.stage || 'À contacter') === name);
+      const contacted = prospects.filter((p) => (p.data.stage || 'À contacter') !== 'À contacter');
+      const answered = prospects.filter((p) => ['En discussion', 'Inscrits', 'Pas intéressés'].includes(p.data.stage));
+      const joined = pstage('Inscrits');
+      const due = prospects.filter((p) => !!p.data.relance && p.data.relance <= today && ['Contactés', 'En discussion'].includes(p.data.stage));
+      const sentToday = prospects.filter((p) => p.data.contacted_at === today).length;
+      const rate = contacted.length ? `${Math.round((answered.length / contacted.length) * 100)} %` : '';
+      next = patch(next, 'prospection', () => ({
+        count: String(prospects.length),
+        headline: due.length
+          ? `${plural(due.length, 'profil')} à relancer aujourd’hui`
+          : sentToday
+            ? `${plural(sentToday, 'message envoyé', 'messages envoyés')} aujourd’hui`
+            : `${plural(pstage('À contacter').length, 'profil')} à contacter`,
+        sub: 'Clubs, coachs et combattants à inviter, partout dans le monde. Le DM et le mail de chacun sont prêts à copier ; « Envoyer à la chaîne » les enchaîne un par un.',
+        heroNum: String(joined.length),
+        heroDelta: rate ? `${rate} de réponses` : '',
+        kpis: [
+          { label: 'Profils', value: spaced(prospects.length), delta: '' },
+          { label: 'Contactés', value: String(contacted.length), delta: sentToday ? `${sentToday} aujourd’hui` : '' },
+          { label: 'Réponses', value: String(answered.length), delta: rate },
+          { label: 'Inscrits', value: String(joined.length), delta: '' },
+        ],
       }));
     }
     next = withPosts(next, posts);

@@ -55,6 +55,13 @@ const paths: Record<string, ReactNode> = {
       <path d="M21.5 9.5v5" />
     </>
   ),
+  // Prospecting (RNDS): a paper plane, the DMs going out
+  prospection: (
+    <>
+      <path d="M3.5 11.2L20.5 4l-6.2 16.5-3.1-6.4z" />
+      <path d="M11.2 14.1L20.5 4" />
+    </>
+  ),
   // Parties: calendar
   soirees: (
     <>

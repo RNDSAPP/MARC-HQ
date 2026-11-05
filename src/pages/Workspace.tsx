@@ -28,6 +28,7 @@ import AccountGate from '../components/AccountGate';
 import AgentDialog from '../components/AgentDialog';
 import RecordDialog from '../components/RecordDialog';
 import { kindOf, nameOf, recordsReady, saveRecord, useRecords } from '../lib/records';
+import { specOf } from '../lib/prospects';
 import type { RecordKind, RecordRow } from '../lib/records';
 import { ago, handToAgent, useLiveAgents } from '../lib/agents';
 import { useFeedback, useGoals, useIdeas, useLinks, useNotes, useTasks, useVersions } from '../data/tools';
@@ -280,10 +281,11 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
   const [editing, setEditing] = useState<{ kind: RecordKind; record?: RecordRow } | null>(null);
   const recordNamed = (name: string) => records.find((r) => nameOf(r) === name);
   // Club 421 prospecting: its own list and sheets (with the DM and the mail) instead of the pipeline
-  const prospecting = project.id === 'club421' && module.slug === 'bde';
+  const spec = specOf(project.id);
+  const prospecting = !!spec && module.slug === spec.module;
   const open = (name: string) => {
     const record = recordNamed(name);
-    if (record && project.id === 'club421' && record.kind === 'bde') navigate(`/${project.id}/bde?fiche=${record.id}`);
+    if (record && spec && record.kind === spec.kind) navigate(`/${project.id}/${spec.module}?fiche=${record.id}`);
     else if (record) setEditing({ kind: record.kind, record });
     // A month (Revenus) or a platform (Abonnés) is not a contact: no call / write / task sheet
     else if (module.slug !== 'revenus' && module.slug !== 'abonnes' && module.slug !== 'app-store') setOpen(name);
@@ -294,7 +296,7 @@ function ModuleView({ project, module, columns, rows, query, onAction, onAddTask
   const act = (label: string) => {
     if (label === module.cta) {
       const kind = kindOf(project, module.slug);
-      if (kind === 'bde' && project.id === 'club421') return navigate(`/${project.id}/bde?fiche=new`);
+      if (spec && kind === spec.kind) return navigate(`/${project.id}/${spec.module}?fiche=${spec.bulk ? 'ajout' : 'new'}`);
       if (kind) return setEditing({ kind });
       if (module.slug === 'abonnes') return navigate(`/${project.id}/objectifs`);
       if (module.slug === 'revenus') return exportTable(project, module, onAction);

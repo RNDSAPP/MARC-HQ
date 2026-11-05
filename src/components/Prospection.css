@@ -203,6 +203,90 @@
   stroke-linecap: round;
 }
 
+/* The round counter of a step (RNDS): one bar per step, all four lit for a sign-up */
+.pro-rounds {
+  display: block;
+  flex: none;
+}
+
+.pro-rounds-frame {
+  fill: var(--accent-tint);
+}
+
+.pro-rounds-bar {
+  fill: var(--accent-soft);
+  opacity: 0.35;
+}
+
+.pro-rounds-bar.is-on {
+  opacity: 1;
+}
+
+.pro-rounds--4 .pro-rounds-frame {
+  fill: var(--accent);
+}
+
+.pro-rounds--4 .pro-rounds-bar {
+  fill: var(--on-accent);
+}
+
+.pro-rounds--0 .pro-rounds-frame {
+  fill: var(--fill-strong);
+}
+
+.pro-rounds path {
+  stroke: var(--text-muted);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+/* The counter of the day (first messages and follow-ups sent today) */
+.pro-today,
+.pro-chain-count {
+  font-size: 13px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.pro-today {
+  margin-left: auto;
+}
+
+.pro-today b,
+.pro-chain-count b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.pro-today.is-full b,
+.pro-chain-count.is-full b {
+  color: var(--alert-text);
+}
+
+.pro-chain-count {
+  margin: 0;
+}
+
+/* « Envoyer à la chaîne »: the big buttons, thumb-sized on the phone */
+.pro-big {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.pro-text--mail {
+  min-height: 280px;
+}
+
+.pro-bulk {
+  min-height: 150px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 13px;
+}
+
 /* Figures in place of the scene */
 .pro-stats {
   padding: 18px;

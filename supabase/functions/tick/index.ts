@@ -279,8 +279,8 @@ async function versions(keys: PushKeys, auth: string) {
 
 // --- 10 a.m.: who to chase -----------------------------------------------------------------------
 
-/** The steps where a club or a BDE is waiting for news from Marc. */
-const CHASE: Record<string, string[]> = { club: ['En discussion', 'Contrat à signer'], bde: ['Contactés', 'En discussion'] };
+/** The steps where a club, a BDE or an RNDS prospect is waiting for news from Marc. */
+const CHASE: Record<string, string[]> = { club: ['En discussion', 'Contrat à signer'], bde: ['Contactés', 'En discussion'], prospect: ['Contactés', 'En discussion'] };
 
 /** "2026-W45": the week of a date, so a contact is chased at most once a week. */
 function week(date: string) {
@@ -293,24 +293,41 @@ function week(date: string) {
 
 async function followUps(today: string, keys: PushKeys) {
   const before = new Date(Date.now() - 7 * 86400000).toISOString();
-  const { data } = await admin.from('records').select('id, user_id, project_id, kind, data, updated_at').in('kind', Object.keys(CHASE)).lt('updated_at', before);
+  const { data } = await admin.from('records').select('id, user_id, project_id, kind, data, updated_at').in('kind', ['club', 'bde']).lt('updated_at', before);
+  // RNDS prospects: due on their follow-up date (set a few days after the message), not after a quiet week
+  const { data: prospects } = await admin.from('records').select('id, user_id, project_id, kind, data, updated_at').eq('kind', 'prospect').neq('data->>relance', '').lte('data->>relance', today);
   // Already chased this week: a "Relancer …" task added or ticked in the last 7 days
   const { data: chased } = await admin.from('tasks').select('user_id, project_id, text, created_at, done_at').ilike('text', 'Relancer %').or(`created_at.gte.${before},done_at.gte.${before}`);
   const recently = new Set((chased ?? []).map((task) => `${task.user_id}:${task.project_id}:${String(task.text).slice('Relancer '.length).trim().toLowerCase()}`));
   const groups = new Map<string, { user: string; project: string; kind: string; items: { name: string; stage: string; days: number }[] }>();
-  for (const record of data ?? []) {
+  for (const record of [...(data ?? []), ...(prospects ?? [])]) {
     const stage = String(record.data?.stage ?? '');
     if (!CHASE[record.kind]?.includes(stage)) continue;
     if (recently.has(`${record.user_id}:${record.project_id}:${String(record.data?.name ?? '').trim().toLowerCase()}`)) continue;
     if (!(await firstTime(`relance:${record.id}:${week(today)}`))) continue;
-    const key = `${record.user_id}:${record.project_id}`;
+    const key = `${record.user_id}:${record.project_id}:${record.kind}`;
     const group = groups.get(key) ?? { user: record.user_id, project: record.project_id, kind: record.kind, items: [] as { name: string; stage: string; days: number }[] };
     group.items.push({ name: String(record.data?.name ?? ''), stage: stage.toLowerCase(), days: Math.floor((Date.now() - new Date(record.updated_at).getTime()) / 86400000) });
     groups.set(key, group);
   }
   for (const group of groups.values()) {
-    const what = group.kind === 'club' ? plural(group.items.length, 'club') : plural(group.items.length, 'BDE', 'BDE');
     const names = group.items.map((item) => item.name).filter(Boolean);
+    if (group.kind === 'prospect') {
+      // Prospects come by the dozen: a few names, then the Prospection opens on them
+      const shown = names.slice(0, 5).join(', ') + (names.length > 5 ? ` et ${names.length - 5} autres` : '');
+      await sendPush(
+        group.user,
+        {
+          title: `${name(group.project)} · ${plural(group.items.length, 'profil')} à relancer`,
+          body: `${shown}. Touche pour ouvrir la Prospection : filtre « À relancer », puis « Relancer à la chaîne ».`,
+          url: `/${group.project}/prospection`,
+          tag: `relance-${group.project}-prospects`,
+        },
+        keys,
+      );
+      continue;
+    }
+    const what = group.kind === 'club' ? plural(group.items.length, 'club') : plural(group.items.length, 'BDE', 'BDE');
     await sendPush(
       group.user,
       {
