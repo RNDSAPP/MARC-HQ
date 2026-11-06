@@ -27,10 +27,11 @@ Deno.serve(safe(async (req) => {
   const who = await signedIn(req);
   if ('error' in who) return json({ error: who.error }, 401);
 
+  // Only the Resend key is a secret; the addresses can be changed with PROSPECT_FROM / PROSPECT_REPLY_TO
   const key = Deno.env.get('RESEND_API_KEY');
-  const from = Deno.env.get('PROSPECT_FROM');
+  const from = Deno.env.get('PROSPECT_FROM') ?? 'Marc · RNDS <marc@mail.rnds.app>';
   const replyTo = Deno.env.get('PROSPECT_REPLY_TO') ?? 'contact@rnds.app';
-  if (!key || !from) return json({ error: 'L’envoi des mails n’est pas encore réglé (adresse d’envoi ou clé Resend).' }, 503);
+  if (!key) return json({ error: 'L’envoi des mails n’est pas encore réglé : il manque la clé Resend dans Supabase.' }, 503);
 
   const body = await req.json().catch(() => ({}));
   const mode = body.mode === 'relance' ? 'relance' : 'first';
