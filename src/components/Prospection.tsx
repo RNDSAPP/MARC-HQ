@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import type { Project } from '../data/types';
+import { supabase } from '../lib/supabase';
 import { handToAgent } from '../lib/agents';
 import { isoDate } from '../lib/dates';
 import { LANGS, SPORTS, contactedStage, handle, isDue, messagesOf, parseHandles, refusedStage, specOf, stageChange, stageOf, toCsv, typeOf } from '../lib/prospects';
@@ -174,6 +176,9 @@ export default function Prospection({ project, query, onNotice, onAddTask }: Pro
   // « Envoyer à la chaîne »: the follow-ups when that filter is on (and the project has a text), else the targets to contact
   const relanceMode = stage === 'relance' && !!spec.relance;
   const queue = list.filter((r) => (relanceMode ? isDue(spec, r, today) : stageOf(spec, r) === spec.stages[0].name)).map((r) => r.id);
+  // « Mails du jour »: the targets with an address not contacted yet, and the mail follow-ups due
+  const mailFirst = spec.mailer ? mailQueue(spec, targets) : [];
+  const mailRelances = spec.mailer ? targets.filter((r) => r.data.channel === 'mail' && isDue(spec, r, today) && !r.data.relanced_at && validEmail(r.data.email)) : [];
 
   function exportCsv() {
     const blob = new Blob([toCsv(spec, list)], { type: 'text/csv;charset=utf-8' });
@@ -218,6 +223,21 @@ export default function Prospection({ project, query, onNotice, onAddTask }: Pro
           <b>{sent}</b>/{spec.dailyGoal} aujourd’hui
         </span>
       </div>
+
+      {spec.mailer && (mailFirst.length > 0 || mailRelances.length > 0) && (
+        <div className="pro-mailday tool-card">
+          <div className="pro-mailday-text">
+            <b>Mails du jour</b>
+            <span>
+              {[mailFirst.length && `${Math.min(mailFirst.length, spec.mailer.daily)} prêts`, mailRelances.length && `${mailRelances.length} relance${mailRelances.length > 1 ? 's' : ''}`].filter(Boolean).join(' · ')}
+              {' · '}tu relis, puis un geste les envoie
+            </span>
+          </div>
+          <button type="button" className="tool-primary tool-primary--small" onClick={() => open('mails')}>
+            Voir et envoyer
+          </button>
+        </div>
+      )}
 
       <div className="pro-filters">
         <div className="pro-chips" role="group" aria-label="Type">
@@ -303,7 +323,8 @@ export default function Prospection({ project, query, onNotice, onAddTask }: Pro
 
       {opened === 'find' && <FindSheet spec={spec} project={project} onClose={close} onNotice={onNotice} />}
       {opened === 'ajout' && spec.bulk && <BulkSheet spec={spec} project={project} targets={targets} onClose={close} onNotice={onNotice} />}
-      {opened && opened !== 'find' && opened !== 'ajout' && (
+      {opened === 'mails' && spec.mailer && <MailsSheet spec={spec} first={mailFirst.slice(0, spec.mailer.daily)} relances={mailRelances} onClose={close} onNotice={onNotice} />}
+      {opened && opened !== 'find' && opened !== 'ajout' && opened !== 'mails' && (
         <TargetSheet
           key={opened}
           spec={spec}
@@ -881,6 +902,141 @@ function ChainStep({ spec, project, target, mode, left, sent, opened, setOpened,
           )}
         </div>
       )}
+    </Sheet>
+  );
+}
+
+/** The mails waiting for their first send: clubs first (a coach brings a whole club), then coaches, then fighters. */
+function mailQueue(spec: ProspectSpec, targets: RecordRow[]) {
+  const order: Record<string, number> = { club: 0, coach: 1, combattant: 2 };
+  return targets
+    .filter((r) => stageOf(spec, r) === spec.stages[0].name && validEmail(r.data.email))
+    .sort((a, b) => (order[typeOf(spec, a)] ?? 3) - (order[typeOf(spec, b)] ?? 3) || a.created_at.localeCompare(b.created_at));
+}
+
+async function sendMails(mode: 'first' | 'relance', items: { id: string; subject: string; text: string }[]) {
+  if (!supabase) return { error: 'Supabase n’est pas réglé.' };
+  const { data, error } = await supabase.functions.invoke('prospect-mail', { body: { mode, items } });
+  if (error) {
+    const why = error instanceof FunctionsHttpError ? ((await error.context.json().catch(() => ({}))).error as string | undefined) : undefined;
+    return { error: why ?? 'Pas de réponse du serveur. Rien n’est parti, réessaie.' };
+  }
+  return data as { sent: number; failed: { id: string; why: string }[]; left: number };
+}
+
+/**
+ * « Mails du jour »: the day's mails, each with its subject and text, ticked by default. Marc
+ * reads, unticks or edits, then one tap (and a confirmation) sends them from the RNDS address.
+ */
+function MailsSheet({ spec, first, relances, onClose, onNotice }: {
+  spec: ProspectSpec;
+  first: RecordRow[];
+  relances: RecordRow[];
+  onClose: () => void;
+  onNotice: (t: string) => void;
+}) {
+  const mailer = spec.mailer!;
+  const [mode, setMode] = useState<'first' | 'relance'>(first.length ? 'first' : 'relance');
+  const list = mode === 'first' ? first : relances;
+  const [drafts, setDrafts] = useState<Record<string, { subject: string; text: string; on: boolean }>>(() => {
+    const all: Record<string, { subject: string; text: string; on: boolean }> = {};
+    first.forEach((r) => {
+      const m = messagesOf(spec, r);
+      all[r.id] = { subject: m.objet, text: m.mail, on: true };
+    });
+    relances.forEach((r) => {
+      const m = messagesOf(spec, r);
+      all[r.id] = { subject: `Re: ${m.objet}`, text: spec.relance ? spec.relance(r, 'mail') : m.mail, on: true };
+    });
+    return all;
+  });
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [report, setReport] = useState<string[]>([]);
+  const chosen = list.filter((r) => drafts[r.id]?.on);
+  const edit = (id: string, change: Partial<{ subject: string; text: string; on: boolean }>) => setDrafts((d) => ({ ...d, [id]: { ...d[id], ...change } }));
+  const nameOf = (id: string) => list.find((r) => r.id === id)?.data.name ?? 'un profil';
+
+  async function send() {
+    if (!confirming) return setConfirming(true);
+    setBusy(true);
+    const out = await sendMails(
+      mode,
+      chosen.map((r) => ({ id: r.id, subject: drafts[r.id].subject, text: drafts[r.id].text })),
+    );
+    setBusy(false);
+    setConfirming(false);
+    if ('error' in out) {
+      onNotice(out.error ?? 'Rien n’est parti.');
+      return;
+    }
+    const lines = out.failed.map((f) => `${nameOf(f.id)} : ${f.why}`);
+    if (out.left) lines.push(`${out.left} gardé${out.left > 1 ? 's' : ''} pour demain (plafond du jour atteint).`);
+    setReport(lines);
+    onNotice(`${out.sent} mail${out.sent > 1 ? 's' : ''} envoyé${out.sent > 1 ? 's' : ''}.${out.failed.length ? ` ${out.failed.length} non envoyé${out.failed.length > 1 ? 's' : ''}.` : ''}`);
+    if (!lines.length) onClose();
+  }
+
+  return (
+    <Sheet title="Mails du jour" sub={`De ${mailer.from.replace(/<.*>/, '').trim()} · les réponses arrivent sur ${mailer.replyTo}`} onClose={onClose}>
+      {first.length > 0 && relances.length > 0 && (
+        <div className="tool-segment" role="group" aria-label="Quels mails">
+          <button type="button" aria-pressed={mode === 'first'} onClick={() => { setMode('first'); setConfirming(false); }}>
+            Premiers mails ({first.length})
+          </button>
+          <button type="button" aria-pressed={mode === 'relance'} onClick={() => { setMode('relance'); setConfirming(false); }}>
+            Relances ({relances.length})
+          </button>
+        </div>
+      )}
+      {list.length === 0 ? (
+        <p className="pro-hint">Rien à envoyer pour l’instant.</p>
+      ) : (
+        <ul className="pro-mails">
+          {list.map((r) => {
+            const d = drafts[r.id];
+            return (
+              <li key={r.id} className={`pro-mail${d.on ? '' : ' is-off'}`}>
+                <label className="pro-mail-head">
+                  <input type="checkbox" className="tool-check" checked={d.on} onChange={(e) => edit(r.id, { on: e.target.checked })} />
+                  <span className="pro-who">
+                    <span className="pro-name">{r.data.name || r.data.email}</span>
+                    <span className="pro-meta">{[spec.types[typeOf(spec, r)], r.data.discipline, r.data.country, r.data.email].filter(Boolean).join(' · ')}</span>
+                  </span>
+                </label>
+                <details className="pro-mail-body">
+                  <summary>{d.subject}</summary>
+                  <input className="tool-input pro-subject" value={d.subject} onChange={(e) => edit(r.id, { subject: e.target.value })} aria-label={`Objet pour ${r.data.name}`} />
+                  <textarea className="pro-text pro-text--mail" value={d.text} onChange={(e) => edit(r.id, { text: e.target.value })} aria-label={`Mail pour ${r.data.name}`} />
+                </details>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {report.length > 0 && (
+        <div className="pro-panel">
+          <h3 className="pro-panel-title">Pas envoyés</h3>
+          <ul className="pro-report">
+            {report.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="pro-panel">
+        <p className="pro-hint">
+          Touche un objet pour relire ou modifier le mail. Chaque mail part à une seule adresse, avec ta signature, l’adresse de RNDS et la ligne « non merci ». Il passe ensuite dans « {contactedStage(spec)} », et la relance est prévue {spec.relanceDays.contacted} jours après.
+        </p>
+        <button type="button" className={`tool-primary pro-big${confirming ? ' is-confirm' : ''}`} disabled={busy || !chosen.length} onClick={send}>
+          {busy ? 'Envoi en cours…' : confirming ? `Confirmer : envoyer ${chosen.length} mail${chosen.length > 1 ? 's' : ''}` : `Envoyer ${chosen.length} mail${chosen.length > 1 ? 's' : ''}`}
+        </button>
+        {confirming && !busy && (
+          <button type="button" className="tool-ghost pro-ghost pro-big" onClick={() => setConfirming(false)}>
+            Pas encore
+          </button>
+        )}
+      </div>
     </Sheet>
   );
 }

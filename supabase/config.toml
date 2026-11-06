@@ -441,5 +441,8 @@ verify_jwt = false
 [functions.tick]
 verify_jwt = false
 
+[functions.prospect-mail]
+verify_jwt = false
+
 [functions.appstore-events]
 verify_jwt = false

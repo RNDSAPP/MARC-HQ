@@ -47,6 +47,8 @@ export type ProspectSpec = {
   /** Bulk add by pasting Instagram handles. */
   bulk: boolean;
   dailyGoal: number;
+  /** Mails sent by Marc HQ after Marc's tap (« Mails du jour »): who it shows as, where replies go, how many a day. */
+  mailer?: { from: string; replyTo: string; daily: number };
   empty: string;
 };
 
@@ -387,6 +389,7 @@ export const RNDS: ProspectSpec = {
   },
   bulk: true,
   dailyGoal: 25,
+  mailer: { from: 'Marc · RNDS <marc@mail.rnds.app>', replyTo: 'contact@rnds.app', daily: 20 },
   empty: 'Aucun profil pour l’instant. Colle des @ Instagram avec « Ajouter des profils », ou demande à un agent d’en trouver.',
 };
 

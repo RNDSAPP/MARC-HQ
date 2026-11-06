@@ -608,3 +608,85 @@
   border-radius: var(--r-lg);
   font-size: 14px;
 }
+
+/* « Mails du jour »: the banner above the filters, then the list to read and send */
+.pro-mailday {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.pro-mailday-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.pro-mailday-text span {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.pro-mails {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro-mail {
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-lg);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro-mail.is-off {
+  opacity: 0.5;
+}
+
+.pro-mail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.pro-mail-body summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.pro-mail-body[open] summary {
+  margin-bottom: 8px;
+}
+
+.pro-mail-body .pro-subject {
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.pro-report {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.pro-big.is-confirm {
+  background: var(--alert-text);
+  border-color: var(--alert-text);
+}

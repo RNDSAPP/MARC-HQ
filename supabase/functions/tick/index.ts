@@ -80,6 +80,38 @@ async function morning(today: string, keys: PushKeys) {
   }
 }
 
+// --- 11 a.m.: the RNDS prospecting mails ready to validate --------------------------------------
+
+/** Once a day, after the morning agent added its profiles: how many mails wait for Marc's tap. */
+async function mailsReady(today: string, keys: PushKeys) {
+  const { data } = await admin.from('records').select('user_id, data').eq('project_id', 'rnds').eq('kind', 'prospect').neq('data->>email', '');
+  const byUser = new Map<string, { first: number; relance: number }>();
+  for (const row of data ?? []) {
+    const d = (row.data ?? {}) as Record<string, string>;
+    if (!d.email) continue;
+    const count = byUser.get(row.user_id) ?? { first: 0, relance: 0 };
+    if ((d.stage || 'À contacter') === 'À contacter') count.first++;
+    else if (d.channel === 'mail' && d.relance && d.relance <= today && !d.relanced_at) count.relance++;
+    byUser.set(row.user_id, count);
+  }
+  for (const [user, count] of byUser) {
+    const first = Math.min(count.first, 20);
+    if (!first && !count.relance) continue;
+    if (!(await firstTime(`mails-ready:${user}:${today}`))) continue;
+    const parts = [first && plural(first, 'mail prêt', 'mails prêts'), count.relance && plural(count.relance, 'relance', 'relances')].filter(Boolean).join(' et ');
+    await sendPush(
+      user,
+      {
+        title: `RNDS · ${parts} à envoyer`,
+        body: 'Ouvre la Prospection : jette un œil à la liste, puis « Envoyer » en un geste.',
+        url: '/rnds/prospection?fiche=mails',
+        tag: 'rnds-mails-du-jour',
+      },
+      keys,
+    );
+  }
+}
+
 // --- 6 p.m.: tomorrow's soirées ----------------------------------------------------------------
 
 async function soireesTomorrow(today: string, keys: PushKeys) {
@@ -389,6 +421,8 @@ Deno.serve(
     if (hour >= 8 && hour < 12) await run('morning', () => morning(date, keys));
     if (hour >= 18) await run('soirees', () => soireesTomorrow(date, keys));
     if (hour >= 10 && hour < 13) await run('follow-ups', () => followUps(date, keys));
+    // After the morning agents (fighters at 10 h, clubs with a mail at 10 h 30) have added theirs
+    if (hour >= 12 && hour < 15) await run('mails-ready', () => mailsReady(date, keys));
     const monday = new Date(`${date}T12:00:00Z`).getUTCDay() === 1;
     if (monday && hour >= 8 && hour < 12) await run('weekly', () => weekly(date, keys));
     const auth = `Bearer ${await token()}`;
