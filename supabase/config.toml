@@ -446,3 +446,6 @@ verify_jwt = false
 
 [functions.appstore-events]
 verify_jwt = false
+
+[functions.agent-rnds]
+verify_jwt = false
